@@ -1,0 +1,67 @@
+@keyframes subtle-shake {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(1px, -1px);
+    transform: rotate(3deg);
+  }
+  50% {
+    transform: translate(0, 1px);
+    transform: rotate(0deg);
+  }
+  75% {
+    transform: translate(-1px, -1px);
+    transform: rotate(-3deg);
+  }
+  100% {
+    transform: translate(0, 0);
+    transform: rotate(0deg);
+  }
+}
+@keyframes subtle-shake-no-rotate {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(1.5px, -1.5px);
+  }
+  50% {
+    transform: translate(0, 1.5px);
+  }
+  75% {
+    transform: translate(-1.5px, -1.5px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+@keyframes subtle-shake-no-rotate-dn {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-1.5px, 1.5px);
+  }
+  50% {
+    transform: translate(0, -1.5px);
+  }
+  75% {
+    transform: translate(-1.5px, 1.5px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+.animated-image {
+  animation: subtle-shake 10s ease-in-out infinite;
+}
+
+.animated-image-up {
+  animation: subtle-shake-no-rotate 8s ease-in-out infinite;
+}
+
+.animated-image-dn {
+  animation: subtle-shake-no-rotate-dn 8s ease-in-out infinite;
+}
