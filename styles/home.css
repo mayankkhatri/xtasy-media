@@ -4,6 +4,10 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 a {
   text-decoration: none;
 }
@@ -85,7 +89,7 @@ main {
   position: absolute;
   right: 0;
   width: 1px;
-  height: calc(4vw + 20px);
+  height: calc(3vw + 25px);
   background-color: #68fd92;
 }
 
@@ -138,6 +142,7 @@ main {
 }
 
 .bt-line .right-L::before {
+  position: absolute;
   top: calc(-3vw + -25px);
 }
 /*?bottom Line  */
@@ -151,11 +156,11 @@ main {
 /*? Up line  */
 
 .we-do .left-L::before {
-  background-color: #ff9191;
+  background-color: #fc7474;
 }
 
 .we-do .right-L::before {
-  background-color: #ff9191;
+  background-color: #fc7474;
 }
 
 .we-do .up-line p,
@@ -165,7 +170,7 @@ main {
 
 .we-do .left-L,
 .we-do .right-L {
-  background-color: #ff9191;
+  background-color: #fc7474;
 }
 
 /*? Service Tiles  */
@@ -203,3 +208,194 @@ strong {
   font-size: calc(1.5vw + 5px);
   font-weight: 300;
 }
+
+/*! Projects   */
+#projects {
+  margin: calc(2vh + 10px) calc(2vw + 2px);
+}
+
+/*? Project Grid Styles */
+.project-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two equal-sized columns */
+  gap: 10px; /* 10px gap between all cells */
+  height: calc(40vw + 20vh); /* Overall height of the grid */
+  width: 100%; /* Full width of the screen */
+}
+
+.left-grid,
+.right-grid {
+  display: grid;
+  height: 100%; /* Full height of the parent container */
+  gap: 10px; /* Adds 10px gap between cells in both left and right grids */
+}
+
+/* Left Grid Layout */
+.left-grid {
+  grid-template-rows: 60% 42%; /* Grid1 is slightly larger than Grid2 */
+}
+
+/* Right Grid Layout */
+.right-grid {
+  grid-template-rows: 10% 50% 40%; /* Logo is smallest, Grid3 larger than Grid4 */
+}
+
+/* Optional: Styling for text inside the grids */
+.grid1,
+.grid2,
+.grid3,
+.grid4,
+.logo-grid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+  border-radius: calc(0.4vh + 2px);
+}
+
+/* Different background colors for each grid cell */
+.grid1 {
+  background-color: #ffadad; /* Change colors for now, images will replace them later */
+}
+
+.grid2 {
+  background-color: #ffd6a5;
+}
+
+.grid3 {
+  background-color: #caffbf;
+}
+
+.grid4 {
+  background-color: #9bf6ff;
+}
+
+.logo-grid {
+  background-color: #fdffb6;
+}
+
+/*? Project Grid Styles */
+
+/*! Projects   */
+
+/*! Services Tiles  */
+/*?tiles  */
+#services {
+  margin: calc(2vh + 10px) calc(2vw + 2px);
+}
+.service-tiles {
+  margin: calc(1vw + 1.6vh) auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: calc(2vw + 2vh);
+}
+
+.servive-tile {
+  position: relative; /* Required for absolute positioning of text */
+  height: calc(15vw + 12vh); /* Set a fixed height or adjust as needed */
+  width: calc(15vw + 12vh); /* Set a fixed height or adjust as needed */
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0));
+}
+
+.servive-tile img {
+  position: absolute; /* Position image absolutely within the div */
+  top: 0;
+  left: 0;
+  width: 100%; /* Make the image cover the div */
+  height: 100%; /* Make the image cover the div */
+  object-fit: cover; /* Ensure the image covers the div without stretching */
+  z-index: -1; /* Send the image behind the text */
+  border-radius: calc(0.6vh + 3px);
+}
+
+.servive-tile span {
+  position: absolute; /* Allows for additional styling if needed */
+  bottom: 0;
+  font-size: calc(0.9vh + 1vw); /* Adjust font size as needed */
+  color: #fff; /* White text color for contrast */
+  text-wrap: nowrap;
+  padding: calc(0.5vh + 0.3vw); /* Padding around text */
+  font-weight: 700;
+}
+
+/*?tiles  */
+/*! Services Tiles  */
+
+/*! About Section    */
+/*? Montage Scroll Images */
+
+.moving-montage {
+  width: 100%;
+  overflow: hidden; /* Hides the overflowing images */
+  position: relative;
+}
+
+.first-line {
+  display: flex;
+  align-items: center;
+}
+
+.second-line {
+  display: flex;
+  align-items: center;
+}
+
+.mont-circle,
+.mont-square {
+  flex-shrink: 0; /* Prevents images from shrinking */
+  margin-right: calc(0.2vw + 0.3vh);
+}
+.mont-circle img {
+  border-radius: 50%;
+  object-fit: cover;
+  width: calc(5vh + 15vw);
+}
+
+.mont-square img {
+  object-fit: cover;
+  width: calc(5vh + 15vw);
+  border-radius: calc(0.5vh + 0.35vw);
+}
+
+/*? Montage Scroll Images */
+
+/*? Our Story  */
+.our-story {
+  margin: calc(2vh + 10px) calc(2vw + 2px);
+  background-color: white;
+  padding: calc(1.5vw) calc(1vw);
+  border-radius: 3%;
+  box-shadow: 0.5px 0.5px 4px rgba(0, 0, 0, 0.03),
+    -0.5px -0.5px 4px rgba(0, 0, 0, 0.03);
+  border: 1px solid #ebeaeb;
+  display: flex;
+  align-items: flex-start;
+  gap: calc(1vw + 0.3vh);
+}
+
+.left-image {
+}
+.left-image img {
+  height: calc(20vh + 15vw);
+}
+
+.story-content {
+}
+.story-content h4 {
+}
+.story-content p {
+  font-size: calc(0.22vw + 1vh);
+}
+
+.quick-links {
+  font-size: calc(0.32vw + 1vh);
+}
+
+/*? Our Story  */
+/*! About Section    */
