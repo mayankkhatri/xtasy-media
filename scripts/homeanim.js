@@ -70,3 +70,31 @@ firstLine.addEventListener("mouseover", handleMouseEnter);
 firstLine.addEventListener("mouseout", handleMouseLeave);
 secondLine.addEventListener("mouseover", handleMouseEnter);
 secondLine.addEventListener("mouseout", handleMouseLeave);
+
+//? Stats increase animation
+// Incriment Animation
+function animateValue(obj, start, end, duration, pauseDuration) {
+  let startTimestamp = null;
+  const step = (timestamp) => {
+    if (!startTimestamp) startTimestamp = timestamp;
+    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+    obj.textContent = Math.floor(progress * (end - start) + start);
+    if (progress < 1) {
+      window.requestAnimationFrame(step);
+    } else {
+      setTimeout(() => {
+        startTimestamp = null;
+        window.requestAnimationFrame(step);
+      }, pauseDuration);
+    }
+  };
+  window.requestAnimationFrame(step);
+}
+
+document.querySelectorAll(".incr-anim").forEach((element) => {
+  const textContent = element.textContent;
+  const numericValue = parseInt(textContent.replace(/[^\d]/g, ""), 10); // Extract only the numeric part
+  animateValue(element, 0, numericValue, 2000, 2000);
+});
+
+//? Stats increase animation
