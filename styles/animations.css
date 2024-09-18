@@ -71,3 +71,91 @@
 .animated-image-dn {
   animation: subtle-shake-no-rotate-dn 8s ease-in-out infinite;
 }
+
+/* Scrolling images  */
+
+/* Set the size of the square div */
+
+.scroll {
+  overflow: hidden; /* Ensure the image stays within the div */
+  background-size: 100% auto; /* Fit the width of the div and allow the height to scale */
+  background-position: 0 0;
+  animation: scrollImage 10s linear infinite; /* Animate the background image */
+}
+.surabo {
+  background-image: url("https://i.postimg.cc/5tMnYg1b/Home-13-1.png"); /* Set your image URL */
+}
+
+.ankita {
+  background-image: url("https://i.postimg.cc/MT8sjSks/Service-1.png");
+}
+
+.yard {
+  background-image: url("https://i.postimg.cc/XvZJBRKy/Home-14-1.png");
+}
+
+.prime {
+  background-image: url("https://i.postimg.cc/vHZTrxbn/Home-Page-28-1.png");
+}
+
+@keyframes scrollImage {
+  0% {
+    background-position: 0 0;
+  }
+  15% {
+    background-position: 0 0; /* Hold at the start for 10% of the duration */
+  }
+  100% {
+    background-position: 0 100%; /* Scroll the image to the bottom */
+  }
+}
+
+/* SHine  */
+.shine {
+  position: relative;
+  color: #000000; /* Text color */
+  overflow: hidden;
+}
+
+.shine::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%; /* Start outside the element */
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.7),
+    transparent
+  );
+  animation: shine 2s infinite;
+}
+
+@keyframes shine {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* move */
+.movelr {
+  display: inline-block; /* Allows smooth animation */
+  animation: poke 1s infinite; /* Adjust duration for desired speed */
+}
+
+@keyframes poke {
+  0% {
+    transform: translateX(0); /* Start at the default position */
+  }
+  50% {
+    transform: translateX(10px); /* Move slightly to the right */
+  }
+  100% {
+    transform: translateX(0); /* Return to the original position */
+  }
+}
