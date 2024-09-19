@@ -691,8 +691,6 @@ strong {
   gap: clamp(30px, 2vw, 30px);
 }
 
-.illu {
-}
 .illu img {
   width: calc(10vw + 20px);
 }
