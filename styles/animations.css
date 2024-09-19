@@ -159,3 +159,11 @@
     transform: translateX(0); /* Return to the original position */
   }
 }
+
+/* Center title */
+/* Gradient text background */
+.grad-text {
+  background: linear-gradient(120deg, hsl(260 70% 70%), hsl(0 100% 80%));
+  background-clip: text;
+  color: transparent;
+}

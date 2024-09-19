@@ -326,10 +326,48 @@ strong {
     -0.5px -0.5px 4px rgba(0, 0, 0, 0.03);
   border: 1px solid #ebeaeb;
   border-radius: 8px;
+  transition: opacity 0.3s ease;
 }
 
 .scroll:hover {
-  border: 1.8px solid #d14c4c;
+  box-shadow: 0.5px 0.5px 4px rgba(0, 0, 0, 0.06),
+    -0.5px -0.5px 4px rgba(0, 0, 0, 0.08);
+}
+
+.scroll::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.45); /* Semi-transparent overlay */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* okay  */
+/* Image appearance in the center on hover using background-image */
+.scroll::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px; /* Image width */
+  height: 50px; /* Image height */
+  border-radius: 10px;
+  background-image: url("https://i.postimg.cc/3wWYCMP7/clipboard-image-1726731986.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* Show image on hover */
+.scroll:hover::after {
+  opacity: 1;
 }
 
 /** Grid Tiles */
@@ -343,6 +381,10 @@ strong {
 #services {
   margin: calc(2vh + 10px) calc(2vw + 2px);
 }
+.link-wrap {
+  display: block;
+}
+
 .service-tiles {
   margin: calc(1vw + 1.6vh) auto;
   display: flex;
@@ -393,6 +435,7 @@ strong {
 
 /*! About Section    */
 #about-us {
+  padding-top: calc(5vw + 1.5vh);
   overflow: hidden;
 }
 /*? Montage Scroll Images */
@@ -759,14 +802,14 @@ strong {
   font-weight: 600;
 }
 
-.callback-form input:nth-child(3) {
+.callback-form input:nth-child(4) {
   margin: auto;
   font-weight: 600;
   background-color: #f3bb00;
   color: white;
 }
 
-.callback-form input:nth-child(3):hover {
+.callback-form input:nth-child(4):hover {
   color: #f3bb00;
   background-color: white;
   border: 1px solid #f3bb00;

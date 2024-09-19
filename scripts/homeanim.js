@@ -98,3 +98,24 @@ document.querySelectorAll(".incr-anim").forEach((element) => {
 });
 
 //? Stats increase animation
+
+//! Data link handle projects
+
+// Function to add click event listeners to all grid divs
+function addClickListeners() {
+  // Select all divs with the class 'scroll' (or any specific class you use)
+  const clickableDivs = document.querySelectorAll(".scroll");
+
+  clickableDivs.forEach((div) => {
+    // Add click event listener to each div
+    div.addEventListener("click", () => {
+      const link = div.getAttribute("data-link"); // Get the URL from data-link attribute
+      if (link) {
+        window.location.href = link; // Redirect to the URL
+      }
+    });
+  });
+}
+
+// Call the function when the DOM is fully loaded
+document.addEventListener("DOMContentLoaded", addClickListeners);
