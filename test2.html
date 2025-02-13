@@ -9,6 +9,8 @@
       type="image/png"
       href="https://static.vecteezy.com/system/resources/previews/050/757/348/non_2x/clock-icon-transparent-background-free-png.png"
     />
+    <!-- Include SortableJS from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -71,6 +73,11 @@
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         position: relative;
+        /* Make the cursor grab when hovering over a card */
+        cursor: grab;
+      }
+      .task-card:active {
+        cursor: grabbing;
       }
       .timer-display {
         font-size: 24px;
@@ -213,9 +220,27 @@
         updateStats();
       }
 
+      // After drag-and-drop, update tasksList order based on dashboard children order.
+      function updateTaskOrder() {
+        const newOrder = [];
+        Array.from(dashboard.children).forEach((child) => {
+          const id = child.getAttribute("data-id");
+          const task = tasksList.find((t) => t.id === id);
+          if (task) {
+            newOrder.push(task);
+          }
+        });
+        tasksList = newOrder;
+      }
+
       class TaskTimer {
         // If savedData is provided, initialize from it.
         constructor(taskName, duration, savedData) {
+          // Generate a unique ID for each task.
+          this.id =
+            savedData && savedData.id
+              ? savedData.id
+              : "task-" + Date.now() + "-" + Math.floor(Math.random() * 10000);
           if (savedData) {
             this.taskName = savedData.taskName;
             this.initialDuration = savedData.initialDuration;
@@ -262,6 +287,8 @@
         createTaskElement() {
           this.element = document.createElement("div");
           this.element.className = "task-card";
+          // Set the data-id attribute for drag & drop ordering.
+          this.element.setAttribute("data-id", this.id);
           // Build inner HTML with a delete button
           this.element.innerHTML = `
             <button class="delete-btn">Delete</button>
@@ -422,6 +449,7 @@
         // Serialize task data for local storage.
         serialize() {
           return {
+            id: this.id,
             taskName: this.taskName,
             initialDuration: this.initialDuration,
             remaining: this.remaining,
@@ -459,6 +487,15 @@
         saveTasks();
         taskForm.reset();
         customMinutesInput.style.display = "none";
+      });
+
+      // Initialize SortableJS on the dashboard for drag & drop ordering.
+      Sortable.create(dashboard, {
+        animation: 150,
+        onEnd: function (evt) {
+          updateTaskOrder();
+          saveTasks();
+        },
       });
 
       // Load tasks on page load.
