@@ -266,23 +266,6 @@ strong {
   position: relative;
 }
 
-/* Different background colors for each grid cell */
-.grid1 {
-  background-color: #ffadad; /* Change colors for now, images will replace them later */
-}
-
-.grid2 {
-  background-color: #ffd6a5;
-}
-
-.grid3 {
-  background-color: #caffbf;
-}
-
-.grid4 {
-  background-color: #9bf6ff;
-}
-
 .logo-grid {
   background-color: white;
   box-shadow: 0.5px 0.5px 4px rgba(0, 0, 0, 0.03),

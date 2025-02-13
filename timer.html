@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Task Timer Application</title>
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://static.vecteezy.com/system/resources/previews/050/757/348/non_2x/clock-icon-transparent-background-free-png.png"
+    />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f0f0f0;
+      }
+      #taskForm {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+      .form-group {
+        margin-bottom: 10px;
+      }
+      /* Increased width for task name input and disable autocomplete */
+      input[type="text"] {
+        padding: 8px;
+        margin: 5px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 300px;
+      }
+      /* Style for select and custom minutes input */
+      select,
+      input[type="number"].custom-minutes {
+        padding: 8px;
+        margin: 5px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      button {
+        padding: 8px 16px;
+        margin: 5px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        background-color: #4caf50;
+        color: white;
+      }
+      button:hover {
+        opacity: 0.8;
+      }
+      /* Stats section styling */
+      #stats {
+        font-size: 16px;
+        margin-bottom: 20px;
+        padding: 10px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      .task-card {
+        background: white;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: relative;
+      }
+      .timer-display {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 10px 0;
+      }
+      .controls {
+        display: flex;
+        gap: 10px;
+      }
+      .completed {
+        background-color: #e8f5e9;
+      }
+      .overtime {
+        color: #d32f2f;
+      }
+      .pause-btn {
+        background-color: #ffa000;
+      }
+      .stop-btn {
+        background-color: #d32f2f;
+      }
+      /* Delete button style */
+      .delete-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background-color: #d32f2f;
+        border: none;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <form id="taskForm">
+      <div class="form-group">
+        <input
+          type="text"
+          id="taskName"
+          placeholder="Task name"
+          autocomplete="off"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <!-- Suggested durations with a Custom option -->
+        <select id="minutes">
+          <option value="5">5 minutes</option>
+          <option value="10">10 minutes</option>
+          <option value="15">15 minutes</option>
+          <option value="20">20 minutes</option>
+          <option value="25">25 minutes</option>
+          <option value="30">30 minutes</option>
+          <option value="custom">Custom</option>
+        </select>
+        <!-- Hidden custom input, will appear when "Custom" is selected -->
+        <input
+          type="number"
+          id="customMinutes"
+          class="custom-minutes"
+          placeholder="Enter minutes"
+          min="1"
+          style="display: none"
+        />
+      </div>
+      <button type="submit">Add Task</button>
+    </form>
+
+    <!-- Statistics Section -->
+    <div id="stats">Completed Tasks: 0 | Pending Tasks: 0</div>
+
+    <div id="dashboard"></div>
+
+    <!-- Short beep sound as alarm -->
+    <audio id="alarmSound">
+      <source
+        src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA="
+        type="audio/wav"
+      />
+    </audio>
+
+    <script>
+      const alarmSound = document.getElementById("alarmSound");
+      const dashboard = document.getElementById("dashboard");
+      const taskForm = document.getElementById("taskForm");
+      const minutesSelect = document.getElementById("minutes");
+      const customMinutesInput = document.getElementById("customMinutes");
+
+      // Toggle custom minutes input visibility
+      minutesSelect.addEventListener("change", () => {
+        if (minutesSelect.value === "custom") {
+          customMinutesInput.style.display = "inline-block";
+        } else {
+          customMinutesInput.style.display = "none";
+        }
+      });
+
+      // Global tasks array
+      let tasksList = [];
+
+      // Update statistics: completed vs. pending tasks
+      function updateStats() {
+        let completed = 0;
+        let pending = 0;
+        tasksList.forEach((task) => {
+          if (task.isCompleted) {
+            completed++;
+          } else {
+            pending++;
+          }
+        });
+        document.getElementById(
+          "stats"
+        ).innerHTML = `Completed Tasks: ${completed} | Pending Tasks: ${pending}`;
+      }
+
+      // Save tasks to local storage and update stats
+      function saveTasks() {
+        const tasksData = tasksList.map((task) => task.serialize());
+        localStorage.setItem("tasks", JSON.stringify(tasksData));
+        updateStats();
+      }
+
+      // Load tasks from local storage
+      function loadTasks() {
+        dashboard.innerHTML = "";
+        tasksList = [];
+        const data = localStorage.getItem("tasks");
+        if (data) {
+          const tasksData = JSON.parse(data);
+          tasksData.forEach((taskData) => {
+            const task = new TaskTimer(null, null, taskData);
+            tasksList.push(task);
+            dashboard.appendChild(task.element);
+          });
+        }
+        updateStats();
+      }
+
+      class TaskTimer {
+        // If savedData is provided, initialize from it.
+        constructor(taskName, duration, savedData) {
+          if (savedData) {
+            this.taskName = savedData.taskName;
+            this.initialDuration = savedData.initialDuration;
+            this.remaining = savedData.remaining;
+            this.overtime = savedData.overtime;
+            this.isCompleted = savedData.isCompleted;
+            this.isRunning = false;
+            this.status =
+              savedData.status ||
+              (savedData.isCompleted ? "completed" : "paused");
+            this.accumulatedTime = savedData.accumulatedTime || 0;
+          } else {
+            this.taskName = taskName;
+            this.initialDuration = duration;
+            this.remaining = duration;
+            this.overtime = 0;
+            this.isCompleted = false;
+            this.isRunning = false;
+            this.status = "pending"; // not started yet
+            this.accumulatedTime = 0;
+          }
+          this.startTime = null; // timestamp when timer is started (or resumed)
+          this.interval = null;
+          this.createTaskElement();
+          this.updateDisplay();
+
+          // If a task was loaded as running, mark it as paused.
+          if (this.status === "running") {
+            this.status = "paused";
+            this.controls.innerHTML = `
+              <button class="resume-btn">Resume</button>
+              <button class="stop-btn">Stop</button>
+            `;
+            this.element
+              .querySelector(".resume-btn")
+              .addEventListener("click", () => this.start());
+            this.element
+              .querySelector(".stop-btn")
+              .addEventListener("click", () => this.stop());
+          }
+        }
+
+        createTaskElement() {
+          this.element = document.createElement("div");
+          this.element.className = "task-card";
+          // Build inner HTML with a delete button
+          this.element.innerHTML = `
+            <button class="delete-btn">Delete</button>
+            <h3>${this.taskName}</h3>
+            <div class="timer-display"></div>
+            <div class="controls">
+              ${
+                this.status === "pending"
+                  ? `<button class="start-btn">Start</button>`
+                  : this.status === "paused"
+                  ? `<button class="resume-btn">Resume</button>
+                     <button class="stop-btn">Stop</button>`
+                  : ``
+              }
+            </div>
+            <p>Target: ${this.formatTime(this.initialDuration)}</p>
+          `;
+
+          this.timerDisplay = this.element.querySelector(".timer-display");
+          this.controls = this.element.querySelector(".controls");
+
+          // If the task is completed, add the completed class so its background stays green.
+          if (this.status === "completed") {
+            this.element.classList.add("completed");
+          }
+
+          // Delete button event listener
+          const deleteBtn = this.element.querySelector(".delete-btn");
+          deleteBtn.addEventListener("click", () => this.deleteTask());
+
+          // Attach event listeners based on status.
+          if (this.status === "pending") {
+            this.element
+              .querySelector(".start-btn")
+              .addEventListener("click", () => this.start());
+          } else if (this.status === "paused") {
+            this.element
+              .querySelector(".resume-btn")
+              .addEventListener("click", () => this.start());
+            this.element
+              .querySelector(".stop-btn")
+              .addEventListener("click", () => this.stop());
+          } else if (this.status === "completed") {
+            this.controls.innerHTML = `<p>Time elapsed: ${this.formatTime(
+              this.accumulatedTime
+            )}</p>`;
+          }
+        }
+
+        formatTime(seconds) {
+          const mins = Math.floor(Math.abs(seconds) / 60);
+          const secs = Math.abs(seconds) % 60;
+          return `${seconds < 0 ? "-" : ""}${String(mins).padStart(
+            2,
+            "0"
+          )}:${String(secs).padStart(2, "0")}`;
+        }
+
+        updateDisplay() {
+          if (this.remaining > 0) {
+            this.timerDisplay.textContent = this.formatTime(this.remaining);
+            this.timerDisplay.classList.remove("overtime");
+          } else {
+            this.timerDisplay.textContent = `+${this.formatTime(
+              this.overtime
+            )}`;
+            this.timerDisplay.classList.add("overtime");
+          }
+        }
+
+        start() {
+          if (this.isRunning || this.isCompleted) return;
+          this.isRunning = true;
+          this.status = "running";
+          this.startTime = Date.now();
+          this.controls.innerHTML = `
+            <button class="pause-btn">Pause</button>
+            <button class="stop-btn">Stop</button>
+          `;
+          this.element
+            .querySelector(".pause-btn")
+            .addEventListener("click", () => this.pause());
+          this.element
+            .querySelector(".stop-btn")
+            .addEventListener("click", () => this.stop());
+          saveTasks();
+
+          this.interval = setInterval(() => {
+            if (this.remaining > 0) {
+              this.remaining--;
+              if (this.remaining === 0) alarmSound.play();
+            } else {
+              this.overtime++;
+            }
+            this.updateDisplay();
+          }, 1000);
+        }
+
+        pause() {
+          if (!this.isRunning) return;
+          this.isRunning = false;
+          clearInterval(this.interval);
+          // Add elapsed seconds from this start period to accumulatedTime
+          if (this.startTime) {
+            const diff = Math.floor((Date.now() - this.startTime) / 1000);
+            this.accumulatedTime += diff;
+            this.startTime = null;
+          }
+          this.status = "paused";
+          this.controls.innerHTML = `
+            <button class="resume-btn">Resume</button>
+            <button class="stop-btn">Stop</button>
+          `;
+          this.element
+            .querySelector(".resume-btn")
+            .addEventListener("click", () => this.start());
+          this.element
+            .querySelector(".stop-btn")
+            .addEventListener("click", () => this.stop());
+          saveTasks();
+        }
+
+        stop() {
+          clearInterval(this.interval);
+          if (this.isRunning && this.startTime) {
+            const diff = Math.floor((Date.now() - this.startTime) / 1000);
+            this.accumulatedTime += diff;
+            this.startTime = null;
+          }
+          this.isCompleted = true;
+          this.isRunning = false;
+          this.status = "completed";
+          this.element.classList.add("completed");
+          this.controls.innerHTML = `<p>Time elapsed: ${this.formatTime(
+            this.accumulatedTime
+          )}</p>`;
+          saveTasks();
+        }
+
+        deleteTask() {
+          clearInterval(this.interval);
+          this.element.remove();
+          const index = tasksList.indexOf(this);
+          if (index > -1) {
+            tasksList.splice(index, 1);
+          }
+          saveTasks();
+        }
+
+        // Serialize task data for local storage.
+        serialize() {
+          return {
+            taskName: this.taskName,
+            initialDuration: this.initialDuration,
+            remaining: this.remaining,
+            overtime: this.overtime,
+            isCompleted: this.isCompleted,
+            status: this.status,
+            accumulatedTime: this.accumulatedTime,
+          };
+        }
+      }
+
+      // Form submission: create a new task.
+      taskForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const taskName = document.getElementById("taskName").value;
+        let minutesValue = minutesSelect.value;
+        let duration = 0;
+        if (minutesValue === "custom") {
+          const customValue = parseInt(customMinutesInput.value, 10);
+          if (!customValue || customValue <= 0) {
+            alert("Please enter a valid custom minute value");
+            return;
+          }
+          duration = customValue * 60;
+        } else {
+          duration = parseInt(minutesValue, 10) * 60;
+        }
+        if (duration <= 0) {
+          alert("Please enter a valid duration");
+          return;
+        }
+        const newTask = new TaskTimer(taskName, duration);
+        tasksList.push(newTask);
+        dashboard.appendChild(newTask.element);
+        saveTasks();
+        taskForm.reset();
+        customMinutesInput.style.display = "none";
+      });
+
+      // Load tasks on page load.
+      window.addEventListener("load", loadTasks);
+    </script>
+  </body>
+</html>
