@@ -1,3 +1,4 @@
+/* --- Basic Reset & Global Styles --- */
 * {
   margin: 0;
   padding: 0;
@@ -14,9 +15,10 @@ a {
 
 body {
   background-color: #fafafa;
+  font-family: "Geist Sans", sans-serif;
 }
 
-/*! Header */
+/* --- Header (existing styles) --- */
 header {
   display: flex;
   align-items: center;
@@ -38,7 +40,7 @@ header {
 
 nav a {
   margin: 0 calc(1vw);
-  font-size: calc(1vw+5px);
+  font-size: calc(1vw + 5px);
   color: #696969;
   font-weight: 500;
 }
@@ -47,4 +49,101 @@ nav a:nth-child(3) {
   color: #f55f5f;
   font-weight: 600;
 }
-/*! Header  */
+
+/* --- Projects Grid --- */
+#projects {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  padding: 1rem;
+  margin-top: 20px;
+}
+
+/* --- Project Card --- */
+.project-card {
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-3px);
+}
+
+/* --- Scrollable Image Container --- */
+.project-image .scroll-container {
+  width: 100%;
+  height: 350px; /* Increased height on desktop */
+  overflow: hidden;
+  position: relative;
+}
+
+.project-image .scroll-container .scroll-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 250%; /* Contains two copies of the image */
+  /* GSAP will control the animation */
+}
+
+.project-image .scroll-container .scroll-content img {
+  width: 100%;
+  height: 200%; /* Each image takes up one container height */
+  object-fit: cover;
+  object-position: top;
+  display: block;
+}
+
+/* Hide the seam by overlapping the second image slightly */
+.project-image .scroll-container .scroll-content img:last-child {
+  margin-top: -1px;
+}
+
+/* --- Project Info --- */
+.project-info {
+  padding: 1rem;
+}
+
+/* Title and link inline */
+.project-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.project-link i {
+  font-size: 1.2rem;
+  color: #f55f5f;
+  transition: transform 0.3s ease;
+}
+
+.project-link:hover i {
+  transform: translateX(5px);
+}
+
+.project-description {
+  font-size: 0.95rem;
+  color: #666;
+  line-height: 1.4;
+  margin-top: 0.5rem;
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 600px) {
+  /* On mobile, you might want a slightly shorter image container */
+  .project-image .scroll-container {
+    height: 200px;
+  }
+  #projects {
+    grid-template-columns: 1fr;
+  }
+}

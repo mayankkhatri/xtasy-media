@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      /* Square container that shows only part of the image */
+      .project-image .scroll-container {
+        width: 300px; /* Set your desired square width */
+        height: 300px; /* Set your desired square height */
+        overflow: hidden;
+        position: relative;
+        margin: 0 auto; /* Centers the container if needed */
+      }
+
+      /* Holds the duplicated images and is animated */
+      .project-image .scroll-content {
+        position: absolute;
+        top: 0;
+        left: 0;
+        animation: scroll 10s linear infinite;
+      }
+
+      /* Keyframe animation for continuous vertical scroll */
+      /* Change '-600px' to match the height of one image */
+      @keyframes scroll {
+        0% {
+          transform: translateY(0);
+        }
+        100% {
+          transform: translateY(-65%);
+        }
+      }
+
+      /* Optional: Ensure the images fill the container’s width */
+      .project-image .scroll-content img {
+        width: 100%;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="project-card">
+      <div class="project-image">
+        <!-- Square container for scrolling -->
+        <div class="scroll-container">
+          <!-- Duplicate the image for a seamless loop -->
+          <div class="scroll-content">
+            <img
+              src="https://i.postimg.cc/5tMnYg1b/Home-13-1.png"
+              alt="Project 1"
+            />
+            <img
+              src="https://i.postimg.cc/5tMnYg1b/Home-13-1.png"
+              alt="Project 1"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="project-info">
+        <h2 class="project-title">Project 1</h2>
+        <a href="#"><i class="ri-external-link-line"></i></a>
+        <p class="project-description">
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam
+          quod, voluptates, quae, quos quia quibusdam quidem quas necessitatibus
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

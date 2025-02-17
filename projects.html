@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!--! Font  -->
+    <!--! Fonts & Icons  -->
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/@fontsource/geist-sans@5.0.3/600.min.css"
@@ -18,7 +18,8 @@
       href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css"
       rel="stylesheet"
     />
-    <!--! Font  -->
+    <!-- Include GSAP Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <!--?Styles  -->
     <link rel="stylesheet" href="styles/projects.css" />
     <link rel="stylesheet" href="styles/components.css" />
@@ -49,26 +50,13 @@
       </nav>
     </header>
 
-    <h1>Our Projects</h1>
-    <!-- Container for projects -->
-    <div id="projects">
-      <div class="project-card">
-        <div class="project-image">
-          <img src="https://i.postimg.cc/0jvZ3v1V/1.png" alt="Project 1" />
-        </div>
-        <div class="project-info">
-          <h2 class="project-title">Project 1</h2>
-          <a href="#"><i class="ri-external-link-line"></i></a>
-          <p class="project-description">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam
-            quod, voluptates, quae, quos quia quibusdam quidem quas
-            necessitatibus
-          </p>
-        </div>
-      </div>
-    </div>
-    <!-- Container for projects -->
+    <!-- Add some top margin to account for the fixed header -->
+    <h1 style="margin-top: 100px; text-align: center">Our Projects</h1>
 
+    <!-- Projects will be injected here -->
+    <div id="projects"></div>
+
+    <!-- JavaScript to load projects -->
     <script src="/scripts/projects.js"></script>
   </body>
 </html>

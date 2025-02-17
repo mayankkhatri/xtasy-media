@@ -14,12 +14,10 @@ const query = `
 const endpoint =
   "https://ap-south-1.cdn.hygraph.com/content/cm56dje8k037q07w3hb9e1efc/master";
 
-// If your project requires authentication, you can add headers with your API token.
-// For now, if authentication isn't needed, you can leave the headers as shown.
+// Headers for the API call
 const headers = {
   "Content-Type": "application/json",
-  // If needed, uncomment and add your API token:
-  // 'Authorization': 'Bearer YOUR_API_TOKEN'
+  // 'Authorization': 'Bearer YOUR_API_TOKEN' // Uncomment if needed
 };
 
 // Fetch data from Hygraph
@@ -30,7 +28,6 @@ fetch(endpoint, {
 })
   .then((response) => response.json())
   .then((result) => {
-    // Check if data exists
     if (result.data && result.data.projects) {
       displayProjects(result.data.projects);
     } else {
@@ -43,19 +40,44 @@ fetch(endpoint, {
 function displayProjects(projects) {
   const projectsContainer = document.getElementById("projects");
   projects.forEach((project) => {
-    // Create a container div for each project
-    const projectDiv = document.createElement("div");
-    projectDiv.className = "project";
+    // Create the project card container
+    const projectCard = document.createElement("div");
+    projectCard.className = "project-card";
 
-    // Populate the project content
-    projectDiv.innerHTML = `
-      <img src="${project.imageLink}" alt="${project.projectTitle}">
-      <h2>${project.projectTitle}</h2>
-      <p>${project.projectDescription}</p>
-      <a href="${project.projectLink}" target="_blank">Visit Project</a>
+    // Wrap the entire card content in an anchor tag so the whole card is clickable
+    projectCard.innerHTML = `
+      <a href="${project.projectLink}" target="_blank" class="project-card-link">
+        <div class="project-image">
+          <div class="scroll-container">
+            <div class="scroll-content">
+              <img src="${project.imageLink}" alt="${project.projectTitle}">
+              <img src="${project.imageLink}" alt="${project.projectTitle}">
+            </div>
+          </div>
+        </div>
+        <div class="project-info">
+          <h2 class="project-title">
+            ${project.projectTitle}
+            <i class="ri-external-link-line"></i>
+          </h2>
+          <p class="project-description">${project.projectDescription}</p>
+        </div>
+      </a>
     `;
 
-    // Append the project to the container
-    projectsContainer.appendChild(projectDiv);
+    // Append the card to the projects container
+    projectsContainer.appendChild(projectCard);
+  });
+
+  // Use GSAP timeline for each scroll-content element to create a seamless loop
+  document.querySelectorAll(".scroll-content").forEach((content) => {
+    gsap
+      .timeline({ repeat: -1 })
+      .to(content, {
+        duration: 5,
+        y: -800, // Scroll by one image height (300px)
+        ease: "none",
+      })
+      .set(content, { y: 0 });
   });
 }
