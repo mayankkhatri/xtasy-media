@@ -9,8 +9,6 @@
       href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
       rel="stylesheet"
     />
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-    <!-- <link rel="stylesheet" href="styles.css"> -->
     <link rel="stylesheet" href="styles/taskboard.css" />
   </head>
   <body>
@@ -453,27 +451,12 @@
 
           const categoryHeader = document.createElement("h3");
           categoryHeader.classList.add("category-header");
-          categoryHeader.innerHTML = `${groupName} <button class="category-up-btn" onclick="moveCategoryUp(event)"><i class="ri-arrow-up-s-line"></i></button>`; // ADDED UP BUTTON
+          categoryHeader.textContent = groupName;
           categorySection.appendChild(categoryHeader);
 
           const taskCardCarousel = document.createElement("div");
           taskCardCarousel.classList.add("task-card-carousel");
-          taskCardCarousel.id = `taskCarousel-${groupName
-            .replace(/\s+/g, "-")
-            .toLowerCase()}`; // ADDED ID FOR SORTABLE
           categorySection.appendChild(taskCardCarousel);
-
-          // Initialize SortableJS for each carousel
-          Sortable.create(taskCardCarousel, {
-            group: "tasksGroup",
-            handle: ".drag-handle", // Use drag handle for dragging
-            onEnd: function (evt) {
-              updateTaskCategoryAndOrder(evt, date);
-            },
-            animation: 150,
-            fallbackOnBody: true,
-            swapThreshold: 0.65,
-          });
 
           let hasTasksInCategory = false;
           groupedTasks[groupName].forEach((task) => {
@@ -494,8 +477,7 @@
         ) {
           taskboardContainer.innerHTML = "<p>No tasks for this date.</p>";
         } else if (
-          tasksForDate.filter((task) => task.status !== "completed").length ===
-            0 &&
+          taskboardContainer.innerHTML.trim() === "" &&
           completedTasksContainer.children.length > 0
         ) {
           taskboardContainer.innerHTML =
@@ -509,10 +491,8 @@
         if (task.status === "ongoing") taskCard.classList.add("ongoing");
         if (task.status === "paused") taskCard.classList.add("paused");
         taskCard.dataset.taskId = task.id;
-        taskCard.dataset.taskGroup = task.group; // ADDED: store group on card for drag/drop
 
         taskCard.innerHTML = `
-                <div class="drag-handle"><i class="ri-drag-move-2-fill"></i></div>  <!-- Drag handle -->
                 <button class="delete-task-btn" onclick="deleteTask('${
                   task.id
                 }')"><i class="ri-delete-bin-line"></i></button>
@@ -525,7 +505,7 @@
                         ${getActionButtonsHTML(task)}
                     </div>
                 </div>
-                <p class="task-duration">Target: ${formatTime(
+                <p class="task-duration">Duration: ${formatTime(
                   task.duration
                 )}</p>
             `;
@@ -669,82 +649,6 @@
           2,
           "0"
         )}`;
-      }
-      // --- Drag & Drop and Category Move Functions ---
-      function updateTaskCategoryAndOrder(evt, taskDate) {
-        const taskId = evt.item.dataset.taskId;
-        const oldGroup = evt.item.dataset.taskGroup; // Get the original group before dragging
-        let newGroup = evt.item.parentNode.id
-          .replace("taskCarousel-", "")
-          .replace(/-/g, " "); // Extract group from carousel ID
-
-        // Create a mapping of original group names
-        const groupNameMap = tasks.reduce((map, task) => {
-          map[task.group.toLowerCase()] = task.group;
-          return map;
-        }, {});
-
-        // Preserve correct case of group name
-        if (groupNameMap[newGroup.toLowerCase()]) {
-          newGroup = groupNameMap[newGroup.toLowerCase()];
-        }
-
-        const taskIndex = tasks.findIndex(
-          (task) => task.id === parseInt(taskId)
-        );
-
-        if (taskIndex !== -1) {
-          const task = tasks[taskIndex];
-          const newCarousel = evt.item.parentNode;
-          const newTaskOrderIds = Array.from(newCarousel.children).map((item) =>
-            parseInt(item.dataset.taskId)
-          );
-
-          // Update task category only if it changed
-          if (oldGroup !== newGroup) {
-            task.group = newGroup;
-          }
-
-          // Reorder tasks within the category (both intra and inter category move)
-          const categoryTasks = tasks.filter(
-            (t) => t.group === newGroup && t.taskDate === taskDate
-          );
-          const orderedTasks = [];
-          newTaskOrderIds.forEach((id) => {
-            const foundTask = categoryTasks.find((t) => t.id === id);
-            if (foundTask) {
-              orderedTasks.push(foundTask);
-            }
-          });
-
-          // Get tasks NOT in the current category for this date
-          const otherTasks = tasks.filter(
-            (t) =>
-              !(t.group === newGroup && t.taskDate === taskDate) ||
-              t.status === "completed"
-          );
-
-          // Combine ordered tasks with other tasks to update the main tasks list.
-          tasks = [...otherTasks, ...orderedTasks];
-
-          saveTasks();
-          displayTasksForDate(taskDate); // Re-render task board to reflect changes
-        }
-      }
-
-      function moveCategoryUp(event) {
-        console.log("moveCategoryUp function called!"); // Debugging log
-        const categoryHeader =
-          event.target.closest(".category-header").parentElement; // Find category section
-        const taskboardContainer =
-          document.getElementById("taskboardContainer");
-        const prevCategory = categoryHeader.previousElementSibling; // Get previous category
-
-        if (prevCategory) {
-          taskboardContainer.insertBefore(categoryHeader, prevCategory); // Move category up
-        } else {
-          console.log("No previous category to move above."); // Debugging log when no prev category
-        }
       }
 
       // --- Initialization ---

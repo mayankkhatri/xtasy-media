@@ -1,0 +1,434 @@
+/* General Styles */
+body {
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f7f7f7;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.container {
+  width: 90%;
+  max-width: 1500px;
+  margin: 20px auto;
+}
+
+/* Header Styles */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+}
+
+.logo img {
+  height: 50px;
+}
+
+.app-buttons button {
+  background-color: #e0e0e0;
+  border: none;
+  padding: 10px 15px;
+  margin: 0 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  color: #555;
+  font-weight: bold;
+}
+.app-buttons button.active {
+  background-color: #4caf50;
+  color: white;
+}
+
+/* Date Row Styles */
+.date-row {
+  display: flex;
+  gap: 5px;
+  padding: 10px 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.date-number {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #fff;
+  color: #555;
+  cursor: pointer;
+  user-select: none;
+}
+
+.date-number.selected {
+  background-color: #e2f0d9;
+}
+.date-number.today {
+  background-color: #4caf50;
+  color: white;
+}
+
+/* Main Content Styles */
+.main-content {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.task-input-section,
+.completed-tasks-section {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  /* Equal height will be achieved by grid layout */
+  display: flex; /* Enable flexbox for stats positioning */
+  flex-direction: column; /* Stack content and stats vertically */
+  position: relative; /* Position relative for absolute positioning of stats */
+  max-height: 40vh;
+}
+
+/* Task Input Section Styles */
+.task-input-section h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+.task-input-section input[type="text"],
+.task-input-section .time-options button,
+.task-input-section .custom-time-input input[type="number"],
+.task-input-section button {
+  width: calc(100% - 22px);
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-sizing: border-box;
+  font-size: 1em;
+}
+.task-input-section button.add-task-btn {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+.task-input-section button.add-task-btn:hover {
+  background-color: #43a047;
+}
+.group-name-dropdown {
+  position: relative;
+}
+.group-name-dropdown-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: calc(100% - 22px);
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-sizing: border-box;
+  font-size: 1em;
+  background-color: white;
+  cursor: pointer;
+}
+.group-name-dropdown-content {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  display: none;
+  padding: 10px;
+}
+.group-name-dropdown-content.show {
+  display: block;
+}
+.group-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 5px;
+  margin-bottom: 5px;
+  border-bottom: 1px solid #eee;
+}
+.group-item:last-child {
+  border-bottom: none;
+}
+.group-item:hover {
+  background-color: #eee;
+  cursor: pointer;
+}
+.group-item span {
+  flex-grow: 1;
+}
+.group-item .group-actions {
+  visibility: hidden;
+}
+.group-item:hover .group-actions {
+  visibility: visible;
+}
+.group-actions i {
+  margin-left: 5px;
+  cursor: pointer;
+}
+.add-group-section {
+  margin-top: 10px;
+  display: flex;
+  gap: 5px;
+}
+.add-group-section input[type="text"] {
+  flex-grow: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+.add-group-section button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.task-input-section .time-options {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.task-input-section .time-options button {
+  width: auto;
+  padding: 8px 12px;
+  background-color: #e1f0d3;
+  color: #555;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+.task-input-section .time-options button:hover,
+.task-input-section .time-options button.selected {
+  background-color: #4f7942;
+  color: white;
+}
+.task-input-section .custom-time-input {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 0.5rem;
+}
+.task-input-section .custom-time-input input[type="number"] {
+  width: 130px;
+}
+
+/* Completed Tasks Section Styles */
+.completed-tasks-section {
+  height: auto; /* Fixed height to match task input section */
+  overflow-y: auto; /* Enable scroll if content overflows */
+}
+.completed-tasks-section #completedTasksContainer {
+  /* Container for task cards, to separate from stats */
+  padding-bottom: 30px; /* Make space for stats at bottom */
+}
+.completed-tasks-section .completed-tasks-stats {
+  /* Stats container style */
+  position: sticky; /* Absolute position to bottom left */
+  bottom: -15px;
+  left: 0px;
+  font-size: 0.9em;
+  color: #777;
+  padding: 8px 20px;
+  margin: 0 !important;
+  background-color: #fff; /* Optional: background to stand out */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional: shadow */
+  border-radius: 5px;
+}
+
+.completed-task-card {
+  background-color: #e8f8ef;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 5px;
+  font-size: 0.95em;
+  position: relative; /* For delete button positioning */
+}
+.completed-task-card .task-name {
+  font-weight: bold;
+}
+.completed-task-card .category-name {
+  color: #777;
+  font-size: 0.85em;
+}
+.completed-task-card .time-taken {
+  font-size: 0.85em;
+  color: #555;
+}
+.completed-task-card .delete-completed-task-btn {
+  /* Delete button for completed tasks */
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: none;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  font-size: 1em;
+}
+.completed-task-card .delete-completed-task-btn:hover {
+  color: #d32f2f;
+}
+
+/* Taskboard Styles - No changes from before */
+.taskboard {
+  margin-top: 20px;
+}
+.category-section {
+  margin-bottom: 20px;
+}
+.category-header {
+  font-size: 1.2em;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+.category-section .task-card-carousel {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+  padding-bottom: 10px;
+  -webkit-overflow-scrolling: touch;
+}
+.task-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  padding: 10px;
+  margin-bottom: 8px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+  flex-shrink: 0;
+}
+.task-card.ongoing {
+  background-color: #e6f9e8;
+}
+.task-card.paused {
+  background-color: #fff9e6;
+}
+.task-card .delete-task-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: none;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  font-size: 1em;
+}
+.task-card .delete-task-btn:hover {
+  color: #d32f2f;
+}
+.task-card .task-name {
+  font-weight: bold;
+  margin-bottom: 5px;
+  font-size: 1.2em;
+  white-space: nowrap;
+  overflow: auto;
+}
+.task-card .timer-display-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+.task-card .timer-display {
+  font-size: 1.2em;
+  margin-right: 5px;
+}
+.task-card .task-actions {
+  display: flex;
+  gap: 5px;
+}
+.task-card .task-actions button {
+  background-color: #f0f0f0;
+  border: none;
+  padding: 5px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.9em;
+  color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 25px;
+  height: 25px;
+}
+.task-card .task-actions button:hover {
+  background-color: #e0e0e0;
+}
+.task-card .task-actions button.start-btn {
+  background-color: #4caf50;
+  color: white;
+}
+.task-card .task-actions button.start-btn:hover {
+  background-color: #43a047;
+}
+.task-card .task-actions button.pause-btn {
+  background-color: #ffa000;
+  color: white;
+}
+.task-card .task-actions button.pause-btn:hover {
+  background-color: #ff8f00;
+}
+.task-card .task-actions button.resume-btn {
+  background-color: #4caf50;
+  color: white;
+}
+.task-card .task-actions button.resume-btn:hover {
+  background-color: #43a047;
+}
+.task-card .task-actions button.stop-btn {
+  background-color: #d32f2f;
+  color: white;
+}
+.task-card .task-actions button.stop-btn:hover {
+  background-color: #c62828;
+}
+.task-card .task-duration {
+  font-size: 0.8em;
+  color: #777;
+  margin-top: 5px;
+}
+
+/* Add these styles to your CSS or within <style> tags in <head> */
+.drag-handle {
+  cursor: grab;
+  padding-right: 5px; /* Add some spacing next to handle */
+}
+.category-up-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8em;
+  color: #777;
+  padding: 0;
+  margin-left: 5px;
+  vertical-align: middle;
+}
+
+.category-up-btn:hover {
+  color: #555;
+}
