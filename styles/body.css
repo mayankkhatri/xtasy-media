@@ -360,7 +360,7 @@ header {
   justify-content: flex-end; /* Align time to the right */
   font-size: 14px;
   color: #777;
-  margin-top: 5px; /* Adjust spacing as needed */
+  margin: 1.2rem auto;
 }
 
 .exercise-set-time .timer-line {
