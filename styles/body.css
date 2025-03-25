@@ -1,0 +1,384 @@
+/* --- Reset and General Styles --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: "Poppins", sans-serif;
+  background-color: #fafafa;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 20px;
+}
+
+/* --- Header Styles --- */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 20px;
+  max-width: 600px;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  height: 30px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 10px;
+}
+
+.nav-link {
+  padding: 10px 15px;
+  text-decoration: none;
+  color: #333;
+  border-radius: 5px;
+}
+
+.nav-link.active {
+  background-color: #4caf50;
+  color: white;
+}
+.nav-link:not(.active):hover {
+  background-color: #f0f0f0;
+}
+
+/* --- Date Slider Styles --- */
+.date-slider-container {
+  width: 100%;
+  max-width: 600px;
+  padding: 15px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.month-display {
+  text-align: left;
+  font-weight: 500;
+  padding-left: 5px;
+}
+
+.date-slider {
+  display: flex;
+  gap: 10px; /* Increased gap for better spacing */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 10px; /* Add some padding at the bottom for scrollbar */
+  padding-left: 5px; /* Align date circles with month display */
+}
+
+.date-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 50px; /* Increased width and height for better circle */
+  height: 50px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  color: #333;
+  cursor: pointer;
+  font-size: 16px; /* Increased font size */
+  border: none;
+  outline: none;
+  flex-shrink: 0; /* Prevent shrinking of date items */
+  transition: background-color 0.2s ease; /* Smooth transition for hover/active */
+}
+
+.date-item.today {
+  background-color: #4caf50;
+  color: white;
+}
+
+.date-item.today .date-day {
+  color: white;
+}
+
+.date-item.selected {
+  background-color: #8bc34a;
+  color: white;
+}
+.date-item:not(.today):not(.selected):hover {
+  background-color: #d0d0d0;
+}
+
+.date-day {
+  font-size: 14px; /* Increased day font size */
+  color: #777;
+}
+
+.date-number {
+  font-weight: bold;
+}
+
+/* --- Workout Dashboard Styles --- */
+.workout-dashboard {
+  width: 100%;
+  max-width: 600px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.select-dropdown {
+  position: relative;
+}
+
+.select-button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: white;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.select-button::after {
+  content: "v";
+  font-size: 14px;
+  color: #777;
+}
+
+.select-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 5px 5px;
+  z-index: 10;
+  display: none;
+  overflow-y: auto;
+  max-height: 200px;
+}
+
+.select-options.show {
+  display: block;
+}
+
+.option {
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 16px;
+}
+.option:hover {
+  background-color: #f0f0f0;
+}
+
+.add-option-input {
+  width: calc(100% - 30px);
+  padding: 8px 15px;
+  margin: 5px 15px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 16px;
+  outline: none;
+}
+
+.add-to-workout-button {
+  padding: 12px 20px;
+  background-color: #8bc34a;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+.add-to-workout-button:hover {
+  background-color: #689f38;
+}
+
+/* --- Workout Log Styles --- */
+.workout-log {
+  width: 100%;
+  max-width: 600px;
+  padding: 20px;
+}
+
+.log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.log-body-parts {
+  font-weight: 600;
+}
+
+.log-separator {
+  flex-grow: 1;
+  height: 1px;
+  background-color: #ccc;
+  margin: 0 10px;
+}
+
+.log-time {
+  color: #4caf50;
+  font-weight: 500;
+}
+
+.exercise-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  margin-bottom: 20px; /* Increased margin for better spacing */
+}
+.exercise-card:last-child {
+  margin-bottom: 0;
+}
+
+.exercise-muscle-group {
+  font-size: 14px;
+  color: #777;
+  margin-bottom: 5px;
+}
+
+.exercise-name {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.exercise-data {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px; /* Space between data and time */
+}
+
+.data-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 15px;
+}
+.data-group:last-child {
+  margin-right: 0;
+}
+
+.data-label {
+  font-size: 12px;
+  color: #777;
+  margin-bottom: 5px;
+}
+
+.data-value {
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer; /* Indicate editability */
+  user-select: none; /* Prevent text selection during swipe */
+}
+.data-value.editing {
+  background-color: #f0f0f0; /* Visual feedback during editing */
+  padding: 0 5px;
+  border-radius: 3px;
+}
+
+.exercise-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.action-icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: #4caf50;
+  padding: 5px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.action-icon-button.continue-set {
+  color: #777;
+}
+.action-icon-button:hover {
+  background-color: #f0f0f0;
+}
+
+.exercise-time-taken {
+  text-align: right;
+  font-size: 14px;
+  color: #777;
+  margin-top: 0; /* Moved closer to data */
+}
+
+.exercise-timer {
+  /* New timer style */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  color: #4caf50; /* Green timer color */
+  margin-top: 10px;
+}
+
+.timer-line {
+  border-top: 2px solid #ccc;
+  width: 20px;
+  margin: 0 10px;
+}
+
+/* --- Utility Classes --- */
+.hidden {
+  display: none !important;
+}
+.mb-0 {
+  margin-bottom: 0 !important;
+}
+
+.exercise-set-time {
+  /* Style for div containing set time */
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* Align time to the right */
+  font-size: 14px;
+  color: #777;
+  margin-top: 5px; /* Adjust spacing as needed */
+}
+
+.exercise-set-time .timer-line {
+  /* Re-use timer-line style for separator lines */
+  border-top: 2px solid #ccc;
+  width: 20px;
+  margin: 0 10px;
+}
+
+.exercise-set-time .set-timer-display {
+  /* Style for time display in completed sets */
+  font-weight: bold;
+  color: #777; /* Or a different color if you prefer */
+}
+
+/* --- Responsive Design --- */
+@media (min-width: 600px) {
+  body {
+    padding: 20px;
+  }
+}

@@ -22,386 +22,84 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
+    <link rel="stylesheet" href="styles/body.css" />
+    <script src="https://hammerjs.github.io/dist/hammer.min.js"></script>
+
     <style>
-      /* --- Reset and General Styles --- */
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      body {
-        font-family: "Poppins", sans-serif;
-        background-color: #fafafa;
-        color: #333;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding-bottom: 20px;
+      /* Add touch-action style for swipe functionality */
+      .data-value {
+        touch-action: none;
       }
 
-      /* --- Header Styles --- */
-      header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-        padding: 20px;
-        max-width: 600px;
-      }
-
-      .logo-container {
-        display: flex;
-        align-items: center;
-      }
-
-      .logo {
-        height: 30px;
-      }
-
-      .nav-links {
-        display: flex;
-        gap: 10px;
-      }
-
-      .nav-link {
-        padding: 10px 15px;
-        text-decoration: none;
-        color: #333;
-        border-radius: 5px;
-      }
-
-      .nav-link.active {
-        background-color: #4caf50;
-        color: white;
-      }
-      .nav-link:not(.active):hover {
-        background-color: #f0f0f0;
-      }
-
-      /* --- Date Slider Styles --- */
+      /* Existing styles remain here, add these new styles */
       .date-slider-container {
-        width: 100%;
-        max-width: 600px;
-        padding: 15px 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .month-display {
-        text-align: left;
-        font-weight: 500;
-        padding-left: 5px;
+        scroll-behavior: smooth;
       }
 
       .date-slider {
         display: flex;
-        gap: 10px; /* Increased gap for better spacing */
         overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        padding-bottom: 10px; /* Add some padding at the bottom for scrollbar */
-        padding-left: 5px; /* Align date circles with month display */
+        scroll-snap-type: x mandatory;
+        padding: 10px 0;
       }
 
       .date-item {
+        scroll-snap-align: center;
+        flex-shrink: 0;
+      }
+
+      /* Add these styles to your existing CSS */
+      .number-control {
         display: flex;
-        flex-direction: column;
         align-items: center;
-        justify-content: center;
-        width: 50px; /* Increased width and height for better circle */
-        height: 50px;
-        border-radius: 50%;
-        background-color: #e0e0e0;
-        color: #333;
-        cursor: pointer;
-        font-size: 16px; /* Increased font size */
-        border: none;
-        outline: none;
-        flex-shrink: 0; /* Prevent shrinking of date items */
-        transition: background-color 0.2s ease; /* Smooth transition for hover/active */
-      }
-
-      .date-item.today {
-        background-color: #4caf50;
-        color: white;
-      }
-
-      .date-item.selected {
-        background-color: #8bc34a;
-        color: white;
-      }
-      .date-item:not(.today):not(.selected):hover {
-        background-color: #d0d0d0;
-      }
-
-      .date-day {
-        font-size: 14px; /* Increased day font size */
-        color: #777;
-      }
-
-      .date-number {
-        font-weight: bold;
-      }
-
-      /* --- Workout Dashboard Styles --- */
-      .workout-dashboard {
-        width: 100%;
-        max-width: 600px;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-      }
-
-      .select-dropdown {
+        gap: 4px;
         position: relative;
       }
 
-      .select-button {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-        padding: 10px 15px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        background-color: white;
-        cursor: pointer;
-        font-size: 16px;
-      }
-
-      .select-button::after {
-        content: "v";
-        font-size: 14px;
-        color: #777;
-      }
-
-      .select-options {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        width: 100%;
-        background-color: white;
-        border: 1px solid #ccc;
-        border-top: none;
-        border-radius: 0 0 5px 5px;
-        z-index: 10;
-        display: none;
-        overflow-y: auto;
-        max-height: 200px;
-      }
-
-      .select-options.show {
-        display: block;
-      }
-
-      .option {
-        padding: 10px 15px;
-        cursor: pointer;
-        font-size: 16px;
-      }
-      .option:hover {
-        background-color: #f0f0f0;
-      }
-
-      .add-option-input {
-        width: calc(100% - 30px);
-        padding: 8px 15px;
-        margin: 5px 15px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
-        font-size: 16px;
-        outline: none;
-      }
-
-      .add-to-workout-button {
-        padding: 12px 20px;
-        background-color: #8bc34a;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 16px;
-        font-weight: 500;
-        transition: background-color 0.3s ease;
-      }
-      .add-to-workout-button:hover {
-        background-color: #689f38;
-      }
-
-      /* --- Workout Log Styles --- */
-      .workout-log {
-        width: 100%;
-        max-width: 600px;
-        padding: 20px;
-      }
-
-      .log-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-      }
-
-      .log-body-parts {
+      .data-value {
+        min-width: 30px;
+        text-align: center;
+        padding: 4px 0;
         font-weight: 600;
       }
 
-      .log-separator {
-        flex-grow: 1;
-        height: 1px;
-        background-color: #ccc;
-        margin: 0 10px;
-      }
-
-      .log-time {
-        color: #4caf50;
-        font-weight: 500;
-      }
-
-      .exercise-card {
-        background-color: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        padding: 15px;
-        margin-bottom: 20px; /* Increased margin for better spacing */
-      }
-      .exercise-card:last-child {
-        margin-bottom: 0;
-      }
-
-      .exercise-muscle-group {
-        font-size: 14px;
-        color: #777;
-        margin-bottom: 5px;
-      }
-
-      .exercise-name {
-        font-size: 18px;
-        font-weight: 500;
-        margin-bottom: 10px;
-      }
-
-      .exercise-data {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px; /* Space between data and time */
-      }
-
-      .data-group {
+      .arrow-controls {
         display: flex;
         flex-direction: column;
-        align-items: center;
-        margin-right: 15px;
-      }
-      .data-group:last-child {
-        margin-right: 0;
+        gap: 2px;
       }
 
-      .data-label {
-        font-size: 12px;
-        color: #777;
-        margin-bottom: 5px;
-      }
-
-      .data-value {
-        font-weight: bold;
-        font-size: 16px;
-        cursor: pointer; /* Indicate editability */
-        user-select: none; /* Prevent text selection during swipe */
-      }
-      .data-value.editing {
-        background-color: #f0f0f0; /* Visual feedback during editing */
-        padding: 0 5px;
-        border-radius: 3px;
-      }
-
-      .exercise-actions {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .action-icon-button {
+      .arrow-btn {
         background: none;
         border: none;
+        padding: 0;
+        margin: 0;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         cursor: pointer;
-        font-size: 20px;
-        color: #4caf50;
-        padding: 5px;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        color: #555;
+        border-radius: 3px;
+        transition: all 0.2s ease;
       }
-      .action-icon-button.continue-set {
-        color: #777;
-      }
-      .action-icon-button:hover {
+
+      .arrow-btn:hover {
         background-color: #f0f0f0;
+        color: #000;
       }
 
-      .exercise-time-taken {
-        text-align: right;
+      .arrow-btn i {
         font-size: 14px;
-        color: #777;
-        margin-top: 0; /* Moved closer to data */
       }
 
-      .exercise-timer {
-        /* New timer style */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-        font-weight: bold;
-        color: #4caf50; /* Green timer color */
-        margin-top: 10px;
-      }
-
-      .timer-line {
-        border-top: 2px solid #ccc;
-        width: 20px;
-        margin: 0 10px;
-      }
-
-      /* --- Utility Classes --- */
-      .hidden {
-        display: none !important;
-      }
-      .mb-0 {
-        margin-bottom: 0 !important;
-      }
-
-      .exercise-set-time {
-        /* Style for div containing set time */
-        display: flex;
-        align-items: center;
-        justify-content: flex-end; /* Align time to the right */
-        font-size: 14px;
-        color: #777;
-        margin-top: 5px; /* Adjust spacing as needed */
-      }
-
-      .exercise-set-time .timer-line {
-        /* Re-use timer-line style for separator lines */
-        border-top: 2px solid #ccc;
-        width: 20px;
-        margin: 0 10px;
-      }
-
-      .exercise-set-time .set-timer-display {
-        /* Style for time display in completed sets */
-        font-weight: bold;
-        color: #777; /* Or a different color if you prefer */
-      }
-
-      /* --- Responsive Design --- */
-      @media (min-width: 600px) {
-        body {
-          padding: 20px;
-        }
+      .weight-value[contenteditable="true"] {
+        background-color: #f8f8f8;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 2px 4px;
+        outline: none;
       }
     </style>
   </head>
@@ -477,7 +175,6 @@
     </div>
 
     <script>
-      // --- JavaScript ---
       document.addEventListener("DOMContentLoaded", () => {
         // --- Date Slider Functionality ---
         const monthDisplay = document.getElementById("monthDisplay");
@@ -486,10 +183,12 @@
         let selectedDate = today;
 
         function generateDates() {
-          const year = today.getFullYear();
-          const month = today.getMonth();
+          const year = selectedDate.getFullYear();
+          const month = selectedDate.getMonth();
           const daysInMonth = new Date(year, month + 1, 0).getDate();
-          const monthName = today.toLocaleString("default", { month: "short" });
+          const monthName = selectedDate.toLocaleString("default", {
+            month: "short",
+          });
           monthDisplay.textContent = monthName;
           dateSlider.innerHTML = "";
 
@@ -498,7 +197,6 @@
             const dayName = date.toLocaleString("default", {
               weekday: "short",
             });
-            const dateNumber = day;
             const isToday = date.toDateString() === today.toDateString();
             const isSelected =
               date.toDateString() === selectedDate.toDateString();
@@ -508,16 +206,27 @@
             if (isToday) dateItem.classList.add("today");
             if (isSelected) dateItem.classList.add("selected");
             dateItem.innerHTML = `
-                      <div class="date-day">${dayName}</div>
-                      <div class="date-number">${dateNumber}</div>
-                  `;
+            <div class="date-day">${dayName}</div>
+            <div class="date-number">${day}</div>
+        `;
             dateItem.addEventListener("click", () => {
               selectedDate = date;
-              generateDates();
-              loadWorkoutLog(selectedDate);
+              generateDates(); // Regenerate dates for the new month if needed
+              loadWorkoutLog(date); // Load workout for the selected date
             });
             dateSlider.appendChild(dateItem);
           }
+
+          // Scroll to selected date
+          setTimeout(() => {
+            const selectedElement = dateSlider.querySelector(".selected");
+            if (selectedElement) {
+              const scrollLeft =
+                selectedElement.offsetLeft -
+                (dateSlider.offsetWidth / 2 - selectedElement.offsetWidth / 2);
+              dateSlider.scrollLeft = scrollLeft;
+            }
+          }, 0);
         }
 
         generateDates();
@@ -684,55 +393,20 @@
         const logBodyPartsDisplay =
           workoutLogContainer.querySelector("#logBodyParts");
         const logTimeDisplay = workoutLogContainer.querySelector("#logTime");
-        let workoutStartTime = 0;
-        let workoutInterval = null;
-        let totalWorkoutTime = 0;
-        let currentExerciseTimerInterval = null;
-
-        addToWorkoutBtn.addEventListener("click", () => {
-          if (selectedMuscleGroup && selectedExercise) {
-            addExerciseToLog(
-              selectedDate,
-              selectedMuscleGroup,
-              selectedExercise
-            );
-            exerciseButton.querySelector("span").textContent =
-              "Select Exersice";
-            selectedExercise = null;
-            if (!workoutInterval) {
-              startWorkoutTimer();
-            }
-          } else {
-            alert("Please select both Muscle Group and Exercise.");
-          }
-        });
-
-        function startWorkoutTimer() {
-          workoutStartTime = Date.now() - totalWorkoutTime;
-          workoutInterval = setInterval(updateWorkoutTimer, 1000);
-        }
-
-        function updateWorkoutTimer() {
-          totalWorkoutTime = Date.now() - workoutStartTime;
-          logTimeDisplay.textContent = formatTime(totalWorkoutTime);
-        }
-
-        function stopWorkoutTimer() {
-          clearInterval(workoutInterval);
-          workoutInterval = null;
-        }
+        let exerciseTimers = {};
 
         function loadWorkoutLog(date) {
           const dateKey = formatDateKey(date);
-          const workoutData = localStorage.getItem(`workoutData_${dateKey}`);
-          const logData = workoutData ? JSON.parse(workoutData) : [];
+          const workoutData = JSON.parse(
+            localStorage.getItem(`workoutData_${dateKey}`) || "[]"
+          );
 
           workoutLogContainer.innerHTML = `
-                      <div class="log-header">
-                          <div class="log-body-parts" id="logBodyParts"></div>
-                          <div class="log-separator"></div>
-                          <div class="log-time" id="logTime">00:00</div>
-                      </div>`;
+        <div class="log-header">
+            <div class="log-body-parts" id="logBodyParts"></div>
+            <div class="log-separator"></div>
+            <div class="log-time" id="logTime">00:00</div>
+        </div>`;
 
           const currentLogBodyPartsDisplay =
             workoutLogContainer.querySelector("#logBodyParts");
@@ -740,44 +414,38 @@
             workoutLogContainer.querySelector("#logTime");
 
           let bodyParts = new Set();
-          let accumulatedTime = 0; // accumulate total time from all exercises
+          let totalWorkoutTime = 0;
           const exerciseIds = [];
 
-          logData.forEach((exerciseEntry) => {
+          workoutData.forEach((exerciseEntry) => {
             bodyParts.add(exerciseEntry.muscleGroup);
             const card = createExerciseCard(exerciseEntry);
             workoutLogContainer.appendChild(card);
             exerciseIds.push(exerciseEntry.id);
-            accumulatedTime += exerciseEntry.totalExerciseTime || 0;
+            totalWorkoutTime += exerciseEntry.sets.reduce(
+              (sum, set) => sum + set.elapsedTime,
+              0
+            );
+
+            // Start timer for active sets
+            if (
+              exerciseEntry.currentSetStartTime &&
+              !exerciseEntry.sets[exerciseEntry.sets.length - 1].isCompleted
+            ) {
+              startExerciseSetTimer(exerciseEntry.id);
+            }
           });
 
-          // Instead of resetting totalWorkoutTime to 0, set it to the sum of elapsed times
-          totalWorkoutTime = accumulatedTime;
           currentLogBodyPartsDisplay.textContent =
             Array.from(bodyParts).join(" & ") || "No exercises yet";
           currentLogTimeDisplay.textContent = formatTime(totalWorkoutTime);
-
-          if (logData.length > 0 && !workoutInterval) {
-            startWorkoutTimer();
-          } else if (logData.length === 0) {
-            stopWorkoutTimer();
-            logTimeDisplay.textContent = "00:00";
-            totalWorkoutTime = 0;
-          }
-
-          exerciseIds.forEach((exerciseId) => {
-            startExerciseSetTimer(exerciseId);
-          });
         }
-
-        let exerciseTimers = {};
 
         function addExerciseToLog(date, muscleGroup, exerciseName) {
           const dateKey = formatDateKey(date);
           const workoutData = JSON.parse(
             localStorage.getItem(`workoutData_${dateKey}`) || "[]"
           );
-
           const newExerciseEntry = {
             id: Date.now(),
             muscleGroup: muscleGroup,
@@ -786,21 +454,16 @@
               {
                 setNumber: 1,
                 reps: 12,
-                weight: 0,
+                weight: 10,
                 isCompleted: false,
                 setId: Date.now(),
                 elapsedTime: 0,
               },
             ],
-            startTime: Date.now(),
-            totalExerciseTime: 0,
             currentSetStartTime: Date.now(),
-            exerciseInterval: null,
             isLastSet: true,
           };
           workoutData.forEach((exercise) => (exercise.isLastSet = false));
-          newExerciseEntry.isLastSet = true;
-
           workoutData.push(newExerciseEntry);
           localStorage.setItem(
             `workoutData_${dateKey}`,
@@ -814,133 +477,251 @@
           card.classList.add("exercise-card");
           card.dataset.exerciseId = exerciseEntry.id;
           card.innerHTML = `
-                      <div class="exercise-muscle-group">${exerciseEntry.muscleGroup}</div>
-                      <div class="exercise-name">${exerciseEntry.exerciseName}</div>`;
+        <div class="exercise-muscle-group">${exerciseEntry.muscleGroup}</div>
+        <div class="exercise-name">${exerciseEntry.exerciseName}</div>`;
 
           exerciseEntry.sets.forEach((set, setIndex) => {
             const setDataHTML = `
-                          <div class="exercise-data exercise-set" data-set-id="${
-                            set.setId
-                          }">
-                              <div class="delete-set-btn" data-set-id="${
-                                set.setId
-                              }" data-exercise-id="${exerciseEntry.id}">✕</div>
-                              <div class="data-group">
-                                  <div class="data-label">#Set</div>
-                                  <div class="data-value set-value" contenteditable="true">${
-                                    set.setNumber
-                                  }</div>
-                              </div>
-                              <div class="data-group">
-                                  <div class="data-label">#Reps</div>
-                                  <div class="data-value reps-value" contenteditable="true">${
-                                    set.reps
-                                  }</div>
-                              </div>
-                              <div class="data-group">
-                                  <div class="data-label">Wt.(Kg)</div>
-                                  <div class="data-value weight-value" contenteditable="true">${
-                                    set.weight
-                                  }</div>
-                              </div>
-                              <div class="exercise-actions">
-                                  ${
-                                    set.isCompleted
-                                      ? `<button class="action-icon-button complete-set completed-icon" data-set-id="${set.setId}" data-exercise-id = "${exerciseEntry.id}">👍🏻</button>`
-                                      : `<button class="action-icon-button complete-set tick-icon" data-set-id="${set.setId}" data-exercise-id = "${exerciseEntry.id}"><i class="fa fa-check" aria-hidden="true"></i></button>
-                                  <button class="action-icon-button continue-set down-arrow-icon" data-set-id="${set.setId}" data-exercise-id = "${exerciseEntry.id}"><i class="fa fa-arrow-down" aria-hidden="true"></i></button>`
-                                  }
-                              </div>
-                          </div>
-                          ${
-                            set.isCompleted
-                              ? `<div class="exercise-set-time">
-                              <div class="timer-line"></div>
-                              <span class="set-timer-display" data-set-id="${
-                                set.setId
-                              }" data-exercise-id = "${
-                                  exerciseEntry.id
-                                }">${formatTime(set.elapsedTime)}</span>
-                              <div class="timer-line"></div>
-                          </div>`
-                              : `<div class="exercise-timer">
-                              <div class="timer-line"></div>
-                              <span class="timer-display" data-set-id="${set.setId}" data-exercise-id = "${exerciseEntry.id}">00:00</span>
-                              <div class="timer-line"></div>
-                          </div>`
-                          }`;
+          <div class="exercise-data exercise-set" data-set-id="${set.setId}">
+            <div class="delete-set-btn" data-set-id="${
+              set.setId
+            }" data-exercise-id="${exerciseEntry.id}">✕</div>
+            <div class="data-group">
+              <div class="data-label">#Set</div>
+              <div class="number-control">
+                <div class="data-value set-value">${set.setNumber}</div>
+                <div class="arrow-controls">
+                  <button class="arrow-btn arrow-up"><i class="fas fa-caret-up"></i></button>
+                  <button class="arrow-btn arrow-down"><i class="fas fa-caret-down"></i></button>
+                </div>
+              </div>
+            </div>
+            <div class="data-group">
+              <div class="data-label">#Reps</div>
+              <div class="number-control">
+                <div class="data-value reps-value">${set.reps}</div>
+                <div class="arrow-controls">
+                  <button class="arrow-btn arrow-up"><i class="fas fa-caret-up"></i></button>
+                  <button class="arrow-btn arrow-down"><i class="fas fa-caret-down"></i></button>
+                </div>
+              </div>
+            </div>
+            <div class="data-group">
+              <div class="data-label">Wt.(Kg)</div>
+              <div class="number-control">
+                <div class="data-value weight-value" contenteditable="true">${
+                  set.weight
+                }</div>
+                <div class="arrow-controls">
+                  <button class="arrow-btn arrow-up"><i class="fas fa-caret-up"></i></button>
+                  <button class="arrow-btn arrow-down"><i class="fas fa-caret-down"></i></button>
+                </div>
+              </div>
+            </div>
+            <div class="exercise-actions">
+              ${
+                set.isCompleted
+                  ? `<button class="action-icon-button complete-set completed-icon" data-set-id="${set.setId}" data-exercise-id="${exerciseEntry.id}">👍🏻</button>`
+                  : `<button class="action-icon-button complete-set tick-icon" data-set-id="${set.setId}" data-exercise-id="${exerciseEntry.id}"><i class="fa fa-check" aria-hidden="true"></i></button>
+                    <button class="action-icon-button continue-set down-arrow-icon" data-set-id="${set.setId}" data-exercise-id="${exerciseEntry.id}"><i class="fa fa-arrow-down" aria-hidden="true"></i></button>`
+              }
+            </div>
+          </div>
+          ${
+            set.isCompleted
+              ? `<div class="exercise-set-time">
+                <div class="timer-line"></div>
+                <span class="set-timer-display" data-set-id="${
+                  set.setId
+                }" data-exercise-id="${exerciseEntry.id}">${formatTime(
+                  set.elapsedTime
+                )}</span>
+                <div class="timer-line"></div>
+              </div>`
+              : `<div class="exercise-timer">
+                <div class="timer-line"></div>
+                <span class="timer-display" data-set-id="${set.setId}" data-exercise-id="${exerciseEntry.id}">00:00</span>
+                <div class="timer-line"></div>
+              </div>`
+          }`;
             card.innerHTML += setDataHTML;
           });
 
-          // After card is added to DOM, attach event listeners to action buttons inside this card
           attachCardEventListeners(card, exerciseEntry);
-
           return card;
         }
 
-        function startExerciseSetTimer(exerciseId) {
-          const exerciseCard = document.querySelector(
-            `.exercise-card[data-exercise-id="${exerciseId}"]`
-          );
-          if (!exerciseCard) {
-            return;
-          }
-          const timerDisplays = exerciseCard.querySelectorAll(".timer-display");
-          const exerciseData = getExerciseData(exerciseId);
+        function setupSwipeControls(element, type, exerciseId, setId) {
+          const hammer = new Hammer(element);
+          hammer.get("pan").set({
+            direction: Hammer.DIRECTION_VERTICAL,
+            threshold: 40, // Increased sensitivity threshold
+          });
 
-          if (!exerciseData || !timerDisplays.length) return;
+          let deltaY = 0;
+          hammer.on("panstart", () => (deltaY = 0));
 
-          const lastTimerDisplay = timerDisplays[timerDisplays.length - 1];
-          const currentSet = exerciseData.sets[exerciseData.sets.length - 1];
-
-          if (!currentSet || currentSet.isCompleted) return;
-
-          currentSet.exerciseInterval = setInterval(() => {
-            const elapsedTime =
-              Date.now() -
-              exerciseData.currentSetStartTime +
-              currentSet.elapsedTime;
-            lastTimerDisplay.textContent = formatTime(elapsedTime);
-          }, 1000);
-
-          exerciseTimers[exerciseId] = currentSet.exerciseInterval;
+          hammer.on("panmove", (ev) => {
+            deltaY += ev.deltaY;
+            if (Math.abs(deltaY) > 900) {
+              // Require 50px movement
+              handleSwipe(ev, element, type, exerciseId, setId);
+              deltaY = 0;
+            }
+          });
         }
 
-        function stopExerciseSetTimer(exerciseId) {
-          const exerciseData = getExerciseData(exerciseId);
-          if (exerciseData && exerciseData.sets.length > 0) {
-            const currentSet = exerciseData.sets[exerciseData.sets.length - 1];
-            if (currentSet.exerciseInterval) {
-              clearInterval(currentSet.exerciseInterval);
-              currentSet.exerciseInterval = null;
+        function handleSwipe(ev, element, type, exerciseId, setId) {
+          let currentValue = parseInt(element.textContent) || 0;
+          const increment = type === "weight" ? 5 : 1;
 
-              const currentTime = Date.now();
-              const elapsedTimeInSet =
-                currentTime -
-                exerciseData.currentSetStartTime +
-                currentSet.elapsedTime;
-              currentSet.elapsedTime = elapsedTimeInSet;
-            }
+          if (ev.direction === Hammer.DIRECTION_UP) {
+            currentValue += increment;
+          } else {
+            currentValue = Math.max(currentValue - increment, 0);
           }
+
+          element.textContent = currentValue;
+          updateExerciseDataViaSwipe(exerciseId, setId, type, currentValue);
+        }
+
+        function updateExerciseDataViaSwipe(
+          exerciseId,
+          setId,
+          dataType,
+          newValue
+        ) {
+          const dateKey = formatDateKey(selectedDate);
+          const workoutData = JSON.parse(
+            localStorage.getItem(`workoutData_${dateKey}`) || "[]"
+          );
+          const exerciseIndex = workoutData.findIndex(
+            (ex) => ex.id === parseInt(exerciseId)
+          );
+          if (exerciseIndex === -1) return;
+
+          const setIndex = workoutData[exerciseIndex].sets.findIndex(
+            (set) => set.setId === parseInt(setId)
+          );
+          if (setIndex === -1) return;
+
+          switch (dataType) {
+            case "set":
+              workoutData[exerciseIndex].sets[setIndex].setNumber = newValue;
+              break;
+            case "reps":
+              workoutData[exerciseIndex].sets[setIndex].reps = newValue;
+              break;
+            case "weight":
+              workoutData[exerciseIndex].sets[setIndex].weight = newValue;
+              break;
+          }
+
+          localStorage.setItem(
+            `workoutData_${dateKey}`,
+            JSON.stringify(workoutData)
+          );
         }
 
         function attachCardEventListeners(card, exerciseEntry) {
-          card.querySelectorAll(".exercise-data").forEach((setData) => {
-            setData.querySelectorAll(".data-value").forEach((valueElement) => {
-              valueElement.addEventListener("focus", function () {
-                this.classList.add("editing");
-              });
+          card.querySelectorAll(".exercise-set").forEach((setData) => {
+            const setValue = setData.querySelector(".set-value");
+            const repsValue = setData.querySelector(".reps-value");
+            const weightValue = setData.querySelector(".weight-value");
 
-              valueElement.addEventListener("blur", function () {
-                this.classList.remove("editing");
-                updateExerciseDataValue(
-                  this,
+            // Swipe controls
+            setupSwipeControls(
+              setValue,
+              "set",
+              exerciseEntry.id,
+              setData.dataset.setId
+            );
+            setupSwipeControls(
+              repsValue,
+              "reps",
+              exerciseEntry.id,
+              setData.dataset.setId
+            );
+            setupSwipeControls(
+              weightValue,
+              "weight",
+              exerciseEntry.id,
+              setData.dataset.setId
+            );
+
+            // Arrow controls
+            setData.querySelectorAll(".arrow-up").forEach((arrow) => {
+              arrow.addEventListener("click", (e) => {
+                const valueElement = e.currentTarget
+                  .closest(".number-control")
+                  .querySelector(".data-value");
+                const type = valueElement.classList.contains("set-value")
+                  ? "set"
+                  : valueElement.classList.contains("reps-value")
+                  ? "reps"
+                  : "weight";
+                const currentValue = parseInt(valueElement.textContent) || 0;
+                const increment = type === "weight" ? 5 : 1;
+                valueElement.textContent = currentValue + increment;
+                updateExerciseDataViaSwipe(
                   exerciseEntry.id,
-                  setData.dataset.setId
+                  setData.dataset.setId,
+                  type,
+                  currentValue + increment
                 );
               });
             });
 
+            setData.querySelectorAll(".arrow-down").forEach((arrow) => {
+              arrow.addEventListener("click", (e) => {
+                const valueElement = e.currentTarget
+                  .closest(".number-control")
+                  .querySelector(".data-value");
+                const type = valueElement.classList.contains("set-value")
+                  ? "set"
+                  : valueElement.classList.contains("reps-value")
+                  ? "reps"
+                  : "weight";
+                const currentValue = parseInt(valueElement.textContent) || 0;
+                const increment = type === "weight" ? 5 : 1;
+                valueElement.textContent = Math.max(
+                  currentValue - increment,
+                  0
+                );
+                updateExerciseDataViaSwipe(
+                  exerciseEntry.id,
+                  setData.dataset.setId,
+                  type,
+                  Math.max(currentValue - increment, 0)
+                );
+              });
+            });
+
+            // Weight keyboard input
+            weightValue.addEventListener("focus", () => {
+              weightValue.contentEditable = true;
+            });
+
+            weightValue.addEventListener("blur", () => {
+              weightValue.contentEditable = false;
+              const newValue = parseInt(weightValue.textContent) || 0;
+              weightValue.textContent = newValue;
+              updateExerciseDataViaSwipe(
+                exerciseEntry.id,
+                setData.dataset.setId,
+                "weight",
+                newValue
+              );
+            });
+
+            weightValue.addEventListener("keydown", (e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                weightValue.blur();
+              }
+            });
+
+            // Existing event listeners
             const completeButton = setData.querySelector(
               ".action-icon-button.tick-icon"
             );
@@ -984,42 +765,107 @@
           });
         }
 
+        function startExerciseSetTimer(exerciseId) {
+          // Clear any existing timer for this exercise
+          if (exerciseTimers[exerciseId]) {
+            clearInterval(exerciseTimers[exerciseId]);
+          }
+
+          const exerciseCard = document.querySelector(
+            `.exercise-card[data-exercise-id="${exerciseId}"]`
+          );
+          if (!exerciseCard) return;
+
+          const exerciseData = getExerciseData(exerciseId);
+          if (!exerciseData || exerciseData.sets.length === 0) return;
+
+          const currentSet = exerciseData.sets[exerciseData.sets.length - 1];
+          if (currentSet.isCompleted) return;
+
+          const timerDisplay = exerciseCard.querySelector(
+            `.timer-display[data-set-id="${currentSet.setId}"]`
+          );
+          if (!timerDisplay) return;
+
+          // Calculate initial elapsed time
+          let elapsed = currentSet.elapsedTime;
+          if (exerciseData.currentSetStartTime) {
+            elapsed += Date.now() - exerciseData.currentSetStartTime;
+          } else {
+            // If no start time, initialize it
+            exerciseData.currentSetStartTime = Date.now();
+            saveExerciseData(exerciseData);
+          }
+
+          // Update display immediately
+          timerDisplay.textContent = formatTime(elapsed);
+
+          // Start the interval
+          exerciseTimers[exerciseId] = setInterval(() => {
+            const currentElapsed =
+              currentSet.elapsedTime +
+              (Date.now() - exerciseData.currentSetStartTime);
+            timerDisplay.textContent = formatTime(currentElapsed);
+            updateTotalTimeDisplay();
+          }, 1000);
+        }
+
+        function stopExerciseSetTimer(exerciseId) {
+          const exerciseData = getExerciseData(exerciseId);
+          if (exerciseData && exerciseData.sets.length > 0) {
+            const currentSet = exerciseData.sets[exerciseData.sets.length - 1];
+            if (!currentSet.isCompleted && exerciseData.currentSetStartTime) {
+              currentSet.elapsedTime +=
+                Date.now() - exerciseData.currentSetStartTime;
+              exerciseData.currentSetStartTime = null;
+              saveExerciseData(exerciseData);
+            }
+          }
+          clearInterval(exerciseTimers[exerciseId]);
+          delete exerciseTimers[exerciseId];
+        }
+
+        function updateTotalTimeDisplay() {
+          const dateKey = formatDateKey(selectedDate);
+          const workoutData = JSON.parse(
+            localStorage.getItem(`workoutData_${dateKey}`) || "[]"
+          );
+          const totalTime = workoutData.reduce(
+            (sum, exercise) =>
+              sum + exercise.sets.reduce((s, set) => s + set.elapsedTime, 0),
+            0
+          );
+          logTimeDisplay.textContent = formatTime(totalTime);
+        }
+
         function handleCompleteSet(exerciseId, setId) {
           const dateKey = formatDateKey(selectedDate);
           const workoutData = JSON.parse(
             localStorage.getItem(`workoutData_${dateKey}`) || "[]"
           );
           const exerciseIndex = workoutData.findIndex(
-            (exercise) => exercise.id === parseInt(exerciseId)
+            (ex) => ex.id === parseInt(exerciseId)
           );
+          if (exerciseIndex === -1) return;
 
-          if (exerciseIndex !== -1) {
-            const setIndex = workoutData[exerciseIndex].sets.findIndex(
-              (set) => set.setId === parseInt(setId)
-            );
-            if (setIndex !== -1) {
-              stopExerciseSetTimer(exerciseId);
-              workoutData[exerciseIndex].sets[setIndex].isCompleted = true;
+          const setIndex = workoutData[exerciseIndex].sets.findIndex(
+            (set) => set.setId === parseInt(setId)
+          );
+          if (setIndex === -1) return;
 
-              let totalExerciseTimeForExercise = 0;
-              workoutData[exerciseIndex].sets.forEach((set) => {
-                totalExerciseTimeForExercise += set.elapsedTime;
-              });
-              workoutData[exerciseIndex].totalExerciseTime =
-                totalExerciseTimeForExercise;
+          const currentSet = workoutData[exerciseIndex].sets[setIndex];
+          stopExerciseSetTimer(exerciseId);
+          currentSet.elapsedTime +=
+            Date.now() - workoutData[exerciseIndex].currentSetStartTime;
+          currentSet.isCompleted = true;
+          workoutData[exerciseIndex].currentSetStartTime = null;
+          workoutData[exerciseIndex].isLastSet = false;
 
-              const isLastSetOfExercise = workoutData[exerciseIndex].isLastSet;
-
-              if (isLastSetOfExercise) {
-                stopWorkoutTimer();
-              }
-              localStorage.setItem(
-                `workoutData_${dateKey}`,
-                JSON.stringify(workoutData)
-              );
-              loadWorkoutLog(selectedDate);
-            }
-          }
+          localStorage.setItem(
+            `workoutData_${dateKey}`,
+            JSON.stringify(workoutData)
+          );
+          loadWorkoutLog(selectedDate);
         }
 
         function handleContinueSet(exerciseId, setId) {
@@ -1028,49 +874,39 @@
             localStorage.getItem(`workoutData_${dateKey}`) || "[]"
           );
           const exerciseIndex = workoutData.findIndex(
-            (exercise) => exercise.id === parseInt(exerciseId)
+            (ex) => ex.id === parseInt(exerciseId)
           );
+          if (exerciseIndex === -1) return;
 
-          if (exerciseIndex !== -1) {
-            const currentSetIndex = workoutData[exerciseIndex].sets.findIndex(
-              (set) => set.setId === parseInt(setId)
-            );
-            if (currentSetIndex !== -1) {
-              stopExerciseSetTimer(exerciseId);
-              workoutData[exerciseIndex].sets[
-                currentSetIndex
-              ].isCompleted = true;
+          const currentSetIndex = workoutData[exerciseIndex].sets.findIndex(
+            (set) => set.setId === parseInt(setId)
+          );
+          if (currentSetIndex === -1) return;
 
-              let totalExerciseTimeForSet = 0;
-              totalExerciseTimeForSet +=
-                workoutData[exerciseIndex].sets[currentSetIndex].elapsedTime;
+          stopExerciseSetTimer(exerciseId);
+          workoutData[exerciseIndex].sets[currentSetIndex].isCompleted = true;
+          workoutData[exerciseIndex].sets[currentSetIndex].elapsedTime +=
+            Date.now() - workoutData[exerciseIndex].currentSetStartTime;
 
-              const currentSet = workoutData[exerciseIndex].sets.find(
-                (set) => set.setId === parseInt(setId)
-              );
-              const newSetNumber = workoutData[exerciseIndex].sets.length + 1;
+          const currentSet = workoutData[exerciseIndex].sets[currentSetIndex];
+          const newSet = {
+            setNumber: workoutData[exerciseIndex].sets.length + 1,
+            reps: currentSet.reps,
+            weight: currentSet.weight,
+            isCompleted: false,
+            setId: Date.now(),
+            elapsedTime: 0,
+          };
 
-              const newSet = {
-                setNumber: newSetNumber,
-                reps: currentSet.reps,
-                weight: currentSet.weight,
-                isCompleted: false,
-                setId: Date.now(),
-                elapsedTime: 0,
-              };
+          workoutData[exerciseIndex].sets.push(newSet);
+          workoutData[exerciseIndex].currentSetStartTime = Date.now();
+          workoutData[exerciseIndex].isLastSet = true;
 
-              workoutData[exerciseIndex].sets.push(newSet);
-              workoutData[exerciseIndex].currentSetStartTime = Date.now();
-
-              localStorage.setItem(
-                `workoutData_${dateKey}`,
-                JSON.stringify(workoutData)
-              );
-              loadWorkoutLog(selectedDate);
-              startWorkoutTimer();
-              startExerciseSetTimer(exerciseId);
-            }
-          }
+          localStorage.setItem(
+            `workoutData_${dateKey}`,
+            JSON.stringify(workoutData)
+          );
+          loadWorkoutLog(selectedDate);
         }
 
         function handleContinueSetFromCompleted(exerciseId, setId) {
@@ -1079,71 +915,31 @@
             localStorage.getItem(`workoutData_${dateKey}`) || "[]"
           );
           const exerciseIndex = workoutData.findIndex(
-            (exercise) => exercise.id === parseInt(exerciseId)
+            (ex) => ex.id === parseInt(exerciseId)
           );
+          if (exerciseIndex === -1) return;
 
-          if (exerciseIndex !== -1) {
-            const currentSet = workoutData[exerciseIndex].sets.find(
-              (set) => set.setId === parseInt(setId)
-            );
-            const newSetNumber = workoutData[exerciseIndex].sets.length + 1;
-
-            const newSet = {
-              setNumber: newSetNumber,
-              reps: currentSet.reps,
-              weight: currentSet.weight,
-              isCompleted: false,
-              setId: Date.now(),
-              elapsedTime: 0,
-            };
-
-            stopExerciseSetTimer(exerciseId);
-
-            workoutData[exerciseIndex].sets.push(newSet);
-            workoutData[exerciseIndex].currentSetStartTime = Date.now();
-
-            localStorage.setItem(
-              `workoutData_${dateKey}`,
-              JSON.stringify(workoutData)
-            );
-            loadWorkoutLog(selectedDate);
-            startWorkoutTimer();
-            startExerciseSetTimer(exerciseId);
-          }
-        }
-
-        function updateExerciseDataValue(element, exerciseId, setId) {
-          const newValue = element.textContent;
-          const dataType = element.classList[1].split("-")[0];
-          const dateKey = formatDateKey(selectedDate);
-          const workoutData = JSON.parse(
-            localStorage.getItem(`workoutData_${dateKey}`) || "[]"
+          const currentSet = workoutData[exerciseIndex].sets.find(
+            (set) => set.setId === parseInt(setId)
           );
+          const newSet = {
+            setNumber: workoutData[exerciseIndex].sets.length + 1,
+            reps: currentSet.reps,
+            weight: currentSet.weight,
+            isCompleted: false,
+            setId: Date.now(),
+            elapsedTime: 0,
+          };
 
-          const exerciseIndex = workoutData.findIndex(
-            (exercise) => exercise.id === parseInt(exerciseId)
+          workoutData[exerciseIndex].sets.push(newSet);
+          workoutData[exerciseIndex].currentSetStartTime = Date.now();
+          workoutData[exerciseIndex].isLastSet = true;
+
+          localStorage.setItem(
+            `workoutData_${dateKey}`,
+            JSON.stringify(workoutData)
           );
-          if (exerciseIndex !== -1) {
-            const setIndex = workoutData[exerciseIndex].sets.findIndex(
-              (set) => set.setId === parseInt(setId)
-            );
-            if (setIndex !== -1) {
-              if (dataType === "set") {
-                workoutData[exerciseIndex].sets[setIndex].setNumber =
-                  parseInt(newValue);
-              } else if (dataType === "reps") {
-                workoutData[exerciseIndex].sets[setIndex].reps =
-                  parseInt(newValue);
-              } else if (dataType === "weight") {
-                workoutData[exerciseIndex].sets[setIndex].weight =
-                  parseInt(newValue);
-              }
-              localStorage.setItem(
-                `workoutData_${dateKey}`,
-                JSON.stringify(workoutData)
-              );
-            }
-          }
+          loadWorkoutLog(selectedDate);
         }
 
         function getExerciseData(exerciseId) {
@@ -1151,9 +947,22 @@
           const workoutData = JSON.parse(
             localStorage.getItem(`workoutData_${dateKey}`) || "[]"
           );
-          return workoutData.find(
-            (exercise) => exercise.id === parseInt(exerciseId)
+          return workoutData.find((ex) => ex.id === parseInt(exerciseId));
+        }
+
+        function saveExerciseData(exercise) {
+          const dateKey = formatDateKey(selectedDate);
+          const workoutData = JSON.parse(
+            localStorage.getItem(`workoutData_${dateKey}`) || "[]"
           );
+          const index = workoutData.findIndex((ex) => ex.id === exercise.id);
+          if (index !== -1) {
+            workoutData[index] = exercise;
+            localStorage.setItem(
+              `workoutData_${dateKey}`,
+              JSON.stringify(workoutData)
+            );
+          }
         }
 
         function handleDeleteSet(exerciseId, setId) {
@@ -1163,20 +972,26 @@
               localStorage.getItem(`workoutData_${dateKey}`) || "[]"
             );
             const exerciseIndex = workoutData.findIndex(
-              (exercise) => exercise.id === parseInt(exerciseId)
+              (ex) => ex.id === parseInt(exerciseId)
             );
-            if (exerciseIndex !== -1) {
-              const setIndexToRemove = workoutData[
-                exerciseIndex
-              ].sets.findIndex((set) => set.setId === parseInt(setId));
-              if (setIndexToRemove > -1) {
-                workoutData[exerciseIndex].sets.splice(setIndexToRemove, 1);
-                localStorage.setItem(
-                  `workoutData_${dateKey}`,
-                  JSON.stringify(workoutData)
-                );
-                loadWorkoutLog(selectedDate);
+            if (exerciseIndex === -1) return;
+
+            const setIndexToRemove = workoutData[exerciseIndex].sets.findIndex(
+              (set) => set.setId === parseInt(setId)
+            );
+            if (setIndexToRemove > -1) {
+              workoutData[exerciseIndex].sets.splice(setIndexToRemove, 1);
+
+              // Remove exercise if no sets left
+              if (workoutData[exerciseIndex].sets.length === 0) {
+                workoutData.splice(exerciseIndex, 1);
               }
+
+              localStorage.setItem(
+                `workoutData_${dateKey}`,
+                JSON.stringify(workoutData)
+              );
+              loadWorkoutLog(selectedDate);
             }
           }
         }
@@ -1196,6 +1011,21 @@
             seconds
           ).padStart(2, "0")}`;
         }
+
+        addToWorkoutBtn.addEventListener("click", () => {
+          if (selectedMuscleGroup && selectedExercise) {
+            addExerciseToLog(
+              selectedDate,
+              selectedMuscleGroup,
+              selectedExercise
+            );
+            exerciseButton.querySelector("span").textContent =
+              "Select Exersice";
+            selectedExercise = null;
+          } else {
+            alert("Please select both Muscle Group and Exercise.");
+          }
+        });
 
         loadWorkoutLog(selectedDate);
       });
