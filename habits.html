@@ -9,19 +9,15 @@
       rel="stylesheet"
     />
     <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link
+      rel="icon"
+      href="https://cdn-icons-png.flaticon.com/128/5778/5778840.png"
+      type="image/x-icon"
     />
     <style>
-      :root {
-        --primary-green: #2ecc71;
-        --dark-green: #27ae60;
-        --light-green: #d1f2eb;
-        --accent-red: #e74c3c;
-        --text-dark: #2c3e50;
-        --text-light: #95a5a6;
-      }
-
       * {
         margin: 0;
         padding: 0;
@@ -31,7 +27,7 @@
 
       body {
         background: #fafafa;
-        color: var(--text-dark);
+        color: #333;
       }
 
       .container {
@@ -40,17 +36,16 @@
         padding: 1rem;
       }
 
-      /* Header Styles */
       header {
-        background: white;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         padding: 1rem 0;
+        margin-bottom: 2rem;
       }
 
-      .nav-container {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+      .logo {
+        width: 50px;
       }
 
       .nav-links {
@@ -60,7 +55,7 @@
 
       .nav-links a {
         text-decoration: none;
-        color: var(--text-light);
+        color: #666;
         padding: 0.5rem 1rem;
         border-radius: 8px;
         transition: all 0.3s ease;
@@ -68,66 +63,57 @@
 
       .nav-links a.active {
         background: white;
-        color: var(--primary-green);
-        font-weight: 500;
+        color: #2ecc71;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
       }
 
-      /* Dashboard Styles */
-      .dashboard {
+      .habit-form {
         background: white;
-        border-radius: 12px;
         padding: 2rem;
-        margin: 2rem 0;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-      }
-
-      .input-group {
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
         display: flex;
         gap: 1rem;
         flex-wrap: wrap;
       }
 
-      input,
-      select,
-      button {
-        padding: 0.75rem 1.5rem;
-        border: 2px solid #eee;
+      .habit-input {
+        flex: 1;
+        padding: 0.8rem;
+        border: 1px solid #eee;
         border-radius: 8px;
-        font-size: 1rem;
+        min-width: 250px;
       }
 
-      button {
-        background: var(--primary-green);
-        color: white;
+      .frequency-select {
+        padding: 0.8rem;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        background: white;
+      }
+
+      .track-btn {
+        padding: 0.8rem 2rem;
         border: none;
+        border-radius: 8px;
+        background: #2ecc71;
+        color: white;
         cursor: pointer;
         transition: transform 0.2s ease;
       }
 
-      button:hover {
+      .track-btn:hover {
         transform: translateY(-2px);
       }
 
-      /* Habit Cards */
       .habit-card {
         background: white;
-        border-radius: 12px;
         padding: 1.5rem;
-        margin: 1rem 0;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
         position: relative;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        animation: slideIn 0.3s ease;
-      }
-
-      @keyframes slideIn {
-        from {
-          transform: translateY(20px);
-          opacity: 0;
-        }
-        to {
-          transform: translateY(0);
-          opacity: 1;
-        }
       }
 
       .habit-header {
@@ -137,160 +123,196 @@
         margin-bottom: 1rem;
       }
 
+      .habit-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+      }
+
+      .target-frequency {
+        color: #666;
+        font-size: 0.9rem;
+        margin-left: 0.5rem;
+      }
+
       .delete-btn {
-        background: var(--accent-red);
-        padding: 0.25rem 0.5rem;
-        border-radius: 6px;
-        color: white;
+        background: none;
+        border: none;
+        color: #e74c3c;
         cursor: pointer;
+        padding: 0.5rem;
       }
 
       .dates-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
         gap: 0.5rem;
-        margin: 1rem 0;
+        margin-bottom: 1rem;
       }
 
       .date-btn {
-        width: 40px;
-        height: 40px;
+        width: 35px;
+        height: 35px;
         border-radius: 50%;
-        background: #ecf0f1;
         border: none;
+        background: #eee;
         cursor: pointer;
         position: relative;
         transition: all 0.3s ease;
       }
 
-      .date-btn.current::after {
+      .date-btn.completed {
+        background: #2ecc71;
+        color: white;
+      }
+
+      .date-btn.current-date::after {
         content: "";
         width: 6px;
         height: 6px;
-        background: var(--primary-green);
+        background: #2ecc71;
         position: absolute;
-        bottom: -10px;
+        bottom: -8px;
         left: 50%;
         transform: translateX(-50%);
         border-radius: 50%;
       }
 
-      .date-btn.completed {
-        background: var(--primary-green);
-        color: white;
+      .progress-text {
+        color: #666;
+        font-size: 0.9rem;
       }
 
-      .date-btn.skipped {
-        background: var(--accent-red);
-        color: white;
-      }
-
-      /* Notes Modal */
-      .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-      }
-
-      .notes-modal {
-        background: white;
-        padding: 2rem;
-        border-radius: 12px;
-        width: 90%;
-        max-width: 500px;
-        position: relative;
-      }
-
-      .close-btn {
+      .notes-icon {
         position: absolute;
-        top: 1rem;
+        bottom: 1rem;
         right: 1rem;
+        color: #666;
         cursor: pointer;
       }
 
-      .notes-list {
-        margin-top: 1rem;
+      /* Updated Notes Modal Styles */
+      .notes-modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        width: 90%;
+        max-width: 500px;
+        z-index: 100;
       }
 
-      .note-item {
-        background: var(--light-green);
+      .notes-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .note-input {
+        width: 100%;
         padding: 1rem;
+        border: 1px solid #eee;
         border-radius: 8px;
-        margin: 0.5rem 0;
+        margin-bottom: 1rem;
+        min-height: 100px;
       }
 
-      /* Responsive Design */
-      @media (max-width: 768px) {
-        .nav-container {
-          flex-direction: column;
-          gap: 1rem;
-        }
+      .save-note {
+        background: #2ecc71;
+        color: white;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+      }
 
-        .input-group {
-          flex-direction: column;
-        }
+      .save-note:hover {
+        transform: translateY(-2px);
+      }
 
-        input,
-        select,
-        button {
-          width: 100%;
-        }
+      .notes-list {
+        margin-top: 1.5rem;
+      }
+
+      .note-card {
+        background: #f8f9fa;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 8px;
+        position: relative;
+      }
+
+      .note-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        color: #666;
+      }
+
+      .delete-note {
+        color: #e74c3c;
+        cursor: pointer;
+        margin-left: 1rem;
+      }
+
+      .note-card p {
+        color: #333;
+        padding: 0.5rem;
+      }
+
+      .date-btn.skipped {
+        background: #e74c3c !important;
+        color: white !important;
       }
     </style>
   </head>
   <body>
-    <header>
-      <div class="container nav-container">
+    <div class="container">
+      <header>
         <img
           src="https://i.postimg.cc/k5F70t2x/Logo-2.png"
           alt="Logo"
-          width="120"
+          class="logo"
         />
         <nav class="nav-links">
           <a href="#" class="active">Habit</a>
           <a href="#">Taskboard</a>
           <a href="#">Body</a>
         </nav>
-      </div>
-    </header>
+      </header>
 
-    <div class="container">
-      <div class="dashboard">
-        <div class="input-group">
-          <input type="text" id="habitName" placeholder="Enter habit name" />
-          <select id="habitFrequency">
-            <option>Everyday</option>
-            <option>Alternate days</option>
-            <option>Every 2 days</option>
-            <option>Every week</option>
-            <option>Every month</option>
-          </select>
-          <button onclick="addHabit()">Track Habit</button>
-        </div>
+      <div class="habit-form">
+        <input type="text" class="habit-input" placeholder="Enter habit name" />
+        <select class="frequency-select">
+          <option>Everyday</option>
+          <option>Alternate days</option>
+          <option>Every 2 Days</option>
+          <option>Every 3 Days</option>
+          <option>Every Week</option>
+          <option>Every Month</option>
+        </select>
+        <button class="track-btn">Track Habit</button>
       </div>
 
-      <div id="habitsContainer"></div>
+      <div id="habits-container"></div>
     </div>
 
-    <div class="modal-overlay" id="notesModal">
-      <div class="notes-modal">
-        <span class="close-btn" onclick="closeNotes()">&times;</span>
-        <h3>Add Note</h3>
-        <textarea
-          id="noteContent"
-          rows="4"
-          placeholder="Write your note..."
-        ></textarea>
-        <button onclick="saveNote()">Save Note</button>
-        <div class="notes-list" id="notesList"></div>
+    <div class="notes-modal">
+      <div class="notes-header">
+        <h3>Notes</h3>
+        <i class="fas fa-times close-notes"></i>
       </div>
+      <textarea class="note-input" placeholder="Add a note..."></textarea>
+      <button class="save-note">Save Note</button>
+      <div class="notes-list"></div>
     </div>
 
     <script>
