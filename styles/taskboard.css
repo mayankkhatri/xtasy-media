@@ -433,3 +433,94 @@ body {
 .category-up-btn:hover {
   color: #555;
 }
+
+/* Mobile-First Responsive Additions */
+@media (max-width: 768px) {
+  .container {
+    width: 95%;
+    margin: 10px auto;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px 0;
+  }
+
+  .app-buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .app-buttons a {
+    margin: 0 5px;
+    padding: 8px 12px;
+    font-size: 0.9em;
+  }
+
+  .main-content {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .task-input-section,
+  .completed-tasks-section {
+    padding: 15px;
+    max-height: none;
+  }
+
+  .date-number {
+    min-width: 40px;
+    height: 40px;
+    font-size: 1.1em;
+  }
+
+  .task-input-section .time-options button {
+    padding: 6px 10px;
+    font-size: 0.85em;
+  }
+
+  .task-input-section .custom-time-input input[type="number"] {
+    width: 100%;
+  }
+
+  .task-card {
+    width: 180px;
+  }
+
+  .task-card .task-name {
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .completed-tasks-section .completed-tasks-stats {
+    position: sticky;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(5px);
+  }
+
+  .group-item .group-actions {
+    visibility: visible !important;
+  }
+
+  .category-section .task-card-carousel {
+    scroll-snap-type: x mandatory;
+  }
+
+  .task-card {
+    scroll-snap-align: start;
+  }
+}
+
+@media (min-width: 769px) {
+  /* Desktop-specific hover states */
+  .group-item .group-actions {
+    visibility: hidden;
+  }
+  .group-item:hover .group-actions {
+    visibility: visible;
+  }
+}
