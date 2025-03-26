@@ -28,7 +28,7 @@ body {
   height: 50px;
 }
 
-.app-buttons button {
+.app-buttons a {
   background-color: #e0e0e0;
   border: none;
   padding: 10px 15px;
@@ -37,8 +37,9 @@ body {
   cursor: pointer;
   color: #555;
   font-weight: bold;
+  text-decoration: none;
 }
-.app-buttons button.active {
+.app-buttons a.active {
   background-color: #4caf50;
   color: white;
 }

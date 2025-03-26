@@ -21,7 +21,7 @@ header {
   align-items: center;
   width: 100%;
   padding: 20px;
-  max-width: 600px;
+  max-width: 1200px;
 }
 
 .logo-container {
@@ -56,7 +56,7 @@ header {
 /* --- Date Slider Styles --- */
 .date-slider-container {
   width: 100%;
-  max-width: 600px;
+  max-width: 1200px;
   padding: 15px 20px;
   display: flex;
   flex-direction: column;
@@ -125,7 +125,7 @@ header {
 /* --- Workout Dashboard Styles --- */
 .workout-dashboard {
   width: 100%;
-  max-width: 600px;
+  max-width: 1200px;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -211,7 +211,7 @@ header {
 /* --- Workout Log Styles --- */
 .workout-log {
   width: 100%;
-  max-width: 600px;
+  max-width: 1200px;
   padding: 20px;
 }
 
