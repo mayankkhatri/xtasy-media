@@ -294,235 +294,167 @@
     </div>
 
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const habitsContainer = document.getElementById("habits-container");
-        const trackBtn = document.querySelector(".track-btn");
-        const notesModal = document.querySelector(".notes-modal");
-        const closeNotesBtn = document.querySelector(".close-notes");
-        const saveNoteBtn = document.querySelector(".save-note");
-        const noteInput = document.querySelector(".note-input");
-        const notesList = document.querySelector(".notes-list");
-        let currentHabitId = null;
+      let habits = JSON.parse(localStorage.getItem("habits")) || [];
+      let currentHabit = null;
+      const currentDate = new Date().getDate();
 
-        // Load habits from localStorage and migrate old data format
-        let habits = JSON.parse(localStorage.getItem("habits")) || [];
-        habits = habits.map((habit) => {
-          // Migrate old array format to new object format
-          if (Array.isArray(habit.completedDates)) {
-            const completedDates = {};
-            habit.completedDates.forEach((date) => {
-              completedDates[date] = "completed";
-            });
-            habit.completedDates = completedDates;
-          }
-          return {
-            notes: habit.notes || [],
-            ...habit,
-            completedDates: habit.completedDates || {},
-          };
-        });
+      class Habit {
+        constructor(name, frequency) {
+          this.id = Date.now();
+          this.name = name;
+          this.frequency = frequency;
+          this.dates = {}; // Ensure dates is always an object
+          this.notes = [];
+        }
+      }
 
-        function getDaysInMonth() {
-          const date = new Date();
-          return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+      function initializeApp() {
+        renderHabits();
+      }
+
+      function addHabit() {
+        const nameInput = document.getElementById("habitName");
+        const frequencySelect = document.getElementById("habitFrequency");
+
+        if (!nameInput.value.trim()) {
+          alert("Please enter a habit name");
+          return;
         }
 
-        function saveHabits() {
-          localStorage.setItem("habits", JSON.stringify(habits));
-        }
+        const habit = new Habit(nameInput.value.trim(), frequencySelect.value);
+        habits.push(habit);
+        saveToLocalStorage();
+        renderHabits();
 
-        function createDateButtons(habit) {
-          const datesGrid = document.createElement("div");
-          datesGrid.className = "dates-grid";
+        nameInput.value = "";
+        frequencySelect.selectedIndex = 0;
+      }
 
-          const daysInMonth = getDaysInMonth();
-          const currentDate = new Date().getDate();
+      function renderHabits() {
+        const container = document.getElementById("habitsContainer");
+        container.innerHTML = "";
 
-          for (let i = 1; i <= daysInMonth; i++) {
-            const dateBtn = document.createElement("button");
-            dateBtn.className = `date-btn ${
-              i === currentDate ? "current-date" : ""
-            }`;
-            dateBtn.textContent = i;
-
-            // Set initial state
-            const state = habit.completedDates[i] || "none";
-            if (state === "completed") dateBtn.classList.add("completed");
-            if (state === "skipped") dateBtn.classList.add("skipped");
-
-            dateBtn.addEventListener("click", () => {
-              const currentState = habit.completedDates[i] || "none";
-              let newState;
-              if (currentState === "none") newState = "completed";
-              else if (currentState === "completed") newState = "skipped";
-              else newState = "none";
-
-              habit.completedDates[i] = newState;
-              dateBtn.classList.remove("completed", "skipped");
-              if (newState !== "none") dateBtn.classList.add(newState);
-
-              updateProgress(habit);
-              saveHabits();
-            });
-
-            datesGrid.appendChild(dateBtn);
-          }
-          return datesGrid;
-        }
-
-        function updateProgress(habit) {
-          const completed = Object.values(habit.completedDates).filter(
-            (state) => state === "completed"
-          ).length;
-          const totalDays = getDaysInMonth();
-          habit.progressText.textContent = `${completed}/${totalDays}`;
-        }
-
-        function createHabitCard(habit) {
+        habits.forEach((habit) => {
           const card = document.createElement("div");
           card.className = "habit-card";
-          card.dataset.id = habit.id;
-
           card.innerHTML = `
-                  <div class="habit-header">
-                      <div>
-                          <span class="habit-title">${habit.name}</span>
-                          <span class="target-frequency">${
-                            habit.frequency
-                          }</span>
-                      </div>
-                      <button class="delete-btn"><i class="fas fa-trash"></i></button>
-                  </div>
-                  <div class="progress-text">0/${getDaysInMonth()}</div>
-                  <i class="fas fa-comment-dots notes-icon"></i>
-              `;
+                    <div class="habit-header">
+                        <div>
+                            <h3>${habit.name}</h3>
+                            <small>${habit.frequency}</small>
+                        </div>
+                        <div>
+                            <span class="delete-btn" onclick="deleteHabit(${
+                              habit.id
+                            })">Delete</span>
+                        </div>
+                    </div>
+                    <div class="dates-grid" id="dates-${habit.id}"></div>
+                    <div class="habit-footer">
+                        <span>Progress: ${calculateProgress(
+                          habit
+                        )}/${new Date().getDate()}</span>
+                        <i class="fas fa-comment-dots" onclick="openNotes(${
+                          habit.id
+                        })"></i>
+                    </div>
+                `;
 
-          const datesGrid = createDateButtons(habit);
-          card.insertBefore(datesGrid, card.querySelector(".progress-text"));
-          habit.progressText = card.querySelector(".progress-text");
-          updateProgress(habit);
-
-          card.querySelector(".delete-btn").addEventListener("click", () => {
-            if (confirm("Are you sure you want to delete this habit?")) {
-              habits = habits.filter((h) => h.id !== habit.id);
-              saveHabits();
-              card.remove();
-            }
-          });
-
-          card.querySelector(".notes-icon").addEventListener("click", () => {
-            currentHabitId = habit.id;
-            notesModal.style.display = "block";
-            loadNotes(habit);
-          });
-
-          return card;
-        }
-
-        function loadHabits() {
-          habitsContainer.innerHTML = "";
-          habits.forEach((habit) => {
-            const card = createHabitCard(habit);
-            habitsContainer.appendChild(card);
-          });
-        }
-
-        function loadNotes(habit) {
-          notesList.innerHTML = "";
-          habit.notes.forEach((note) => {
-            const noteElement = document.createElement("div");
-            noteElement.className = "note-card";
-            noteElement.innerHTML = `
-                      <div class="note-header">
-                          <span>${note.date}</span>
-                          <div>
-                              <i class="fas fa-times delete-note" data-id="${note.id}"></i>
-                          </div>
-                      </div>
-                      <p contenteditable="true">${note.text}</p>
-                  `;
-            noteElement
-              .querySelector(".delete-note")
-              .addEventListener("click", (e) => {
-                habit.notes = habit.notes.filter(
-                  (n) => n.id !== Number(e.target.dataset.id)
-                );
-                saveHabits();
-                noteElement.remove();
-              });
-
-            // Save edited notes
-            const noteText = noteElement.querySelector("p");
-            noteText.addEventListener("blur", () => {
-              note.text = noteText.textContent;
-              saveHabits();
-            });
-
-            notesList.appendChild(noteElement);
-          });
-        }
-
-        trackBtn.addEventListener("click", (e) => {
-          e.preventDefault();
-          const name = document.querySelector(".habit-input").value.trim();
-          const frequency = document.querySelector(".frequency-select").value;
-
-          if (!name) return;
-
-          const habit = {
-            id: Date.now(),
-            name,
-            frequency,
-            completedDates: {},
-            notes: [],
-          };
-
-          habits.push(habit);
-          saveHabits();
-          const card = createHabitCard(habit);
-          habitsContainer.appendChild(card);
-
-          document.querySelector(".habit-input").value = "";
+          renderDateButtons(card, habit);
+          container.appendChild(card);
         });
+      }
 
-        // Notes functionality
-        closeNotesBtn.addEventListener("click", () => {
-          notesModal.style.display = "none";
-        });
+      function renderDateButtons(card, habit) {
+        const datesGrid = card.querySelector(".dates-grid");
+        datesGrid.innerHTML = "";
 
-        saveNoteBtn.addEventListener("click", () => {
-          const noteText = noteInput.value.trim();
-          if (!noteText || !currentHabitId) return;
+        for (let day = 1; day <= 31; day++) {
+          const dateBtn = document.createElement("button");
+          dateBtn.className = `date-btn ${
+            day === currentDate ? "current" : ""
+          }`;
+          dateBtn.textContent = day;
 
-          const habit = habits.find((h) => h.id === currentHabitId);
-          const note = {
-            text: noteText,
-            date: new Date().toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-            id: Date.now(),
-          };
-
-          habit.notes.push(note);
-          saveHabits();
-          loadNotes(habit);
-          noteInput.value = "";
-        });
-
-        // Close modal when clicking outside
-        window.addEventListener("click", (e) => {
-          if (e.target === notesModal) {
-            notesModal.style.display = "none";
+          if (habit.dates[day]) {
+            dateBtn.classList.add(habit.dates[day]);
           }
+
+          dateBtn.onclick = () => toggleDateState(habit, day);
+          datesGrid.appendChild(dateBtn);
+        }
+      }
+
+      function toggleDateState(habit, day) {
+        if (!habit.dates) habit.dates = {}; // Add this safety check
+        const states = [null, "completed", "skipped"];
+        const currentState = habit.dates[day];
+        const newIndex = (states.indexOf(currentState) + 1) % 3;
+        habit.dates[day] = states[newIndex] || null;
+        saveToLocalStorage();
+        renderHabits();
+      }
+      function calculateProgress(habit) {
+        return Object.values(habit.dates).filter(
+          (state) => state === "completed"
+        ).length;
+
+        // Add null check for habit.dates
+        const dateStates = habit.dates ? Object.values(habit.dates) : [];
+        return dateStates.filter((state) => state === "completed").length;
+      }
+
+      function deleteHabit(id) {
+        if (!confirm("Are you sure you want to delete this habit?")) return;
+        habits = habits.filter((habit) => habit.id !== id);
+        saveToLocalStorage();
+        renderHabits();
+      }
+
+      function openNotes(id) {
+        currentHabit = habits.find((habit) => habit.id === id);
+        document.getElementById("notesModal").style.display = "flex";
+        renderNotes();
+      }
+
+      function closeNotes() {
+        document.getElementById("notesModal").style.display = "none";
+      }
+
+      function saveNote() {
+        const content = document.getElementById("noteContent").value;
+        if (!content.trim()) return;
+
+        currentHabit.notes.push({
+          date: new Date().toLocaleDateString(),
+          content: content.trim(),
         });
 
-        // Initial load
-        loadHabits();
-      });
+        saveToLocalStorage();
+        renderNotes();
+        document.getElementById("noteContent").value = "";
+      }
+
+      function renderNotes() {
+        const notesList = document.getElementById("notesList");
+        notesList.innerHTML = currentHabit.notes
+          .map(
+            (note) => `
+                <div class="note-item">
+                    <small>${note.date}</small>
+                    <p>${note.content}</p>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      function saveToLocalStorage() {
+        localStorage.setItem("habits", JSON.stringify(habits));
+      }
+
+      // Initialize the app
+      initializeApp();
     </script>
   </body>
 </html>
