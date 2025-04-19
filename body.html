@@ -101,6 +101,147 @@
         padding: 2px 4px;
         outline: none;
       }
+      .history-modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.5);
+        padding: 20px;
+        border-radius: 8px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        max-height: 90vh;
+        overflow: auto;
+      }
+
+      .modal-content {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        width: 100%;
+        max-width: 600px;
+      }
+
+      .history-table-container {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+      }
+
+      th,
+      td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+
+      .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        cursor: pointer;
+        font-size: 24px;
+        background: none;
+        border: none;
+        color: #333;
+      }
+
+      .close-btn:hover {
+        color: #666;
+      }
+
+      .modal-header {
+        position: relative;
+        margin-bottom: 20px;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 20px;
+      }
+
+      h3 {
+        margin: 15px 0;
+        font-size: 16px;
+        color: #444;
+      }
+
+      /* Add this to your CSS */
+      .note-input-container {
+        margin-top: 20px;
+      }
+
+      .note-input {
+        width: 100%;
+        height: 60px;
+        padding: 8px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        resize: vertical;
+      }
+
+      .add-note-btn {
+        background: #4caf50;
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        width: 100px;
+      }
+
+      .add-note-btn:hover {
+        background: #45a049;
+      }
+
+      .note-card {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 10px 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .note-content {
+        flex-grow: 1;
+        margin-right: 10px;
+        font-family: Arial, sans-serif;
+        font-style: italic;
+        color: #333;
+      }
+
+      .note-controls {
+        display: flex;
+        gap: 8px;
+      }
+
+      .edit-note,
+      .delete-note {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 4px;
+        font-size: 16px;
+      }
+
+      .edit-note:hover {
+        color: #4caf50;
+      }
+
+      .delete-note:hover {
+        color: #f44336;
+      }
     </style>
   </head>
   <body>
@@ -1029,6 +1170,424 @@
 
         loadWorkoutLog(selectedDate);
       });
+
+      //! History
+
+      function viewExerciseHistory(event) {
+        const muscleGroupName = event.target.textContent;
+        const historyModal = createModal(muscleGroupName);
+        document.body.appendChild(historyModal);
+      }
+
+      function createModal(muscleGroupName) {
+        const modal = document.createElement("div");
+        modal.className = "history-modal";
+        modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Exercise History - ${muscleGroupName}</h2>
+                <button class="close-btn" onclick="this.parentElement.parentElement.remove()">×</button>
+            </div>
+            <div class="history-table-container">
+                <h3>Most Recent Workout</h3>
+                <table id="lastWorkoutTable">
+                    <tr>
+                        <th>Date</th>
+                        <th>Exercise</th>
+                        <th>Sets</th>
+                        <th>Weight (kg)</th>
+                        <th>Reps</th>
+                    </tr>
+                </table>
+                <h3>Last 3 Workouts</h3>
+                <table id="historyTable">
+                    <tr>
+                        <th>Date</th>
+                        <th>Exercise</th>
+                        <th>Sets</th>
+                        <th>Weight (kg)</th>
+                        <th>Reps</th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    `;
+
+        // Get all workout data
+        const allWorkoutData = {};
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key.startsWith("workoutData_")) {
+            const dateKey = key.split("workoutData_")[1];
+            const data = JSON.parse(localStorage.getItem(key));
+            allWorkoutData[dateKey] = data;
+          }
+        }
+
+        // Get today's date
+        const today = new Date();
+        const todayStr = formatDateKey(today);
+
+        // Get workout history for muscle group
+        const historyData = [];
+        Object.keys(allWorkoutData).forEach((dateKey) => {
+          if (dateKey === todayStr) return; // Skip today's workouts
+          const workouts = allWorkoutData[dateKey];
+          const muscleGroupWorkouts = workouts.filter(
+            (exercise) => exercise.muscleGroup === muscleGroupName
+          );
+
+          if (muscleGroupWorkouts.length > 0) {
+            muscleGroupWorkouts.forEach((exercise) => {
+              const lastSet = exercise.sets[exercise.sets.length - 1];
+              historyData.push({
+                date: new Date(dateKey),
+                exerciseName: exercise.exerciseName,
+                sets: exercise.sets.length,
+                weight: lastSet.weight,
+                reps: lastSet.reps,
+                dateKey: dateKey,
+              });
+            });
+          }
+        });
+
+        // Sort history data by date descending
+        historyData.sort((a, b) => b.date - a.date);
+
+        // Find most recent workout (closest date before today)
+        const mostRecentWorkout = historyData.reduce((closest, current) => {
+          if (!closest) return current;
+          const timeDiff = today - current.date;
+          const closestTimeDiff = today - closest.date;
+          return timeDiff > closestTimeDiff ? current : closest;
+        }, null);
+
+        // Display most recent workout
+        const lastWorkoutTable = modal.querySelector("#lastWorkoutTable");
+        if (mostRecentWorkout) {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${new Date(mostRecentWorkout.dateKey).toLocaleDateString()}</td>
+            <td>${mostRecentWorkout.exerciseName}</td>
+            <td>${mostRecentWorkout.sets}</td>
+            <td>${mostRecentWorkout.weight}</td>
+            <td>${mostRecentWorkout.reps}</td>
+        `;
+          lastWorkoutTable.appendChild(row);
+        } else {
+          const noData = document.createElement("tr");
+          noData.innerHTML = `
+            <td colspan="5">No previous workout data found for this muscle group</td>
+        `;
+          lastWorkoutTable.appendChild(noData);
+        }
+
+        // Display last 3 workouts
+        const historyTable = modal.querySelector("#historyTable");
+        const recentWorkouts = historyData.slice(0, 3);
+        if (recentWorkouts.length === 0) {
+          const noData = document.createElement("tr");
+          noData.innerHTML = `
+            <td colspan="5">No additional workout data found</td>
+        `;
+          historyTable.appendChild(noData);
+        } else {
+          recentWorkouts.forEach((item) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${new Date(item.dateKey).toLocaleDateString()}</td>
+                <td>${item.exerciseName}</td>
+                <td>${item.sets}</td>
+                <td>${item.weight}</td>
+                <td>${item.reps}</td>
+            `;
+            historyTable.appendChild(row);
+          });
+        }
+
+        return modal;
+      }
+
+      // Add event listeners to muscle group elements
+      document.addEventListener("DOMContentLoaded", () => {
+        document
+          .querySelectorAll(".exercise-muscle-group")
+          .forEach((element) => {
+            element.addEventListener("click", viewExerciseHistory);
+          });
+      });
+
+      // Helper function to format date key
+      function formatDateKey(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }
+
+      // Improved close button functionality
+      document.addEventListener("click", (e) => {
+        if (e.target.classList.contains("close-btn")) {
+          e.target.parentElement.parentElement.remove();
+        }
+      });
+
+      // Add click outside modal to close it
+      document.addEventListener("click", function (e) {
+        if (e.target.classList.contains("history-modal")) {
+          e.target.remove();
+        }
+      });
+      //! History
+
+      //! Notes
+      // Add this to your JavaScript code
+      let noteInput;
+      let currentDate = new Date().toISOString();
+
+      // Load notes when page loads
+      document.addEventListener("DOMContentLoaded", () => {
+        initializeNoteInput();
+        loadNotes();
+      });
+
+      function initializeNoteInput() {
+        noteInput = document.createElement("textarea");
+        noteInput.placeholder = "Add a note to your workout...";
+        noteInput.className = "note-input";
+
+        const addButton = document.createElement("button");
+        addButton.textContent = "Add Note";
+        addButton.className = "add-note-btn";
+
+        document.querySelector(".workout-dashboard").appendChild(noteInput);
+        document.querySelector(".workout-dashboard").appendChild(addButton);
+
+        addButton.addEventListener("click", saveNote);
+        noteInput.addEventListener("keypress", (e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            saveNote();
+          }
+        });
+      }
+
+      function saveNote() {
+        const note = noteInput.value.trim();
+        if (note) {
+          const noteCard = document.createElement("div");
+          noteCard.className = "note-card";
+          noteCard.innerHTML = `
+            <div class="note-content" contenteditable="false">${note}</div>
+            <div class="note-controls">
+                <button class="edit-note">✏️</button>
+                <button class="delete-note">🗑️</button>
+                <button class="save-note" style="display: none;">💾</button>
+            </div>
+        `;
+
+          const workoutLog = document.querySelector(".workout-log");
+          workoutLog.insertBefore(noteCard, workoutLog.firstChild);
+
+          // Save to localStorage
+          const dateKey = formatDateKey(new Date());
+          const notes = JSON.parse(
+            localStorage.getItem(`notes_${dateKey}`) || "[]"
+          );
+          notes.push({
+            content: note,
+            date: currentDate,
+          });
+          localStorage.setItem(`notes_${dateKey}`, JSON.stringify(notes));
+
+          noteInput.value = "";
+
+          // Add event listeners
+          const editBtn = noteCard.querySelector(".edit-note");
+          const deleteBtn = noteCard.querySelector(".delete-note");
+          const saveBtn = noteCard.querySelector(".save-note");
+          const noteContent = noteCard.querySelector(".note-content");
+
+          editBtn.addEventListener("click", () => {
+            // Toggle contentEditable
+            noteContent.contentEditable = true;
+            noteContent.focus();
+            editBtn.style.display = "none";
+            saveBtn.style.display = "inline-block";
+          });
+
+          saveBtn.addEventListener("click", () => {
+            // Save changes
+            const newNote = noteContent.textContent.trim();
+            if (newNote !== note) {
+              noteContent.textContent = newNote;
+
+              // Update localStorage
+              const notes = JSON.parse(
+                localStorage.getItem(`notes_${dateKey}`) || "[]"
+              );
+              const index = notes.findIndex((n) => n.content === note);
+              if (index !== -1) {
+                notes[index].content = newNote;
+                localStorage.setItem(`notes_${dateKey}`, JSON.stringify(notes));
+              }
+            }
+
+            noteContent.contentEditable = false;
+            editBtn.style.display = "inline-block";
+            saveBtn.style.display = "none";
+          });
+
+          deleteBtn.addEventListener("click", () => {
+            if (confirm("Are you sure you want to delete this note?")) {
+              noteCard.remove();
+
+              // Remove from localStorage
+              const notes = JSON.parse(
+                localStorage.getItem(`notes_${dateKey}`) || "[]"
+              );
+              const updatedNotes = notes.filter((n) => n.content !== note);
+              localStorage.setItem(
+                `notes_${dateKey}`,
+                JSON.stringify(updatedNotes)
+              );
+            }
+          });
+
+          // Save on blur if changes were made
+          noteContent.addEventListener("blur", () => {
+            if (
+              noteContent.contentEditable &&
+              noteContent.textContent.trim() !== note
+            ) {
+              const newNote = noteContent.textContent.trim();
+              noteContent.textContent = newNote;
+
+              // Update localStorage
+              const notes = JSON.parse(
+                localStorage.getItem(`notes_${dateKey}`) || "[]"
+              );
+              const index = notes.findIndex((n) => n.content === note);
+              if (index !== -1) {
+                notes[index].content = newNote;
+                localStorage.setItem(`notes_${dateKey}`, JSON.stringify(notes));
+              }
+
+              noteContent.contentEditable = false;
+              editBtn.style.display = "inline-block";
+              saveBtn.style.display = "none";
+            }
+          });
+        }
+      }
+
+      function loadNotes() {
+        const dateKey = formatDateKey(new Date());
+        const notes = JSON.parse(
+          localStorage.getItem(`notes_${dateKey}`) || "[]"
+        );
+
+        notes.forEach((note) => {
+          const noteCard = document.createElement("div");
+          noteCard.className = "note-card";
+          noteCard.innerHTML = `
+            <div class="note-content" contenteditable="false">${note.content}</div>
+            <div class="note-controls">
+                <button class="edit-note">✏️</button>
+                <button class="delete-note">🗑️</button>
+                <button class="save-note" style="display: none;">💾</button>
+            </div>
+        `;
+
+          const workoutLog = document.querySelector(".workout-log");
+          workoutLog.insertBefore(noteCard, workoutLog.firstChild);
+
+          // Add event listeners
+          const editBtn = noteCard.querySelector(".edit-note");
+          const deleteBtn = noteCard.querySelector(".delete-note");
+          const saveBtn = noteCard.querySelector(".save-note");
+          const noteContent = noteCard.querySelector(".note-content");
+
+          editBtn.addEventListener("click", () => {
+            noteContent.contentEditable = true;
+            noteContent.focus();
+            editBtn.style.display = "none";
+            saveBtn.style.display = "inline-block";
+          });
+
+          saveBtn.addEventListener("click", () => {
+            const newNote = noteContent.textContent.trim();
+            if (newNote !== note.content) {
+              noteContent.textContent = newNote;
+
+              // Update localStorage
+              const notes = JSON.parse(
+                localStorage.getItem(`notes_${dateKey}`) || "[]"
+              );
+              const index = notes.findIndex((n) => n.content === note.content);
+              if (index !== -1) {
+                notes[index].content = newNote;
+                localStorage.setItem(`notes_${dateKey}`, JSON.stringify(notes));
+              }
+            }
+
+            noteContent.contentEditable = false;
+            editBtn.style.display = "inline-block";
+            saveBtn.style.display = "none";
+          });
+
+          deleteBtn.addEventListener("click", () => {
+            if (confirm("Are you sure you want to delete this note?")) {
+              noteCard.remove();
+
+              // Remove from localStorage
+              const notes = JSON.parse(
+                localStorage.getItem(`notes_${dateKey}`) || "[]"
+              );
+              const updatedNotes = notes.filter(
+                (n) => n.content !== note.content
+              );
+              localStorage.setItem(
+                `notes_${dateKey}`,
+                JSON.stringify(updatedNotes)
+              );
+            }
+          });
+
+          noteContent.addEventListener("blur", () => {
+            if (
+              noteContent.contentEditable &&
+              noteContent.textContent.trim() !== note.content
+            ) {
+              const newNote = noteContent.textContent.trim();
+              noteContent.textContent = newNote;
+
+              // Update localStorage
+              const notes = JSON.parse(
+                localStorage.getItem(`notes_${dateKey}`) || "[]"
+              );
+              const index = notes.findIndex((n) => n.content === note.content);
+              if (index !== -1) {
+                notes[index].content = newNote;
+                localStorage.setItem(`notes_${dateKey}`, JSON.stringify(notes));
+              }
+
+              noteContent.contentEditable = false;
+              editBtn.style.display = "inline-block";
+              saveBtn.style.display = "none";
+            }
+          });
+        });
+      }
+
+      function formatDateKey(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }
+      //! Notes
     </script>
   </body>
 </html>
