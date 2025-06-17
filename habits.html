@@ -584,7 +584,6 @@
       }
       .tag-icon {
         font-size: 1.2rem;
-        margin-right: 1.5rem;
         color: #868e96;
         cursor: pointer;
         transition: color 0.2s;
@@ -593,21 +592,15 @@
         color: #343a40;
       }
 
-      /* Tag Management Modal */
-      .tag-modal {
-        display: none; /* Hidden by default */
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0, 0, 0, 0.5);
+      /* ADD THIS NEW RULE */
+      .tags-section {
         display: flex;
         align-items: center;
-        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px; /* Creates space between badges and the icon */
       }
+
+      /* Tag Management Modal */
 
       /* This is the CORRECT version */
       .tag-modal {
@@ -621,6 +614,9 @@
         overflow: auto;
         background-color: rgba(0, 0, 0, 0.5);
         /* The 'display: flex' and alignment rules are now only applied by JS when opened */
+        /* These properties will be used when display is set to 'flex' by JS */
+        align-items: center;
+        justify-content: center;
       }
 
       .tag-modal-content {
@@ -685,6 +681,40 @@
         background-color: #007bff;
         width: 100%;
         margin-top: 10px;
+      }
+
+      /* Paste this new CSS into your <style> tag */
+
+      /* This rule will turn the tag item into a flex container,
+   pushing the name to the left and the delete button to the right. */
+      .tag-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 5px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+      }
+
+      .tag-item:hover {
+        background-color: #f8f9fa;
+      }
+
+      .tag-item-name {
+        display: flex;
+        align-items: center;
+      }
+
+      .delete-tag-btn {
+        color: #adb5bd;
+        cursor: pointer;
+        font-size: 1.1rem;
+        transition: color 0.2s;
+      }
+
+      .delete-tag-btn:hover {
+        color: #e74c3c; /* Red on hover for delete action */
       }
     </style>
   </head>
@@ -1043,11 +1073,12 @@
 
       // REPLACE your old createHabitCard function with this entire new one.
       // REPLACE the existing function with this. It's a bit long but contains all the logic.
+      // REPLACE your current createHabitCard function with this one
       function createHabitCard(habit) {
         const card = document.createElement("div");
         card.className = "habit-card";
         card.dataset.id = habit.id;
-        // Added .habit-card-footer and .tags-display containers
+        // Corrected HTML structure
         card.innerHTML = `
         <div class="habit-header">
             <div class="habit-title-container">
@@ -1062,13 +1093,11 @@
         </div>
         <div class="progress-text">0/0</div>
         <div class="habit-card-footer">
-            <div class="tags-display">
-                <!-- Tag badges will be inserted here -->
-            </div>
-            <div>
-                <i class="fas fa-comment-dots notes-icon"></i>
+            <div class="tags-section">
+                <div class="tags-display"></div>
                 <i class="ri-price-tag-3-line tag-icon"></i>
             </div>
+            <i class="fas fa-comment-dots notes-icon"></i>
         </div>
     `;
 
@@ -1083,23 +1112,42 @@
           tagsDisplay.appendChild(badge);
         });
 
-        // Event listener for the new tag icon
+        // CRUCIAL: Event listener for the tag icon
         card.querySelector(".tag-icon").addEventListener("click", () => {
           openTagModal(habit.id);
         });
 
-        // --- All your other existing listeners for the card ---
+        // Title Editing Logic
         const habitTitleEl = card.querySelector(".habit-title");
         const saveTitleChange = () => {
-          /* ... (your existing title edit logic) ... */
+          habitTitleEl.contentEditable = false;
+          const newName = habitTitleEl.textContent.trim();
+          if (newName && newName !== habit.name) {
+            habit.name = newName;
+            saveHabitsToFirestore();
+            renderQuickActionCards();
+          } else {
+            habitTitleEl.textContent = habit.name;
+          }
         };
         habitTitleEl.addEventListener("click", () => {
-          /* ... */
+          habitTitleEl.contentEditable = true;
+          habitTitleEl.focus();
+          document.execCommand("selectAll", false, null);
         });
         habitTitleEl.addEventListener("blur", saveTitleChange);
         habitTitleEl.addEventListener("keydown", (e) => {
-          /* ... */
+          if (e.key === "Enter") {
+            e.preventDefault();
+            saveTitleChange();
+            habitTitleEl.blur();
+          } else if (e.key === "Escape") {
+            habitTitleEl.textContent = habit.name;
+            habitTitleEl.blur();
+          }
         });
+
+        // Other listeners
         card.querySelector(".delete-btn").addEventListener("click", () => {
           if (confirm("Are you sure you want to delete this habit?")) {
             habits = habits.filter((h) => h.id !== habit.id);
@@ -1116,15 +1164,22 @@
           loadNotes(currentHabit);
         });
         card.querySelector(".prev-month").addEventListener("click", () => {
-          /* ... */
+          const viewingDate = new Date(habit.viewingDate);
+          viewingDate.setMonth(viewingDate.getMonth() - 1);
+          habit.viewingDate = viewingDate.toISOString();
+          saveHabitsToFirestore();
+          updateHabitCardView(card, habit);
         });
         card.querySelector(".next-month").addEventListener("click", () => {
-          /* ... */
+          const viewingDate = new Date(habit.viewingDate);
+          viewingDate.setMonth(viewingDate.getMonth() + 1);
+          habit.viewingDate = viewingDate.toISOString();
+          saveHabitsToFirestore();
+          updateHabitCardView(card, habit);
         });
 
         return card;
       }
-
       // REPLACE the existing function with this
       function renderAllHabitCards() {
         habitsContainer.innerHTML = "";
@@ -1334,6 +1389,7 @@
       }
 
       // NEW FUNCTION: Opens and populates the tag management modal
+      // REPLACE your current openTagModal function with this one
       function openTagModal(habitId) {
         currentHabitId = habitId;
         const habit = habits.find((h) => h.id === habitId);
@@ -1346,44 +1402,88 @@
           const isChecked = (habit.tags || []).includes(tag);
           const tagItem = document.createElement("div");
           tagItem.className = "tag-item";
+
+          // This HTML includes the delete button
           tagItem.innerHTML = `
-            <input type="checkbox" id="tag-${tag}" value="${tag}" ${
+            <div class="tag-item-name">
+                <input type="checkbox" id="tag-${tag}" value="${tag}" ${
             isChecked ? "checked" : ""
           }>
-            <label for="tag-${tag}">${tag}</label>
+                <label for="tag-${tag}">${tag}</label>
+            </div>
+            <i class="fas fa-trash-alt delete-tag-btn" data-tag="${tag}" title="Delete this tag everywhere"></i>
         `;
           tagList.appendChild(tagItem);
+
+          // This listener handles the delete action
+          tagItem
+            .querySelector(".delete-tag-btn")
+            .addEventListener("click", (e) => {
+              const tagToDelete = e.target.dataset.tag;
+
+              if (
+                confirm(
+                  `Are you sure you want to permanently delete the tag "${tagToDelete}"? This will remove it from ALL habits.`
+                )
+              ) {
+                // 1. Remove tag from global list
+                allTags = allTags.filter((t) => t !== tagToDelete);
+
+                // 2. Remove tag from all habits
+                habits.forEach((h) => {
+                  if (h.tags && h.tags.includes(tagToDelete)) {
+                    h.tags = h.tags.filter((t) => t !== tagToDelete);
+                  }
+                });
+
+                // 3. Save changes and re-render UI
+                saveHabitsToFirestore();
+                renderFilterBar();
+                renderAllHabitCards();
+
+                // 4. Refresh the modal view itself
+                openTagModal(currentHabitId);
+              }
+            });
         });
 
+        tagModal.classList.add("is-visible");
         tagModal.style.display = "flex";
       }
-
       // NEW FUNCTIONALITY: Add event listeners for the tag modal
+      // REPLACE your current setupTagModalListeners function with this one
+      // REPLACE your current setupTagModalListeners function with this FINAL version
       function setupTagModalListeners() {
         const newTagInput = document.getElementById("new-tag-input");
+        const closeBtn = document.querySelector(".close-tag-modal");
+        const createBtn = document.getElementById("create-tag-btn");
+        const saveBtn = document.getElementById("save-tags-btn");
 
-        document
-          .querySelector(".close-tag-modal")
-          .addEventListener("click", () => (tagModal.style.display = "none"));
+        // --- Listener for the 'X' close button ---
+        if (closeBtn) {
+          closeBtn.addEventListener("click", () => {
+            tagModal.style.display = "none";
+          });
+        }
 
-        document
-          .getElementById("create-tag-btn")
-          .addEventListener("click", () => {
+        // --- Listener for the 'Create' button ---
+        if (createBtn) {
+          createBtn.addEventListener("click", () => {
             const newTagName = newTagInput.value.trim();
             if (newTagName && !allTags.includes(newTagName)) {
               allTags.push(newTagName);
-              allTags.sort(); // Keep tags alphabetized
+              allTags.sort();
               saveHabitsToFirestore();
               renderFilterBar();
-              // Re-open modal to refresh the list with the new tag
-              openTagModal(currentHabitId);
+              openTagModal(currentHabitId); // Re-open to refresh the list
               newTagInput.value = "";
             }
           });
+        }
 
-        document
-          .getElementById("save-tags-btn")
-          .addEventListener("click", () => {
+        // --- Listener for the 'Save Changes' button ---
+        if (saveBtn) {
+          saveBtn.addEventListener("click", () => {
             const habit = habits.find((h) => h.id === currentHabitId);
             if (habit) {
               const selectedTags = [];
@@ -1394,10 +1494,18 @@
                 });
               habit.tags = selectedTags;
               saveHabitsToFirestore();
-              renderAllHabitCards(); // Re-render to show new tags
+              renderAllHabitCards();
               tagModal.style.display = "none";
             }
           });
+        }
+
+        // --- Also close the modal if the user clicks the dark background ---
+        window.addEventListener("click", (event) => {
+          if (event.target == tagModal) {
+            tagModal.style.display = "none";
+          }
+        });
       }
 
       setupTagModalListeners();
