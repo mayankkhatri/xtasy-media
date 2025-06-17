@@ -444,6 +444,248 @@
           transform: rotate(360deg);
         }
       }
+
+      /* --- New Quick Actions Styles --- */
+      #quick-actions-container {
+        padding: 10px 0;
+        margin-bottom: 20px;
+      }
+
+      #quick-actions-container h3 {
+        margin-left: 20px;
+        margin-bottom: 10px;
+        color: #555;
+        font-weight: 500;
+      }
+
+      #quick-actions-stack {
+        display: flex;
+        overflow-x: auto;
+        gap: 15px;
+        padding: 10px 20px;
+        /* Hide scrollbar for a cleaner look */
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
+      }
+
+      #quick-actions-stack::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, and Opera */
+      }
+
+      .quick-action-card {
+        flex: 0 0 150px; /* Prevent cards from shrinking */
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px 15px;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease, opacity 0.3s ease;
+      }
+
+      .quick-action-card .habit-name {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 15px;
+        height: 40px; /* Give a fixed height to prevent layout shifts */
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .quick-action-buttons {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+      }
+
+      .quick-action-buttons i {
+        font-size: 3rem; /* Larger icons */
+        cursor: pointer;
+        transition: transform 0.2s ease;
+      }
+
+      .quick-action-buttons i:hover {
+        transform: scale(1.1);
+      }
+
+      .quick-action-buttons .tick {
+        color: #2ecc71; /* Green */
+      }
+
+      .quick-action-buttons .cross {
+        color: #e74c3c; /* Red */
+      }
+
+      /* --- New Editable Title Style --- */
+      .habit-title[contenteditable="true"] {
+        cursor: text;
+        background-color: #e8f0fe; /* A light blue background */
+        outline: 2px solid #4285f4; /* A google-blue outline */
+        padding: 2px 5px;
+        border-radius: 4px;
+      }
+
+      /* --- New Tagging and Filtering Styles --- */
+      /* Filter Bar */
+      #filter-container {
+        padding: 10px 20px;
+        margin-bottom: 10px;
+      }
+      .filter-bar {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        padding-bottom: 10px;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
+      }
+      .filter-bar::-webkit-scrollbar {
+        display: none;
+      }
+      .filter-tag-btn {
+        background-color: #e9ecef;
+        border: 1px solid #dee2e6;
+        color: #495057;
+        padding: 8px 15px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+      }
+      .filter-tag-btn:hover {
+        background-color: #ced4da;
+      }
+      .filter-tag-btn.active {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+      }
+
+      /* Tag Icon and Badges on Habit Card */
+      .habit-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+      }
+      .tags-display {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+      }
+      .tag-badge {
+        background-color: #f1f3f5;
+        color: #495057;
+        padding: 3px 8px;
+        border-radius: 5px;
+        font-size: 0.75rem;
+      }
+      .tag-icon {
+        font-size: 1.2rem;
+        margin-right: 1.5rem;
+        color: #868e96;
+        cursor: pointer;
+        transition: color 0.2s;
+      }
+      .tag-icon:hover {
+        color: #343a40;
+      }
+
+      /* Tag Management Modal */
+      .tag-modal {
+        display: none; /* Hidden by default */
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* This is the CORRECT version */
+      .tag-modal {
+        display: none; /* Hidden by default */
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+        /* The 'display: flex' and alignment rules are now only applied by JS when opened */
+      }
+
+      .tag-modal-content {
+        background-color: #fff;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        width: 90%;
+        max-width: 400px;
+      }
+      .tag-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 15px;
+      }
+      .tag-modal-header h3 {
+        margin: 0;
+      }
+      .close-tag-modal {
+        font-size: 1.5rem;
+        cursor: pointer;
+      }
+      #tag-list {
+        max-height: 150px;
+        overflow-y: auto;
+        margin-bottom: 20px;
+      }
+      .tag-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+      .tag-item input {
+        margin-right: 10px;
+        width: 18px;
+        height: 18px;
+      }
+      #create-tag-section {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+      }
+      #new-tag-input {
+        flex-grow: 1;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      #create-tag-btn,
+      #save-tags-btn {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        background-color: #28a745;
+        color: white;
+      }
+      #save-tags-btn {
+        background-color: #007bff;
+        width: 100%;
+        margin-top: 10px;
+      }
     </style>
   </head>
   <body>
@@ -516,9 +758,26 @@
             <option>Every 2 Days</option>
             <option>Every 3 Days</option>
             <option>Every Week</option>
+            <option>Every 10 Days</option>
+            <option>Every 15 Days</option>
             <option>Every Month</option>
           </select>
           <button class="track-btn">Track Habit</button>
+        </div>
+
+        <!-- Paste this new section right after your </header> -->
+        <div id="quick-actions-container">
+          <h3>Today's Quick Actions</h3>
+          <div id="quick-actions-stack">
+            <!-- Quick action cards will be dynamically inserted here by JavaScript -->
+          </div>
+        </div>
+
+        <!-- Paste this before the habits-container div -->
+        <div id="filter-container">
+          <div class="filter-bar">
+            <!-- Filter buttons will be inserted here by JS -->
+          </div>
         </div>
 
         <div id="habits-container"></div>
@@ -532,6 +791,29 @@
         <textarea class="note-input" placeholder="Add a note..."></textarea>
         <button class="save-note">Save Note</button>
         <div class="notes-list"></div>
+      </div>
+    </div>
+
+    <!-- Paste this modal at the end of the body -->
+    <div id="tag-modal" class="tag-modal">
+      <div class="tag-modal-content">
+        <div class="tag-modal-header">
+          <h3>Manage Tags</h3>
+          <i class="fas fa-times close-tag-modal"></i>
+        </div>
+        <p>Select tags for this habit:</p>
+        <div id="tag-list">
+          <!-- Checkboxes will be inserted here by JS -->
+        </div>
+        <div id="create-tag-section">
+          <input
+            type="text"
+            id="new-tag-input"
+            placeholder="Create a new tag..."
+          />
+          <button id="create-tag-btn">Create</button>
+        </div>
+        <button id="save-tags-btn">Save Changes</button>
       </div>
     </div>
 
@@ -581,11 +863,20 @@
       const saveNoteBtn = document.querySelector(".save-note");
       const noteInput = document.querySelector(".note-input");
       const notesList = document.querySelector(".notes-list");
+      const quickActionsStack = document.getElementById("quick-actions-stack");
 
       // --- APP STATE ---
       let habits = [];
       let currentUser = null;
       let currentHabitId = null;
+
+      let allTags = [];
+      let currentFilterTag = "All";
+
+      // --- DOM ELEMENTS ---
+      // ... (existing element variables)
+      const filterContainer = document.getElementById("filter-container");
+      const tagModal = document.getElementById("tag-modal");
 
       // --- FIREBASE AUTHENTICATION ---
       loginBtn.addEventListener("click", () => {
@@ -626,28 +917,36 @@
       });
 
       // --- FIREBASE DATA FUNCTIONS ---
+      // REPLACE the existing function with this
       async function saveHabitsToFirestore() {
         if (!currentUser) return;
         try {
           const userHabitsRef = doc(db, "users", currentUser.uid);
-          await setDoc(userHabitsRef, { allHabits: habits });
+          // Save both habits and the global list of tags
+          await setDoc(userHabitsRef, { allHabits: habits, allTags: allTags });
         } catch (error) {
-          console.error("Error saving habits: ", error);
-          alert("Could not save your habits. Please check your connection.");
+          console.error("Error saving data: ", error);
+          alert("Could not save your data. Please check your connection.");
         }
       }
 
+      // REPLACE the existing function with this
       async function loadHabitsFromFirestore() {
         if (!currentUser) return;
         const userHabitsRef = doc(db, "users", currentUser.uid);
         const docSnap = await getDoc(userHabitsRef);
 
         if (docSnap.exists()) {
-          habits = docSnap.data().allHabits || [];
+          const data = docSnap.data();
+          habits = data.allHabits || [];
+          allTags = data.allTags || []; // Load all available tags
         } else {
           habits = [];
+          allTags = [];
         }
+        renderFilterBar(); // Render filters first
         renderAllHabitCards();
+        renderQuickActionCards();
       }
 
       // --- APP LOGIC ---
@@ -742,17 +1041,72 @@
         updateProgress(habit, card);
       }
 
+      // REPLACE your old createHabitCard function with this entire new one.
+      // REPLACE the existing function with this. It's a bit long but contains all the logic.
       function createHabitCard(habit) {
         const card = document.createElement("div");
         card.className = "habit-card";
         card.dataset.id = habit.id;
-        card.innerHTML = `<div class="habit-header"><div class="habit-title-container"><i class="ri-arrow-left-s-line month-nav-btn prev-month"></i><div class="title-month-wrapper"><span class="habit-title">${habit.name}</span><span class="month-display"></span></div><i class="ri-arrow-right-s-line month-nav-btn next-month"></i></div><button class="delete-btn"><i class="fas fa-trash"></i></button></div><div class="progress-text">0/0</div><i class="fas fa-comment-dots notes-icon"></i>`;
+        // Added .habit-card-footer and .tags-display containers
+        card.innerHTML = `
+        <div class="habit-header">
+            <div class="habit-title-container">
+                <i class="ri-arrow-left-s-line month-nav-btn prev-month"></i>
+                <div class="title-month-wrapper">
+                    <span class="habit-title">${habit.name}</span>
+                    <span class="month-display"></span>
+                </div>
+                <i class="ri-arrow-right-s-line month-nav-btn next-month"></i>
+            </div>
+            <button class="delete-btn"><i class="fas fa-trash"></i></button>
+        </div>
+        <div class="progress-text">0/0</div>
+        <div class="habit-card-footer">
+            <div class="tags-display">
+                <!-- Tag badges will be inserted here -->
+            </div>
+            <div>
+                <i class="fas fa-comment-dots notes-icon"></i>
+                <i class="ri-price-tag-3-line tag-icon"></i>
+            </div>
+        </div>
+    `;
+
         updateHabitCardView(card, habit);
+
+        // Populate the tag badges
+        const tagsDisplay = card.querySelector(".tags-display");
+        (habit.tags || []).forEach((tag) => {
+          const badge = document.createElement("span");
+          badge.className = "tag-badge";
+          badge.textContent = tag;
+          tagsDisplay.appendChild(badge);
+        });
+
+        // Event listener for the new tag icon
+        card.querySelector(".tag-icon").addEventListener("click", () => {
+          openTagModal(habit.id);
+        });
+
+        // --- All your other existing listeners for the card ---
+        const habitTitleEl = card.querySelector(".habit-title");
+        const saveTitleChange = () => {
+          /* ... (your existing title edit logic) ... */
+        };
+        habitTitleEl.addEventListener("click", () => {
+          /* ... */
+        });
+        habitTitleEl.addEventListener("blur", saveTitleChange);
+        habitTitleEl.addEventListener("keydown", (e) => {
+          /* ... */
+        });
         card.querySelector(".delete-btn").addEventListener("click", () => {
           if (confirm("Are you sure you want to delete this habit?")) {
             habits = habits.filter((h) => h.id !== habit.id);
             saveHabitsToFirestore();
             card.remove();
+            renderQuickActionCards();
+            renderFilterBar();
           }
         });
         card.querySelector(".notes-icon").addEventListener("click", () => {
@@ -762,25 +1116,28 @@
           loadNotes(currentHabit);
         });
         card.querySelector(".prev-month").addEventListener("click", () => {
-          const viewingDate = new Date(habit.viewingDate);
-          viewingDate.setMonth(viewingDate.getMonth() - 1);
-          habit.viewingDate = viewingDate.toISOString();
-          saveHabitsToFirestore();
-          updateHabitCardView(card, habit);
+          /* ... */
         });
         card.querySelector(".next-month").addEventListener("click", () => {
-          const viewingDate = new Date(habit.viewingDate);
-          viewingDate.setMonth(viewingDate.getMonth() + 1);
-          habit.viewingDate = viewingDate.toISOString();
-          saveHabitsToFirestore();
-          updateHabitCardView(card, habit);
+          /* ... */
         });
+
         return card;
       }
 
+      // REPLACE the existing function with this
       function renderAllHabitCards() {
         habitsContainer.innerHTML = "";
-        habits.forEach((habit) => {
+
+        // Apply the current filter
+        const habitsToRender =
+          currentFilterTag === "All"
+            ? habits
+            : habits.filter((habit) =>
+                (habit.tags || []).includes(currentFilterTag)
+              );
+
+        habitsToRender.forEach((habit) => {
           const card = createHabitCard(habit);
           habitsContainer.appendChild(card);
         });
@@ -838,12 +1195,14 @@
           frequency: document.querySelector(".frequency-select").value,
           completedDates: {},
           notes: [],
+          tags: [], // <<<script ADD THIS LINE
           viewingDate: new Date().toISOString(),
         };
         habits.push(habit);
         saveHabitsToFirestore();
         const card = createHabitCard(habit);
         habitsContainer.appendChild(card);
+        renderQuickActionCards();
         document.querySelector(".habit-input").value = "";
       });
 
@@ -879,6 +1238,169 @@
       window.addEventListener("click", (e) => {
         if (e.target === notesModal) notesModal.style.display = "none";
       });
+
+      function renderQuickActionCards() {
+        quickActionsStack.innerHTML = ""; // Clear existing cards
+        const todayKey = formatDateToKey(new Date());
+
+        habits.forEach((habit) => {
+          // Only show a card if the habit hasn't been actioned today
+          if (habit.lastQuickActionDate !== todayKey) {
+            const card = document.createElement("div");
+            card.className = "quick-action-card";
+            card.dataset.habitId = habit.id;
+
+            card.innerHTML = `
+                <div class="habit-name">${habit.name}</div>
+                <div class="quick-action-buttons">
+                    <i class="ri-checkbox-circle-fill tick"></i>
+                    <i class="ri-close-circle-fill cross"></i>
+                </div>
+            `;
+
+            // --- Event Listener for Green Tick ---
+            card.querySelector(".tick").addEventListener("click", () => {
+              // Find the habit in our main array
+              const targetHabit = habits.find((h) => h.id === habit.id);
+              if (targetHabit) {
+                targetHabit.completedDates[todayKey] = "completed";
+                targetHabit.lastQuickActionDate = todayKey; // Mark as actioned for today
+
+                // Update the main habit grid visually
+                const mainHabitCard = habitsContainer.querySelector(
+                  `.habit-card[data-id="${habit.id}"]`
+                );
+                if (mainHabitCard) {
+                  const todayBtn = mainHabitCard.querySelector(
+                    ".date-btn.current-date"
+                  );
+                  if (todayBtn) {
+                    todayBtn.classList.remove("skipped");
+                    todayBtn.classList.add("completed");
+                  }
+                  updateProgress(targetHabit, mainHabitCard);
+                }
+
+                saveHabitsToFirestore();
+              }
+
+              // Animate and remove the card
+              card.style.transform = "scale(0)";
+              card.style.opacity = "0";
+              setTimeout(() => card.remove(), 300);
+            });
+
+            // --- Event Listener for Red Cross ---
+            card.querySelector(".cross").addEventListener("click", () => {
+              const targetHabit = habits.find((h) => h.id === habit.id);
+              if (targetHabit) {
+                targetHabit.lastQuickActionDate = todayKey; // Just mark as actioned
+                saveHabitsToFirestore();
+              }
+
+              // Animate and remove the card
+              card.style.transform = "scale(0)";
+              card.style.opacity = "0";
+              setTimeout(() => card.remove(), 300);
+            });
+
+            quickActionsStack.appendChild(card);
+          }
+        });
+      }
+
+      // NEW FUNCTION: Renders the filter buttons
+      function renderFilterBar() {
+        const filterBar = filterContainer.querySelector(".filter-bar");
+        filterBar.innerHTML = ""; // Clear old buttons
+
+        const createFilterBtn = (tag) => {
+          const btn = document.createElement("button");
+          btn.className = "filter-tag-btn";
+          btn.textContent = tag;
+          if (tag === currentFilterTag) {
+            btn.classList.add("active");
+          }
+          btn.addEventListener("click", () => {
+            currentFilterTag = tag;
+            renderFilterBar(); // Re-render to show active state
+            renderAllHabitCards(); // Re-render habits based on new filter
+          });
+          filterBar.appendChild(btn);
+        };
+
+        createFilterBtn("All");
+        allTags.forEach((tag) => createFilterBtn(tag));
+      }
+
+      // NEW FUNCTION: Opens and populates the tag management modal
+      function openTagModal(habitId) {
+        currentHabitId = habitId;
+        const habit = habits.find((h) => h.id === habitId);
+        if (!habit) return;
+
+        const tagList = document.getElementById("tag-list");
+        tagList.innerHTML = "";
+
+        allTags.forEach((tag) => {
+          const isChecked = (habit.tags || []).includes(tag);
+          const tagItem = document.createElement("div");
+          tagItem.className = "tag-item";
+          tagItem.innerHTML = `
+            <input type="checkbox" id="tag-${tag}" value="${tag}" ${
+            isChecked ? "checked" : ""
+          }>
+            <label for="tag-${tag}">${tag}</label>
+        `;
+          tagList.appendChild(tagItem);
+        });
+
+        tagModal.style.display = "flex";
+      }
+
+      // NEW FUNCTIONALITY: Add event listeners for the tag modal
+      function setupTagModalListeners() {
+        const newTagInput = document.getElementById("new-tag-input");
+
+        document
+          .querySelector(".close-tag-modal")
+          .addEventListener("click", () => (tagModal.style.display = "none"));
+
+        document
+          .getElementById("create-tag-btn")
+          .addEventListener("click", () => {
+            const newTagName = newTagInput.value.trim();
+            if (newTagName && !allTags.includes(newTagName)) {
+              allTags.push(newTagName);
+              allTags.sort(); // Keep tags alphabetized
+              saveHabitsToFirestore();
+              renderFilterBar();
+              // Re-open modal to refresh the list with the new tag
+              openTagModal(currentHabitId);
+              newTagInput.value = "";
+            }
+          });
+
+        document
+          .getElementById("save-tags-btn")
+          .addEventListener("click", () => {
+            const habit = habits.find((h) => h.id === currentHabitId);
+            if (habit) {
+              const selectedTags = [];
+              document
+                .querySelectorAll('#tag-list input[type="checkbox"]:checked')
+                .forEach((checkbox) => {
+                  selectedTags.push(checkbox.value);
+                });
+              habit.tags = selectedTags;
+              saveHabitsToFirestore();
+              renderAllHabitCards(); // Re-render to show new tags
+              tagModal.style.display = "none";
+            }
+          });
+      }
+
+      setupTagModalListeners();
     </script>
   </body>
 </html>
