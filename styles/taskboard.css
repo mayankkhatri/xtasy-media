@@ -92,7 +92,7 @@ body {
   display: flex; /* Enable flexbox for stats positioning */
   flex-direction: column; /* Stack content and stats vertically */
   position: relative; /* Position relative for absolute positioning of stats */
-  max-height: 40vh;
+  max-height: 50vh;
 }
 
 /* Task Input Section Styles */
