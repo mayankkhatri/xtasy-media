@@ -3,16 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="shortcut icon"
-      href="https://lh3.googleusercontent.com/-UAdUEN_DZfg/Yjt9ZOaeZAI/AAAAAAAABXU/z2sLvNDxJI0LZHDHCyPr7zqMqAhuYRwtwCO8EGAYYCw/512.png"
-      type="image/png"
-    />
-    <link
-      rel="apple-touch-icon"
-      href="https://lh3.googleusercontent.com/-UAdUEN_DZfg/Yjt9ZOaeZAI/AAAAAAAABXU/z2sLvNDxJI0LZHDHCyPr7zqMqAhuYRwtwCO8EGAYYCw/512.png"
-    />
-
     <title>ClarityTrack - Taskboard</title>
     <!-- Remix Icon CDN -->
     <link
@@ -26,7 +16,6 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-
     <!-- SortableJS -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
@@ -259,7 +248,7 @@
         color: #eee;
       }
       .taskboard {
-        padding: 20px 0 100px 0;
+        padding: 20px 0;
         min-height: 40vh;
       }
       .category-section h3 {
@@ -418,7 +407,7 @@
         gap: 10px;
         font-weight: 500;
         margin-left: auto;
-      }
+      } /* <-- Fix for right alignment */
       .subtask-timer-controls button {
         background: none;
         border: none;
@@ -491,7 +480,6 @@
         cursor: pointer;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         transition: transform 0.2s ease;
-        z-index: 1001;
       }
       .fab:hover {
         transform: scale(1.05);
@@ -681,32 +669,6 @@
         gap: 10px;
         margin-top: 15px;
       }
-
-      #pip-timer-container {
-        position: fixed;
-        bottom: -100px; /* Initially hidden */
-        left: 50%;
-        transform: translateX(-50%);
-        width: 400px;
-        height: 60px;
-        background-color: var(--surface-color);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.2);
-        z-index: 1000;
-        transition: bottom 0.3s ease-in-out;
-        display: flex;
-        align-items: center;
-        overflow: hidden;
-      }
-      #pip-timer-container.visible {
-        bottom: 20px;
-      }
-      #pip-timer-container video {
-        width: 100%;
-        height: 100%;
-      }
-
       @media (max-width: 600px) {
         .container {
           padding: 0 10px;
@@ -739,22 +701,6 @@
           bottom: 20px;
           right: 20px;
         }
-        #pip-timer-container {
-          width: 90%;
-        }
-      }
-      #pip-timer-container {
-        width: 160px;
-        height: 90px; /* Maintain 16:9 ratio */
-        bottom: -100px;
-        border-radius: 6px;
-        overflow: hidden;
-      }
-
-      #pip-video {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
       }
     </style>
   </head>
@@ -809,17 +755,6 @@
       src="https://cdn.pixabay.com/download/audio/2022/05/31/audio_785fc51498.mp3?filename=bright-notification-352449.mp3"
       preload="auto"
     ></audio>
-    <canvas
-      id="pip-canvas"
-      width="160"
-      height="90"
-      style="display: none"
-    ></canvas>
-
-    <!-- NEW: Visible Timer Player Container -->
-    <div id="pip-timer-container">
-      <video id="pip-video" muted playsinline></video>
-    </div>
 
     <!-- Modals -->
     <div id="addGoalModal" class="modal">
@@ -969,7 +904,6 @@
       let recurringGoals = [];
       let activeTimers = {};
       let dataListeners = [];
-      let activePiPAnimation = null;
       const deepCopy = (obj) => JSON.parse(JSON.stringify(obj));
 
       const loadingScreen = document.getElementById("loading-screen");
@@ -983,11 +917,8 @@
       );
       const notificationBanner = document.getElementById("notification-banner");
       const notificationSound = document.getElementById("notification-sound");
-      const pipCanvas = document.getElementById("pip-canvas");
-      const pipVideo = document.getElementById("pip-video");
-      const pipContainer = document.getElementById("pip-timer-container");
 
-      // --- CORE ACTION HANDLERS ---
+      // --- CORE ACTION HANDLERS (Defined before initialization) ---
       function addGoal() {
         const name = document.getElementById("goalNameInput").value.trim();
         const category = document.getElementById("categorySelect").value;
@@ -1128,11 +1059,70 @@
             }
           }
           saveDataToDb("goals", goals);
+          displayGoalsForDate(selectedDate);
           addSubtaskModal.classList.remove("show");
         }
       }
 
-      // --- APP STARTUP & AUTH ---
+      // --- MODAL & INITIALIZATION ---
+      function initializeModals() {
+        document.getElementById("addGoalFab").onclick = openGoalModal;
+        window.onclick = (event) => {
+          if (event.target.classList.contains("modal"))
+            event.target.classList.remove("show");
+        };
+        document.getElementById("addGoalBtn").onclick = addGoal;
+        document.getElementById("addNewCategoryBtn").onclick = addNewCategory;
+        document.getElementById("deleteCategoryBtn").onclick = deleteCategory;
+        document.getElementById("addSubtaskBtn").onclick = addSubtask;
+        document.querySelectorAll(".am-pm-switcher").forEach((s) =>
+          s.addEventListener("click", (e) => {
+            if (e.target.tagName === "BUTTON") {
+              s.querySelectorAll("button").forEach((b) =>
+                b.classList.remove("active")
+              );
+              e.target.classList.add("active");
+            }
+          })
+        );
+        const timeOpts = document.getElementById("subtaskTimeOptions");
+        timeOpts.addEventListener("click", (e) => {
+          if (e.target.tagName === "BUTTON") {
+            timeOpts
+              .querySelectorAll("button")
+              .forEach((b) => b.classList.remove("selected"));
+            e.target.classList.add("selected");
+            document.getElementById("customMinutesInput").value = "";
+          }
+        });
+        document.getElementById("customMinutesInput").oninput = () =>
+          timeOpts
+            .querySelectorAll("button")
+            .forEach((b) => b.classList.remove("selected"));
+        document.getElementById("deleteTodayBtn").onclick =
+          handleDeleteRecurring_JustToday;
+        document.getElementById("deleteAllBtn").onclick =
+          handleDeleteRecurring_AllFuture;
+      }
+      function openGoalModal() {
+        populateCategoryDropdown();
+        document.getElementById("goalNameInput").value = "";
+        document.getElementById("newCategoryInput").value = "";
+        document.getElementById("dailyTaskCheckbox").checked = false;
+        addGoalModal.classList.add("show");
+      }
+      function openSubtaskModal(goalId) {
+        document.getElementById("parentGoalId").value = goalId;
+        document.getElementById("subtaskNameInput").value = "";
+        document.getElementById("customMinutesInput").value = "";
+        document
+          .querySelector('#subtaskTimeOptions button[data-minutes="0"]')
+          .click();
+        addSubtaskModal.classList.add("show");
+        document.getElementById("subtaskNameInput").focus();
+      }
+
+      // --- AUTH, DB & APP STARTUP ---
       auth.onAuthStateChanged((user) => {
         if (user) {
           if (currentUserId !== user.uid) {
@@ -1206,10 +1196,11 @@
         db.ref(`users/${currentUserId}/${path}`).set(cleanData);
       }
 
-      // --- DISPLAY & RENDERING ---
+      // (Remaining functions: Display, Timers, Helpers, etc.)
       function displayGoalsForDate(date) {
         if (!date) {
-          taskboardContainer.innerHTML = "<p>Please select a date.</p>";
+          taskboardContainer.innerHTML =
+            "<p>Please select a date to see your goals.</p>";
           return;
         }
         generateRecurringInstancesForDate(date);
@@ -1217,47 +1208,42 @@
         const goalsForDate = goals.filter(
           (goal) => goal && goal.taskDate === date
         );
+        const groupedGoals = {};
         if (isFocusView) {
-          taskboardContainer.className = "taskboard focus-view";
-          const sortedGoals = goalsForDate.sort(
+          groupedGoals["focus"] = goalsForDate.sort(
             (a, b) =>
               parseStartTimeTo24HrValue(a.timeFrame) -
               parseStartTimeTo24HrValue(b.timeFrame)
           );
-          const focusSection = createCategorySection("focus-view");
-          const goalContainer = focusSection.querySelector(".goal-container");
-          sortedGoals.forEach((goal) =>
-            goalContainer.appendChild(createGoalCard(goal))
-          );
-          if (sortedGoals.length > 0)
-            taskboardContainer.appendChild(focusSection);
         } else {
-          taskboardContainer.className = "taskboard";
-          const groupedGoals = {};
           goalsForDate.forEach((goal) => {
             if (!groupedGoals[goal.category]) groupedGoals[goal.category] = [];
             groupedGoals[goal.category].push(goal);
           });
-          groups.forEach((groupName) => {
-            if (groupedGoals[groupName] && groupedGoals[groupName].length > 0) {
-              const categorySection = createCategorySection(groupName);
-              const goalContainer =
-                categorySection.querySelector(".goal-container");
-              groupedGoals[groupName]
-                .sort((a, b) => (a.order || 0) - (b.order || 0))
-                .forEach((goal) =>
-                  goalContainer.appendChild(createGoalCard(goal))
-                );
-              taskboardContainer.appendChild(categorySection);
-              Sortable.create(goalContainer, {
-                group: "goals",
-                handle: ".drag-handle",
-                animation: 150,
-                onEnd: updateGoalOrder,
-              });
-            }
-          });
         }
+        const displayGroups = isFocusView ? ["focus"] : groups;
+        taskboardContainer.className = isFocusView
+          ? "taskboard focus-view"
+          : "taskboard";
+        displayGroups.forEach((groupName) => {
+          if (groupedGoals[groupName] && groupedGoals[groupName].length > 0) {
+            const categorySection = createCategorySection(groupName);
+            const goalContainer =
+              categorySection.querySelector(".goal-container");
+            groupedGoals[groupName]
+              .sort((a, b) => (a.order || 0) - (b.order || 0))
+              .forEach((goal) =>
+                goalContainer.appendChild(createGoalCard(goal))
+              );
+            taskboardContainer.appendChild(categorySection);
+            Sortable.create(goalContainer, {
+              group: "goals",
+              handle: ".drag-handle",
+              animation: 150,
+              onEnd: updateGoalOrder,
+            });
+          }
+        });
         if (taskboardContainer.children.length === 0) {
           taskboardContainer.innerHTML =
             "<p>No goals for this date. Click the '+' to add one!</p>";
@@ -1328,106 +1314,6 @@
           dateRow.firstChild.click();
         }
         scrollActiveDateIntoView();
-      }
-
-      // --- HELPER & UI FUNCTIONS ---
-      function initializeModals() {
-        document.getElementById("addGoalFab").onclick = openGoalModal;
-        window.onclick = (event) => {
-          if (event.target.classList.contains("modal"))
-            event.target.classList.remove("show");
-        };
-        document.getElementById("addGoalBtn").onclick = addGoal;
-        document.getElementById("addNewCategoryBtn").onclick = addNewCategory;
-        document.getElementById("deleteCategoryBtn").onclick = deleteCategory;
-        document.getElementById("addSubtaskBtn").onclick = addSubtask;
-        document.querySelectorAll(".am-pm-switcher").forEach((s) =>
-          s.addEventListener("click", (e) => {
-            if (e.target.tagName === "BUTTON") {
-              s.querySelectorAll("button").forEach((b) =>
-                b.classList.remove("active")
-              );
-              e.target.classList.add("active");
-            }
-          })
-        );
-        const timeOpts = document.getElementById("subtaskTimeOptions");
-        timeOpts.addEventListener("click", (e) => {
-          if (e.target.tagName === "BUTTON") {
-            timeOpts
-              .querySelectorAll("button")
-              .forEach((b) => b.classList.remove("selected"));
-            e.target.classList.add("selected");
-            document.getElementById("customMinutesInput").value = "";
-          }
-        });
-        document.getElementById("customMinutesInput").oninput = () =>
-          timeOpts
-            .querySelectorAll("button")
-            .forEach((b) => b.classList.remove("selected"));
-        document.getElementById("deleteTodayBtn").onclick =
-          handleDeleteRecurring_JustToday;
-        document.getElementById("deleteAllBtn").onclick =
-          handleDeleteRecurring_AllFuture;
-      }
-      function openGoalModal() {
-        populateCategoryDropdown();
-        document.getElementById("goalNameInput").value = "";
-        document.getElementById("newCategoryInput").value = "";
-        document.getElementById("dailyTaskCheckbox").checked = false;
-        addGoalModal.classList.add("show");
-      }
-      function openSubtaskModal(goalId) {
-        document.getElementById("parentGoalId").value = goalId;
-        document.getElementById("subtaskNameInput").value = "";
-        document.getElementById("customMinutesInput").value = "";
-        document
-          .querySelector('#subtaskTimeOptions button[data-minutes="0"]')
-          .click();
-        addSubtaskModal.classList.add("show");
-        document.getElementById("subtaskNameInput").focus();
-      }
-      function toggleFocusView() {
-        isFocusView = !isFocusView;
-        displayGoalsForDate(selectedDate);
-        generateDateRow(currentDisplayDate);
-      }
-      function makeEditable(element, goalId, subtaskId) {
-        const originalText = element.textContent;
-        element.innerHTML = `<input type="text" value="${originalText}" style="width: 100%; font: inherit; color: inherit; background: var(--card-color); border: 1px solid var(--primary-accent); border-radius: 4px; padding: 2px 4px;">`;
-        const input = element.querySelector("input");
-        input.focus();
-        input.select();
-        const save = () => {
-          const newText = input.value.trim();
-          if (newText && newText !== originalText) {
-            if (subtaskId) {
-              const { goalIndex, subtaskIndex } = findSubtask(
-                goalId,
-                subtaskId
-              );
-              if (goalIndex !== -1 && subtaskIndex !== -1) {
-                goals[goalIndex].subTasks[subtaskIndex].name = newText;
-              }
-            } else {
-              const goalIndex = goals.findIndex((g) => g && g.id === goalId);
-              if (goalIndex !== -1) {
-                goals[goalIndex].name = newText;
-              }
-            }
-            saveDataToDb("goals", goals);
-          } else {
-            displayGoalsForDate(selectedDate);
-          }
-        };
-        input.addEventListener("blur", save);
-        input.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") input.blur();
-          if (e.key === "Escape") {
-            input.value = originalText;
-            input.blur();
-          }
-        });
       }
       function createCategorySection(groupName) {
         const section = document.createElement("div");
@@ -1513,18 +1399,18 @@
         let buttons = "";
         if (status === "pending") {
           buttons = `<button onclick="startSubtask('${goalId}', '${id}')" title="Start"><i class="ri-play-circle-line"></i></button>`;
-        } else {
-          const timerDisplay = `<span class="subtask-elapsed-time ${
-            isOvertime ? "overtime" : ""
-          }">${formatTimer(elapsedTime || 0)}</span>`;
-          if (status === "ongoing") {
-            buttons = `${timerDisplay}<button onclick="pauseSubtask('${goalId}', '${id}')" title="Pause"><i class="ri-pause-circle-fill"></i></button>`;
-          } else if (status === "paused") {
-            buttons = `${timerDisplay}<button onclick="startSubtask('${goalId}', '${id}')" title="Resume"><i class="ri-play-circle-fill"></i></button>`;
-          }
-          buttons += `<button onclick="completeSubtask('${goalId}', '${id}')" title="Complete"><i class="ri-stop-circle-fill"></i></button>`;
+        } else if (status === "ongoing") {
+          buttons = `<button onclick="pauseSubtask('${goalId}', '${id}')" title="Pause"><i class="ri-pause-circle-fill"></i></button><button onclick="completeSubtask('${goalId}', '${id}')" title="Complete"><i class="ri-stop-circle-fill"></i></button>`;
+        } else if (status === "paused") {
+          buttons = `<button onclick="startSubtask('${goalId}', '${id}')" title="Resume"><i class="ri-play-circle-fill"></i></button><button onclick="completeSubtask('${goalId}', '${id}')" title="Complete"><i class="ri-stop-circle-fill"></i></button>`;
         }
-        return `${buttons} ${deleteBtn}`;
+        const timerDisplay =
+          status === "pending"
+            ? ""
+            : `<span class="subtask-elapsed-time ${
+                isOvertime ? "overtime" : ""
+              }">${formatTimer(elapsedTime || 0)}</span>`;
+        return `${timerDisplay} ${buttons} ${deleteBtn}`;
       }
       function showNotification(message) {
         document.getElementById("notification-text").textContent = message;
@@ -1535,7 +1421,12 @@
         notificationSound.currentTime = 0;
         notificationSound
           .play()
-          .catch((e) => console.warn("Sound play failed.", e));
+          .catch((e) =>
+            console.warn(
+              "Sound play failed. User may need to interact with the page first.",
+              e
+            )
+          );
       }
       function previousMonth() {
         selectedDate = null;
@@ -1635,7 +1526,7 @@
       }
       function deleteSubtask(goalId, subtaskId) {
         if (confirm("Are you sure you want to delete this task?")) {
-          const goalIndex = goals.findIndex((g) => g && g.id === goalId);
+          const goalIndex = goals.findIndex((g) => g.id === goalId);
           if (goalIndex !== -1) {
             const goal = goals[goalIndex];
             goal.subTasks = goal.subTasks.filter((st) => st.id !== subtaskId);
@@ -1662,7 +1553,7 @@
         }
       }
       function startSubtask(goalId, subtaskId) {
-        const { subtask, goalIndex, subtaskIndex } = findSubtask(
+        const { goal, subtask, goalIndex, subtaskIndex } = findSubtask(
           goalId,
           subtaskId
         );
@@ -1675,7 +1566,6 @@
           () => timerTick(goalId, subtaskId),
           1000
         );
-        startPiPTimer(goalId, subtaskId);
       }
       function pauseSubtask(goalId, subtaskId) {
         const { goal, subtask, goalIndex, subtaskIndex } = findSubtask(
@@ -1690,7 +1580,6 @@
           (Date.now() - subtask.startTime) / 1000
         );
         goals[goalIndex].subTasks[subtaskIndex] = subtask;
-        stopPiPTimer();
         saveDataToDb("goals", goals);
       }
       function completeSubtask(goalId, subtaskId) {
@@ -1707,7 +1596,6 @@
           );
         subtask.status = "completed";
         goals[goalIndex].subTasks[subtaskIndex] = subtask;
-        stopPiPTimer();
         saveDataToDb("goals", goals);
       }
       function timerTick(goalId, subtaskId) {
@@ -1715,7 +1603,6 @@
         if (!subtask || subtask.status !== "ongoing") {
           clearInterval(activeTimers[subtaskId]);
           delete activeTimers[subtaskId];
-          stopPiPTimer();
           return;
         }
         subtask.elapsedTime = Math.floor(
@@ -1819,7 +1706,7 @@
         if (goalIndex === -1) return {};
         const goal = goals[goalIndex];
         const subtaskIndex = (goal.subTasks || []).findIndex(
-          (st) => st && st.id === subtaskId
+          (st) => st.id === subtaskId
         );
         const subtask =
           subtaskIndex !== -1 ? goal.subTasks[subtaskIndex] : null;
@@ -1872,105 +1759,6 @@
           option.textContent = group;
           select.appendChild(option);
         });
-      }
-
-      // --- ON-PAGE TIMER DISPLAY LOGIC ---
-      // --- PiP TIMER DISPLAY FUNCTIONS ---
-      function drawPiPCanvas(taskName, elapsedSeconds) {
-        const ctx = pipCanvas.getContext("2d");
-        if (!ctx) return;
-
-        // Clear canvas
-        ctx.fillStyle = "#1a1a1a";
-        ctx.fillRect(0, 0, pipCanvas.width, pipCanvas.height);
-
-        // Draw task name
-        ctx.fillStyle = "#ffffff";
-        ctx.font = '24px "Inter", sans-serif';
-        ctx.textAlign = "center";
-        ctx.fillText(taskName, pipCanvas.width / 2, 40);
-
-        // Draw timer
-        const minutes = Math.floor(elapsedSeconds / 60);
-        const seconds = elapsedSeconds % 60;
-        const timeString = `${String(minutes).padStart(2, "0")}:${String(
-          seconds
-        ).padStart(2, "0")}`;
-
-        ctx.font = 'bold 48px "Inter", sans-serif';
-        ctx.fillStyle = "#0a84ff";
-        ctx.fillText(timeString, pipCanvas.width / 2, 90);
-      }
-
-      function drawPiPCanvas(taskName, elapsedSeconds) {
-        const ctx = pipCanvas.getContext("2d");
-        if (!ctx) return;
-
-        // Clear canvas with dark background
-        ctx.fillStyle = "#1a1a1a";
-        ctx.fillRect(0, 0, 160, 90);
-
-        // Draw task name (top left)
-        ctx.fillStyle = "#ffffff";
-        ctx.font = '14px "Inter", sans-serif';
-        ctx.textAlign = "center";
-        ctx.textBaseline = "top";
-        ctx.fillText(taskName.substring(0, 20), 80, 10); // Center horizontally at x=80 (half of 160)
-
-        // Draw timer (bottom right)
-        const minutes = Math.floor(elapsedSeconds / 60);
-        const seconds = elapsedSeconds % 60;
-        const timeString = `${String(minutes).padStart(2, "0")}:${String(
-          seconds
-        ).padStart(2, "0")}`;
-
-        ctx.font = 'bold 32px "Inter", sans-serif'; // Increased font size
-        ctx.fillStyle = "#0a84ff";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(timeString, 80, 55); // Center horizontally and vertically (x=80, y=55)
-      }
-
-      // Update startPiPTimer to set video title
-      function startPiPTimer(goalId, subtaskId) {
-        if (activePiPAnimation) cancelAnimationFrame(activePiPAnimation);
-        pipContainer.classList.add("visible");
-
-        const ctx = pipCanvas.getContext("2d");
-        ctx.imageSmoothingEnabled = true;
-
-        pipVideo.srcObject = pipCanvas.captureStream();
-        pipVideo.title =
-          "ClarityTrack - " +
-          document.querySelector(
-            `[data-subtask-id="${subtaskId}"] .subtask-name`
-          ).textContent;
-
-        pipVideo.play().then(() => {
-          if (document.pictureInPictureEnabled) {
-            pipVideo.requestPictureInPicture();
-          }
-        });
-
-        const drawLoop = () => {
-          const { subtask } = findSubtask(goalId, subtaskId);
-          if (
-            subtask &&
-            (subtask.status === "ongoing" || subtask.status === "paused")
-          ) {
-            drawPiPCanvas(subtask.name, subtask.elapsedTime);
-            activePiPAnimation = requestAnimationFrame(drawLoop);
-          } else {
-            stopPiPTimer();
-          }
-        };
-        drawLoop();
-      }
-
-      function stopPiPTimer() {
-        if (activePiPAnimation) cancelAnimationFrame(activePiPAnimation);
-        activePiPAnimation = null;
-        pipContainer.classList.remove("visible");
       }
     </script>
   </body>

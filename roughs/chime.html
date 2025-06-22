@@ -3,16 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="shortcut icon"
-      href="https://lh3.googleusercontent.com/-UAdUEN_DZfg/Yjt9ZOaeZAI/AAAAAAAABXU/z2sLvNDxJI0LZHDHCyPr7zqMqAhuYRwtwCO8EGAYYCw/512.png"
-      type="image/png"
-    />
-    <link
-      rel="apple-touch-icon"
-      href="https://lh3.googleusercontent.com/-UAdUEN_DZfg/Yjt9ZOaeZAI/AAAAAAAABXU/z2sLvNDxJI0LZHDHCyPr7zqMqAhuYRwtwCO8EGAYYCw/512.png"
-    />
-
     <title>ClarityTrack - Taskboard</title>
     <!-- Remix Icon CDN -->
     <link
@@ -26,7 +16,6 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-
     <!-- SortableJS -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
@@ -48,6 +37,8 @@
         --border-color: #48484a;
         --font-family: "Inter", sans-serif;
       }
+
+      /* --- Base, App Container, and Screens --- */
       * {
         margin: 0;
         padding: 0;
@@ -57,6 +48,8 @@
         font-family: var(--font-family);
         background-color: var(--bg-color);
         color: var(--text-primary);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
       button {
         font-family: var(--font-family);
@@ -76,6 +69,8 @@
         justify-content: center;
         height: 100vh;
       }
+
+      /* --- Loading Spinner & Notification Banner --- */
       .spinner {
         width: 50px;
         height: 50px;
@@ -89,6 +84,7 @@
           transform: rotate(360deg);
         }
       }
+
       #notification-banner {
         position: fixed;
         top: 0;
@@ -109,6 +105,8 @@
       #notification-banner.show {
         transform: translate(-50%, 20px);
       }
+
+      /* --- Login Screen --- */
       #login-screen {
         flex-direction: column;
         align-items: center;
@@ -148,6 +146,8 @@
         font-size: 1.5rem;
         color: #db4437;
       }
+
+      /* --- App Header & Profile Card --- */
       .header {
         display: flex;
         justify-content: space-between;
@@ -184,6 +184,8 @@
       #profile-card .signout-btn:hover {
         color: var(--red-accent);
       }
+
+      /* --- Month & Date Navigation --- */
       .month-nav-header {
         display: flex;
         align-items: center;
@@ -200,7 +202,7 @@
         color: var(--text-secondary);
         transition: color 0.2s ease;
       }
-      .master-sort-btn {
+      #sort-by-time-btn {
         background: none;
         border: none;
         color: var(--text-secondary);
@@ -209,10 +211,12 @@
         margin-left: 20px;
         transition: color 0.2s ease;
       }
-      .master-sort-btn:hover,
+      #sort-by-time-btn:hover,
       .month-nav:hover {
         color: var(--text-primary);
       }
+
+      /* --- Rest of the styles (unchanged) --- */
       #dateRow {
         display: flex;
         overflow-x: auto;
@@ -259,7 +263,7 @@
         color: #eee;
       }
       .taskboard {
-        padding: 20px 0 100px 0;
+        padding: 20px 0;
         min-height: 40vh;
       }
       .category-section h3 {
@@ -268,24 +272,20 @@
         font-size: 1.5rem;
         margin-bottom: 15px;
         color: var(--text-primary);
-        gap: 10px;
       }
       .category-section h3 .category-name-text {
         flex-grow: 1;
       }
-      .category-header-btn {
+      .category-section h3 .category-up-btn {
         background: none;
         border: none;
         color: var(--text-secondary);
         cursor: pointer;
         font-size: 1.5rem;
-        transition: color 0.2s ease;
+        margin-left: 10px;
       }
-      .category-header-btn:hover {
+      .category-up-btn:hover {
         color: var(--text-primary);
-      }
-      .focus-view .category-section h3 {
-        display: none;
       }
       .goal-card {
         background-color: var(--surface-color);
@@ -315,13 +315,9 @@
         cursor: pointer;
         margin-top: 2px;
       }
-      .goal-name,
-      .subtask-name {
-        font-weight: 600;
-        cursor: pointer;
-      }
       .goal-name {
         font-size: 1.4rem;
+        font-weight: 600;
         flex-grow: 1;
       }
       .goal-card.completed .goal-name {
@@ -400,6 +396,9 @@
       .subtask-item.completed .subtask-bullet {
         background-color: var(--green-accent);
       }
+      .subtask-name {
+        flex-grow: 1;
+      }
       .subtask-item.completed .subtask-name {
         text-decoration: line-through;
         color: var(--text-secondary);
@@ -417,7 +416,8 @@
         align-items: center;
         gap: 10px;
         font-weight: 500;
-        margin-left: auto;
+        min-width: 130px;
+        justify-content: flex-end;
       }
       .subtask-timer-controls button {
         background: none;
@@ -491,7 +491,6 @@
         cursor: pointer;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         transition: transform 0.2s ease;
-        z-index: 1001;
       }
       .fab:hover {
         transform: scale(1.05);
@@ -681,85 +680,13 @@
         gap: 10px;
         margin-top: 15px;
       }
-
-      #pip-timer-container {
-        position: fixed;
-        bottom: -100px; /* Initially hidden */
-        left: 50%;
-        transform: translateX(-50%);
-        width: 400px;
-        height: 60px;
-        background-color: var(--surface-color);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.2);
-        z-index: 1000;
-        transition: bottom 0.3s ease-in-out;
-        display: flex;
-        align-items: center;
-        overflow: hidden;
-      }
-      #pip-timer-container.visible {
-        bottom: 20px;
-      }
-      #pip-timer-container video {
-        width: 100%;
-        height: 100%;
-      }
-
-      @media (max-width: 600px) {
-        .container {
-          padding: 0 10px;
-        }
-        .header {
-          flex-direction: column;
-          gap: 15px;
-          padding: 15px 0;
-        }
-        .month-nav-header {
-          font-size: 1rem;
-        }
-        .date-item {
-          min-width: 50px;
-          height: 50px;
-        }
-        .goal-name {
-          font-size: 1.2rem;
-        }
-        .subtask-item {
-          flex-wrap: wrap;
-        }
-        .subtask-timer-controls {
-          min-width: initial;
-        }
-        .fab {
-          width: 50px;
-          height: 50px;
-          font-size: 1.5rem;
-          bottom: 20px;
-          right: 20px;
-        }
-        #pip-timer-container {
-          width: 90%;
-        }
-      }
-      #pip-timer-container {
-        width: 160px;
-        height: 90px; /* Maintain 16:9 ratio */
-        bottom: -100px;
-        border-radius: 6px;
-        overflow: hidden;
-      }
-
-      #pip-video {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
     </style>
   </head>
   <body>
-    <div id="loading-screen"><div class="spinner"></div></div>
+    <div id="loading-screen">
+      <div class="spinner"></div>
+    </div>
+
     <div id="login-screen">
       <img
         src="https://i.postimg.cc/k5F70t2x/Logo-2.png"
@@ -772,9 +699,11 @@
         sync your progress across all devices.
       </p>
       <button class="google-signin-btn" onclick="signInWithGoogle()">
-        <i class="ri-google-fill"></i> Sign in with Google
+        <i class="ri-google-fill"></i>
+        Sign in with Google
       </button>
     </div>
+
     <div id="app-container">
       <div class="container">
         <div class="header">
@@ -782,10 +711,9 @@
             <img src="https://i.postimg.cc/k5F70t2x/Logo-2.png" alt="logo" />
           </div>
           <div id="profile-card">
-            <img id="user-photo" src="" alt="User Photo" /><span
-              id="user-name"
-            ></span
-            ><button
+            <img id="user-photo" src="" alt="User Photo" />
+            <span id="user-name"></span>
+            <button
               class="signout-btn"
               onclick="signOutUser()"
               title="Sign Out"
@@ -801,25 +729,18 @@
       <div class="fab" id="addGoalFab"><i class="ri-add-line"></i></div>
     </div>
 
+    <!-- Notification Banner -->
     <div id="notification-banner">
-      <i class="ri-notification-3-line"></i><span id="notification-text"></span>
+      <i class="ri-notification-3-line"></i>
+      <span id="notification-text"></span>
     </div>
+
+    <!-- Notification Sound -->
     <audio
       id="notification-sound"
-      src="https://cdn.pixabay.com/download/audio/2022/05/31/audio_785fc51498.mp3?filename=bright-notification-352449.mp3"
+      src="https://cdn.pixabay.com/download/audio/2025/05/31/audio_785fc51498.mp3?filename=bright-notification-352449.mp3"
       preload="auto"
     ></audio>
-    <canvas
-      id="pip-canvas"
-      width="160"
-      height="90"
-      style="display: none"
-    ></canvas>
-
-    <!-- NEW: Visible Timer Player Container -->
-    <div id="pip-timer-container">
-      <video id="pip-video" muted playsinline></video>
-    </div>
 
     <!-- Modals -->
     <div id="addGoalModal" class="modal">
@@ -831,6 +752,7 @@
           id="goalNameInput"
           placeholder="e.g., Morning Workout Routine"
         />
+
         <label for="categorySelect">Category</label>
         <div class="category-input-container">
           <select id="categorySelect"></select>
@@ -846,6 +768,7 @@
           />
           <button id="addNewCategoryBtn">Add</button>
         </div>
+
         <div class="daily-task-group">
           <input type="checkbox" id="dailyTaskCheckbox" />
           <label for="dailyTaskCheckbox"
@@ -945,6 +868,7 @@
     </div>
 
     <script>
+      // --- FIREBASE SETUP ---
       const firebaseConfig = {
         apiKey: "AIzaSyDtMlw839uPMmlfpKCoG9L9zlWvGvO9mZs",
         authDomain: "xtasy-habits.firebaseapp.com",
@@ -956,22 +880,23 @@
         appId: "1:1081060020039:web:340b58a4cf1bf85cba8662",
         measurementId: "G-9761Z6CHG5",
       };
+
       firebase.initializeApp(firebaseConfig);
       const auth = firebase.auth();
       const db = firebase.database();
 
+      // --- STATE MANAGEMENT ---
       let currentUserId = null;
       let selectedDate = null;
       let currentDisplayDate = new Date();
-      let isFocusView = false;
       let goals = [];
       let groups = [];
       let recurringGoals = [];
       let activeTimers = {};
       let dataListeners = [];
-      let activePiPAnimation = null;
       const deepCopy = (obj) => JSON.parse(JSON.stringify(obj));
 
+      // --- DOM ELEMENTS ---
       const loadingScreen = document.getElementById("loading-screen");
       const loginScreen = document.getElementById("login-screen");
       const appContainer = document.getElementById("app-container");
@@ -983,11 +908,201 @@
       );
       const notificationBanner = document.getElementById("notification-banner");
       const notificationSound = document.getElementById("notification-sound");
-      const pipCanvas = document.getElementById("pip-canvas");
-      const pipVideo = document.getElementById("pip-video");
-      const pipContainer = document.getElementById("pip-timer-container");
 
-      // --- CORE ACTION HANDLERS ---
+      // --- AUTHENTICATION & APP INITIALIZATION ---
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          if (currentUserId !== user.uid) {
+            currentUserId = user.uid;
+            initializeApplication(user);
+          }
+        } else {
+          currentUserId = null;
+          dataListeners.forEach(({ ref, type }) => ref.off(type));
+          dataListeners = [];
+          loadingScreen.style.display = "none";
+          loginScreen.style.display = "flex";
+          appContainer.style.display = "none";
+        }
+      });
+
+      function initializeApplication(user) {
+        document.getElementById("user-name").textContent = user.displayName;
+        document.getElementById("user-photo").src = user.photoURL;
+        db.ref(`users/${currentUserId}`).once("value", (snapshot) => {
+          const data = snapshot.val() || {};
+          goals = data.goals || [];
+          recurringGoals = data.recurringGoals || [];
+          groups = data.groups || ["My Day"];
+          initializeModals();
+          generateDateRow(currentDisplayDate);
+          loadingScreen.style.display = "none";
+          appContainer.style.display = "block";
+          initializeDatabaseListeners();
+        });
+      }
+
+      function signInWithGoogle() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).catch((error) => {
+          console.error("Sign-in error", error);
+          alert("Could not sign in. Please check console for errors.");
+        });
+      }
+      function signOutUser() {
+        auth.signOut().catch((error) => console.error("Sign-out error", error));
+      }
+
+      // --- DATABASE ---
+      function initializeDatabaseListeners() {
+        if (!currentUserId) return;
+        const userRef = db.ref(`users/${currentUserId}`);
+        const paths = {
+          goals: (val) => (goals = val || []),
+          recurringGoals: (val) => (recurringGoals = val || []),
+          groups: (val) => (groups = val || ["My Day"]),
+        };
+        dataListeners.forEach(({ ref, type }) => ref.off(type));
+        dataListeners = [];
+        Object.keys(paths).forEach((path) => {
+          const ref = userRef.child(path);
+          const listener = ref.on("value", (snapshot) => {
+            paths[path](snapshot.val());
+            if (selectedDate) {
+              displayGoalsForDate(selectedDate);
+            }
+          });
+          dataListeners.push({ ref: ref, type: "value", listener: listener });
+        });
+      }
+
+      function saveDataToDb(path, data) {
+        if (!currentUserId) return;
+        const cleanData = Array.isArray(data)
+          ? data.filter((item) => item)
+          : data;
+        db.ref(`users/${currentUserId}/${path}`).set(cleanData);
+      }
+
+      // --- UI, DATE & NOTIFICATION HELPERS ---
+      function showNotification(message) {
+        const notifText = document.getElementById("notification-text");
+        notifText.textContent = message;
+        notificationBanner.classList.add("show");
+        setTimeout(() => notificationBanner.classList.remove("show"), 4000);
+      }
+      function playNotificationSound() {
+        notificationSound.currentTime = 0;
+        notificationSound
+          .play()
+          .catch((e) => console.error("Sound play failed:", e));
+      }
+      function generateDateRow(dateToDisplay) {
+        const dateRow = document.getElementById("dateRow");
+        const monthNavHeader = document.getElementById("monthNavHeader");
+        dateRow.innerHTML = "";
+        monthNavHeader.innerHTML = "";
+        const today = new Date();
+        const year = dateToDisplay.getFullYear();
+        const month = dateToDisplay.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const monthNames = [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
+        ];
+        monthNavHeader.innerHTML = `<i class="ri-arrow-left-s-line month-nav" onclick="previousMonth()"></i><span>${monthNames[month]} ${year}</span><button id="sort-by-time-btn" onclick="sortGoalsByTime()" title="Sort by Time"><i class="ri-sort-asc"></i></button><i class="ri-arrow-right-s-line month-nav" onclick="nextMonth()"></i>`;
+        for (let i = 1; i <= daysInMonth; i++) {
+          const dayDate = new Date(year, month, i);
+          const dayName = dayDate.toLocaleDateString("en-US", {
+            weekday: "short",
+          });
+          const dateItem = document.createElement("div");
+          dateItem.classList.add("date-item");
+          dateItem.innerHTML = `<span class="day-name">${dayName}</span><span class="date-number">${i}</span>`;
+          const dateStr = `${year}-${String(month + 1).padStart(
+            2,
+            "0"
+          )}-${String(i).padStart(2, "0")}`;
+          dateItem.dataset.date = dateStr;
+          if (
+            i === today.getDate() &&
+            month === today.getMonth() &&
+            year === today.getFullYear()
+          ) {
+            dateItem.classList.add("today");
+          }
+          dateItem.addEventListener("click", () => {
+            document
+              .querySelectorAll(".date-item.selected")
+              .forEach((el) => el.classList.remove("selected"));
+            dateItem.classList.add("selected");
+            selectedDate = dateStr;
+            displayGoalsForDate(selectedDate);
+          });
+          dateRow.appendChild(dateItem);
+        }
+        const todayEl = dateRow.querySelector(".today");
+        if (todayEl) {
+          todayEl.click();
+        } else if (dateRow.firstChild) {
+          dateRow.firstChild.click();
+        } else {
+          displayGoalsForDate(null);
+        }
+      }
+      function displayGoalsForDate(date) {
+        if (!date) {
+          taskboardContainer.innerHTML =
+            "<p>Please select a date to see your goals.</p>";
+          return;
+        }
+        generateRecurringInstancesForDate(date);
+        taskboardContainer.innerHTML = "";
+        const goalsForDate = goals.filter(
+          (goal) => goal && goal.taskDate === date
+        );
+        const groupedGoals = {};
+        goalsForDate.forEach((goal) => {
+          if (!groupedGoals[goal.category]) groupedGoals[goal.category] = [];
+          groupedGoals[goal.category].push(goal);
+        });
+        groups.forEach((groupName) => {
+          if (groupedGoals[groupName] && groupedGoals[groupName].length > 0) {
+            const categorySection = createCategorySection(groupName);
+            const goalContainer =
+              categorySection.querySelector(".goal-container");
+            groupedGoals[groupName]
+              .sort((a, b) => (a.order || 0) - (b.order || 0))
+              .forEach((goal) =>
+                goalContainer.appendChild(createGoalCard(goal))
+              );
+            taskboardContainer.appendChild(categorySection);
+            Sortable.create(goalContainer, {
+              group: "goals",
+              handle: ".drag-handle",
+              animation: 150,
+              onEnd: updateGoalOrder,
+            });
+          }
+        });
+        if (taskboardContainer.children.length === 0) {
+          taskboardContainer.innerHTML =
+            "<p>No goals for this date. Click the '+' to add one!</p>";
+        }
+        scrollActiveDateIntoView();
+      }
+
+      // --- CORE LOGIC with Optimistic Updates ---
       function addGoal() {
         const name = document.getElementById("goalNameInput").value.trim();
         const category = document.getElementById("categorySelect").value;
@@ -1036,6 +1151,7 @@
         displayGoalsForDate(selectedDate);
         addGoalModal.classList.remove("show");
       }
+
       function addNewCategory() {
         const input = document.getElementById("newCategoryInput");
         const newGroup = input.value.trim();
@@ -1053,6 +1169,7 @@
         input.value = "";
         saveDataToDb("groups", groups);
       }
+
       function deleteCategory() {
         const categoryToDelete =
           document.getElementById("categorySelect").value;
@@ -1079,6 +1196,7 @@
               rg.category = defaultCategory;
           });
           groups = groups.filter((g) => g !== categoryToDelete);
+
           populateCategoryDropdown();
           displayGoalsForDate(selectedDate);
           saveDataToDb("goals", goals);
@@ -1086,251 +1204,153 @@
           saveDataToDb("groups", groups);
         }
       }
-      function addSubtask() {
-        const parentGoalId = document.getElementById("parentGoalId").value;
-        const name = document.getElementById("subtaskNameInput").value.trim();
-        if (!name) {
-          alert("Please enter a sub-task name.");
-          return;
-        }
-        const selectedButton = document.querySelector(
-          "#subtaskTimeOptions button.selected"
-        );
-        let minutes = selectedButton
-          ? parseInt(selectedButton.dataset.minutes)
-          : 0;
-        const customMinutes = parseInt(
-          document.getElementById("customMinutesInput").value
-        );
-        if (!isNaN(customMinutes) && customMinutes > 0) minutes = customMinutes;
-        const goalIndex = goals.findIndex((g) => g && g.id === parentGoalId);
-        if (goalIndex !== -1) {
-          const goal = goals[goalIndex];
-          const newSubtask = {
-            id: `st_${Date.now()}`,
-            name,
-            status: "pending",
-            targetTime: minutes * 60,
-            elapsedTime: 0,
-            startTime: null,
-          };
-          if (!goal.subTasks) goal.subTasks = [];
-          goal.subTasks.push(newSubtask);
-          if (goal.recurringId) {
-            const masterIndex = recurringGoals.findIndex(
-              (rg) => rg.id === goal.recurringId
-            );
-            if (masterIndex !== -1) {
-              if (!recurringGoals[masterIndex].subTasks)
-                recurringGoals[masterIndex].subTasks = [];
-              recurringGoals[masterIndex].subTasks.push(newSubtask);
-              saveDataToDb("recurringGoals", recurringGoals);
-            }
+
+      // (Helper functions with fixes for optimistic updates)
+      function previousMonth() {
+        selectedDate = null;
+        currentDisplayDate.setMonth(currentDisplayDate.getMonth() - 1);
+        generateDateRow(currentDisplayDate);
+      }
+      function nextMonth() {
+        selectedDate = null;
+        currentDisplayDate.setMonth(currentDisplayDate.getMonth() + 1);
+        generateDateRow(currentDisplayDate);
+      }
+      function scrollActiveDateIntoView() {
+        setTimeout(() => {
+          const activeEl = document.querySelector(
+            ".date-item.selected, .date-item.today"
+          );
+          if (activeEl)
+            activeEl.scrollIntoView({
+              behavior: "smooth",
+              inline: "center",
+              block: "nearest",
+            });
+        }, 250);
+      }
+      function generateRecurringInstancesForDate(date) {
+        let goalsModified = false;
+        (recurringGoals || []).forEach((masterGoal) => {
+          if (!masterGoal) return;
+          const isAfterStartDate =
+            new Date(date) >= new Date(masterGoal.startDate);
+          const isNotAnException = !(
+            masterGoal.exceptions && masterGoal.exceptions.includes(date)
+          );
+          const instanceExists = (goals || []).some(
+            (g) => g && g.recurringId === masterGoal.id && g.taskDate === date
+          );
+          if (isAfterStartDate && isNotAnException && !instanceExists) {
+            const instance = deepCopy(masterGoal);
+            instance.id = `g_inst_${Date.now()}_${Math.random()}`;
+            instance.recurringId = masterGoal.id;
+            instance.taskDate = date;
+            instance.isCompleted = false;
+            (instance.subTasks || []).forEach((st) => {
+              st.elapsedTime = 0;
+              st.status = "pending";
+              st.startTime = null;
+            });
+            goals.push(instance);
+            goalsModified = true;
           }
+        });
+        if (goalsModified) {
           saveDataToDb("goals", goals);
-          addSubtaskModal.classList.remove("show");
         }
       }
-
-      // --- APP STARTUP & AUTH ---
-      auth.onAuthStateChanged((user) => {
-        if (user) {
-          if (currentUserId !== user.uid) {
-            currentUserId = user.uid;
-            initializeApplication(user);
-          }
-        } else {
-          currentUserId = null;
-          dataListeners.forEach(({ ref, type }) => ref.off(type));
-          dataListeners = [];
-          loadingScreen.style.display = "none";
-          loginScreen.style.display = "flex";
-          appContainer.style.display = "none";
-        }
-      });
-      function initializeApplication(user) {
-        document.getElementById("user-name").textContent = user.displayName;
-        document.getElementById("user-photo").src = user.photoURL;
-        db.ref(`users/${currentUserId}`).once("value", (snapshot) => {
-          const data = snapshot.val() || {};
-          goals = data.goals || [];
-          recurringGoals = data.recurringGoals || [];
-          groups = data.groups || ["My Day"];
-          initializeModals();
-          generateDateRow(currentDisplayDate);
-          loadingScreen.style.display = "none";
-          loginScreen.style.display = "none";
-          appContainer.style.display = "block";
-          initializeDatabaseListeners();
-        });
+      function createCategorySection(groupName) {
+        const section = document.createElement("div");
+        section.className = "category-section";
+        section.dataset.groupName = groupName;
+        section.innerHTML = `<h3><span class="category-name-text">${groupName}</span><button class="category-up-btn" onclick="moveCategoryUp(event)"><i class="ri-arrow-up-s-line"></i></button></h3><div class="goal-container"></div>`;
+        return section;
       }
-      function signInWithGoogle() {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider).catch((error) => {
-          console.error("Sign-in error", error);
-          alert("Could not sign in. Please check console for errors.");
-        });
-      }
-      function signOutUser() {
-        auth.signOut().catch((error) => console.error("Sign-out error", error));
-      }
-      function initializeDatabaseListeners() {
-        if (!currentUserId) return;
-        const userRef = db.ref(`users/${currentUserId}`);
-        const paths = {
-          goals: (val) => (goals = val || []),
-          recurringGoals: (val) => (recurringGoals = val || []),
-          groups: (val) => {
-            groups = val || ["My Day"];
-            populateCategoryDropdown();
-          },
-        };
-        dataListeners.forEach(({ ref, type }) => ref.off(type));
-        dataListeners = [];
-        Object.keys(paths).forEach((path) => {
-          const ref = userRef.child(path);
-          const listener = ref.on("value", (snapshot) => {
-            paths[path](snapshot.val());
-            if (selectedDate) {
-              displayGoalsForDate(selectedDate);
-            }
-          });
-          dataListeners.push({ ref: ref, type: "value", listener: listener });
-        });
-      }
-      function saveDataToDb(path, data) {
-        if (!currentUserId) return;
-        const cleanData = Array.isArray(data)
-          ? data.filter((item) => item)
-          : data;
-        db.ref(`users/${currentUserId}/${path}`).set(cleanData);
-      }
-
-      // --- DISPLAY & RENDERING ---
-      function displayGoalsForDate(date) {
-        if (!date) {
-          taskboardContainer.innerHTML = "<p>Please select a date.</p>";
-          return;
-        }
-        generateRecurringInstancesForDate(date);
-        taskboardContainer.innerHTML = "";
-        const goalsForDate = goals.filter(
-          (goal) => goal && goal.taskDate === date
+      function createGoalCard(goal) {
+        if (!goal) return document.createDocumentFragment();
+        const card = document.createElement("div");
+        card.className = `goal-card ${goal.isCompleted ? "completed" : ""}`;
+        card.dataset.goalId = goal.id;
+        const totalTime = (goal.subTasks || []).reduce(
+          (acc, st) => acc + (st.elapsedTime || 0),
+          0
         );
-        if (isFocusView) {
-          taskboardContainer.className = "taskboard focus-view";
-          const sortedGoals = goalsForDate.sort(
-            (a, b) =>
-              parseStartTimeTo24HrValue(a.timeFrame) -
-              parseStartTimeTo24HrValue(b.timeFrame)
-          );
-          const focusSection = createCategorySection("focus-view");
-          const goalContainer = focusSection.querySelector(".goal-container");
-          sortedGoals.forEach((goal) =>
-            goalContainer.appendChild(createGoalCard(goal))
-          );
-          if (sortedGoals.length > 0)
-            taskboardContainer.appendChild(focusSection);
-        } else {
-          taskboardContainer.className = "taskboard";
-          const groupedGoals = {};
-          goalsForDate.forEach((goal) => {
-            if (!groupedGoals[goal.category]) groupedGoals[goal.category] = [];
-            groupedGoals[goal.category].push(goal);
-          });
-          groups.forEach((groupName) => {
-            if (groupedGoals[groupName] && groupedGoals[groupName].length > 0) {
-              const categorySection = createCategorySection(groupName);
-              const goalContainer =
-                categorySection.querySelector(".goal-container");
-              groupedGoals[groupName]
-                .sort((a, b) => (a.order || 0) - (b.order || 0))
-                .forEach((goal) =>
-                  goalContainer.appendChild(createGoalCard(goal))
-                );
-              taskboardContainer.appendChild(categorySection);
-              Sortable.create(goalContainer, {
-                group: "goals",
-                handle: ".drag-handle",
-                animation: 150,
-                onEnd: updateGoalOrder,
-              });
-            }
-          });
-        }
-        if (taskboardContainer.children.length === 0) {
-          taskboardContainer.innerHTML =
-            "<p>No goals for this date. Click the '+' to add one!</p>";
-        }
+        const dailyTagHTML = goal.recurringId
+          ? `<span class="daily-tag"><i class="ri-repeat-line"></i> Daily</span>`
+          : "";
+        card.innerHTML = `<div class="goal-header"><i class="ri-drag-move-2-fill drag-handle"></i><input type="checkbox" class="goal-checkbox" ${
+          goal.isCompleted ? "checked" : ""
+        } onchange="toggleGoalCompletion('${goal.id}')"><h4 class="goal-name">${
+          goal.name
+        }</h4><button class="delete-goal-btn" onclick="deleteGoal('${
+          goal.id
+        }')" title="Delete Goal"><i class="ri-delete-bin-line"></i></button></div><div class="goal-meta"><span>${
+          goal.timeFrame
+        }</span> • <span id="subtask-count-${goal.id}">${
+          (goal.subTasks || []).length
+        } Tasks</span> ${
+          goal.recurringId ? "•" : ""
+        } ${dailyTagHTML}</div><div class="goal-subtask-list">${
+          (goal.subTasks || []).length > 1 ? '<div class="timeline"></div>' : ""
+        }</div><div class="goal-footer"><button class="add-subtask-btn" onclick="openSubtaskModal('${
+          goal.id
+        }')"><i class="ri-add-circle-line"></i> Add Task</button><div class="total-time-spent" id="total-time-${
+          goal.id
+        }">Time Spent: ${formatTotalTime(totalTime)}</div></div>`;
+        const subtaskListEl = card.querySelector(".goal-subtask-list");
+        (goal.subTasks || []).forEach((subtask) =>
+          subtaskListEl.appendChild(createSubtaskItem(goal.id, subtask))
+        );
+        return card;
       }
-      function generateDateRow(dateToDisplay) {
-        const dateRow = document.getElementById("dateRow");
-        const monthNavHeader = document.getElementById("monthNavHeader");
-        dateRow.innerHTML = "";
-        monthNavHeader.innerHTML = "";
-        const today = new Date();
-        const year = dateToDisplay.getFullYear();
-        const month = dateToDisplay.getMonth();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const monthNames = [
-          "January",
-          "February",
-          "March",
-          "April",
-          "May",
-          "June",
-          "July",
-          "August",
-          "September",
-          "October",
-          "November",
-          "December",
-        ];
-        monthNavHeader.innerHTML = `<i class="ri-arrow-left-s-line month-nav" onclick="previousMonth()"></i><span>${
-          monthNames[month]
-        } ${year}</span><button class="master-sort-btn" onclick="toggleFocusView()" title="Toggle Focus View"><i class="${
-          isFocusView ? "ri-arrow-go-back-line" : "ri-list-check"
-        }"></i></button><i class="ri-arrow-right-s-line month-nav" onclick="nextMonth()"></i>`;
-        for (let i = 1; i <= daysInMonth; i++) {
-          const dayDate = new Date(year, month, i);
-          const dayName = dayDate.toLocaleDateString("en-US", {
-            weekday: "short",
-          });
-          const dateItem = document.createElement("div");
-          dateItem.classList.add("date-item");
-          dateItem.innerHTML = `<span class="day-name">${dayName}</span><span class="date-number">${i}</span>`;
-          const dateStr = `${year}-${String(month + 1).padStart(
-            2,
-            "0"
-          )}-${String(i).padStart(2, "0")}`;
-          dateItem.dataset.date = dateStr;
-          if (
-            i === today.getDate() &&
-            month === today.getMonth() &&
-            year === today.getFullYear()
-          ) {
-            dateItem.classList.add("today");
-          }
-          dateItem.addEventListener("click", () => {
-            document
-              .querySelectorAll(".date-item.selected")
-              .forEach((el) => el.classList.remove("selected"));
-            dateItem.classList.add("selected");
-            selectedDate = dateStr;
-            displayGoalsForDate(selectedDate);
-          });
-          dateRow.appendChild(dateItem);
-        }
-        const todayEl = dateRow.querySelector(".today");
-        if (todayEl) {
-          todayEl.click();
-        } else if (dateRow.firstChild) {
-          dateRow.firstChild.click();
-        }
-        scrollActiveDateIntoView();
+      function createSubtaskItem(goalId, subtask) {
+        const item = document.createElement("div");
+        item.className = `subtask-item ${
+          subtask.status === "completed" ? "completed" : ""
+        }`;
+        item.dataset.subtaskId = subtask.id;
+        const targetTimeDisplay =
+          subtask.targetTime > 0
+            ? `<div class="subtask-target-time">${
+                subtask.targetTime / 60
+              }Min</div>`
+            : "";
+        const isOvertime =
+          subtask.targetTime > 0 && subtask.elapsedTime > subtask.targetTime;
+        item.innerHTML = `<div class="subtask-bullet"></div><div class="subtask-name">${
+          subtask.name
+        }</div>${targetTimeDisplay}<div class="subtask-timer-controls">${getSubtaskControlsHTML(
+          goalId,
+          subtask,
+          isOvertime
+        )}</div>`;
+        return item;
       }
-
-      // --- HELPER & UI FUNCTIONS ---
+      function getSubtaskControlsHTML(goalId, subtask, isOvertime) {
+        const { id, status, elapsedTime } = subtask;
+        if (status === "completed") {
+          return `<span class="subtask-elapsed-time">${formatTimer(
+            elapsedTime || 0
+          )}</span> <i class="ri-checkbox-circle-fill subtask-complete-icon"></i>`;
+        }
+        let buttons = "";
+        if (status === "pending") {
+          buttons = `<button onclick="startSubtask('${goalId}', '${id}')" title="Start"><i class="ri-play-circle-line"></i></button>`;
+        } else if (status === "ongoing") {
+          buttons = `<button onclick="pauseSubtask('${goalId}', '${id}')" title="Pause"><i class="ri-pause-circle-fill"></i></button><button onclick="completeSubtask('${goalId}', '${id}')" title="Complete"><i class="ri-stop-circle-fill"></i></button>`;
+        } else if (status === "paused") {
+          buttons = `<button onclick="startSubtask('${goalId}', '${id}')" title="Resume"><i class="ri-play-circle-fill"></i></button><button onclick="completeSubtask('${goalId}', '${id}')" title="Complete"><i class="ri-stop-circle-fill"></i></button>`;
+        }
+        const timerDisplay =
+          status === "pending"
+            ? ""
+            : `<span class="subtask-elapsed-time ${
+                isOvertime ? "overtime" : ""
+              }">${formatTimer(elapsedTime || 0)}</span>`;
+        const deleteBtn = `<button class="delete-subtask-btn" onclick="deleteSubtask('${goalId}', '${id}')" title="Delete Task"><i class="ri-delete-bin-line"></i></button>`;
+        return `${timerDisplay} ${buttons} ${deleteBtn}`;
+      }
       function initializeModals() {
         document.getElementById("addGoalFab").onclick = openGoalModal;
         window.onclick = (event) => {
@@ -1387,208 +1407,50 @@
         addSubtaskModal.classList.add("show");
         document.getElementById("subtaskNameInput").focus();
       }
-      function toggleFocusView() {
-        isFocusView = !isFocusView;
-        displayGoalsForDate(selectedDate);
-        generateDateRow(currentDisplayDate);
-      }
-      function makeEditable(element, goalId, subtaskId) {
-        const originalText = element.textContent;
-        element.innerHTML = `<input type="text" value="${originalText}" style="width: 100%; font: inherit; color: inherit; background: var(--card-color); border: 1px solid var(--primary-accent); border-radius: 4px; padding: 2px 4px;">`;
-        const input = element.querySelector("input");
-        input.focus();
-        input.select();
-        const save = () => {
-          const newText = input.value.trim();
-          if (newText && newText !== originalText) {
-            if (subtaskId) {
-              const { goalIndex, subtaskIndex } = findSubtask(
-                goalId,
-                subtaskId
-              );
-              if (goalIndex !== -1 && subtaskIndex !== -1) {
-                goals[goalIndex].subTasks[subtaskIndex].name = newText;
-              }
-            } else {
-              const goalIndex = goals.findIndex((g) => g && g.id === goalId);
-              if (goalIndex !== -1) {
-                goals[goalIndex].name = newText;
-              }
+      function addSubtask() {
+        const parentGoalId = document.getElementById("parentGoalId").value;
+        const name = document.getElementById("subtaskNameInput").value.trim();
+        if (!name) {
+          alert("Please enter a sub-task name.");
+          return;
+        }
+        const selectedButton = document.querySelector(
+          "#subtaskTimeOptions button.selected"
+        );
+        let minutes = selectedButton
+          ? parseInt(selectedButton.dataset.minutes)
+          : 0;
+        const customMinutes = parseInt(
+          document.getElementById("customMinutesInput").value
+        );
+        if (!isNaN(customMinutes) && customMinutes > 0) minutes = customMinutes;
+        const goalIndex = goals.findIndex((g) => g.id === parentGoalId);
+        if (goalIndex !== -1) {
+          const goal = goals[goalIndex];
+          const newSubtask = {
+            id: `st_${Date.now()}`,
+            name,
+            status: "pending",
+            targetTime: minutes * 60,
+            elapsedTime: 0,
+            startTime: null,
+          };
+          if (!goal.subTasks) goal.subTasks = [];
+          goal.subTasks.push(newSubtask);
+          if (goal.recurringId) {
+            const masterIndex = recurringGoals.findIndex(
+              (rg) => rg.id === goal.recurringId
+            );
+            if (masterIndex !== -1) {
+              if (!recurringGoals[masterIndex].subTasks)
+                recurringGoals[masterIndex].subTasks = [];
+              recurringGoals[masterIndex].subTasks.push(newSubtask);
+              saveDataToDb("recurringGoals", recurringGoals);
             }
-            saveDataToDb("goals", goals);
-          } else {
-            displayGoalsForDate(selectedDate);
           }
-        };
-        input.addEventListener("blur", save);
-        input.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") input.blur();
-          if (e.key === "Escape") {
-            input.value = originalText;
-            input.blur();
-          }
-        });
-      }
-      function createCategorySection(groupName) {
-        const section = document.createElement("div");
-        section.className = "category-section";
-        section.dataset.groupName = groupName;
-        section.innerHTML = `<h3><span class="category-name-text">${groupName}</span><button class="category-header-btn" onclick="sortCategoryByTime('${groupName}')" title="Sort by Time"><i class="ri-sort-asc"></i></button><button class="category-header-btn" onclick="moveCategoryUp(event)"><i class="ri-arrow-up-s-line"></i></button></h3><div class="goal-container"></div>`;
-        return section;
-      }
-      function createGoalCard(goal) {
-        if (!goal) return document.createDocumentFragment();
-        const card = document.createElement("div");
-        card.className = `goal-card ${goal.isCompleted ? "completed" : ""}`;
-        card.dataset.goalId = goal.id;
-        const totalTime = (goal.subTasks || []).reduce(
-          (acc, st) => acc + (st.elapsedTime || 0),
-          0
-        );
-        const dailyTagHTML = goal.recurringId
-          ? `<span class="daily-tag"><i class="ri-repeat-line"></i> Daily</span>`
-          : "";
-        card.innerHTML = `<div class="goal-header"><i class="ri-drag-move-2-fill drag-handle"></i><input type="checkbox" class="goal-checkbox" ${
-          goal.isCompleted ? "checked" : ""
-        } onchange="toggleGoalCompletion('${
-          goal.id
-        }')"><h4 class="goal-name" onclick="makeEditable(event.target, '${
-          goal.id
-        }', null)">${
-          goal.name
-        }</h4><button class="delete-goal-btn" onclick="deleteGoal('${
-          goal.id
-        }')" title="Delete Goal"><i class="ri-delete-bin-line"></i></button></div><div class="goal-meta"><span>${
-          goal.timeFrame
-        }</span> • <span id="subtask-count-${goal.id}">${
-          (goal.subTasks || []).length
-        } Tasks</span> ${
-          goal.recurringId ? "•" : ""
-        } ${dailyTagHTML}</div><div class="goal-subtask-list">${
-          (goal.subTasks || []).length > 1 ? '<div class="timeline"></div>' : ""
-        }</div><div class="goal-footer"><button class="add-subtask-btn" onclick="openSubtaskModal('${
-          goal.id
-        }')"><i class="ri-add-circle-line"></i> Add Task</button><div class="total-time-spent" id="total-time-${
-          goal.id
-        }">Time Spent: ${formatTotalTime(totalTime)}</div></div>`;
-        const subtaskListEl = card.querySelector(".goal-subtask-list");
-        (goal.subTasks || []).forEach((subtask) =>
-          subtaskListEl.appendChild(createSubtaskItem(goal.id, subtask))
-        );
-        return card;
-      }
-      function createSubtaskItem(goalId, subtask) {
-        const item = document.createElement("div");
-        item.className = `subtask-item ${
-          subtask.status === "completed" ? "completed" : ""
-        }`;
-        item.dataset.subtaskId = subtask.id;
-        const targetTimeDisplay =
-          subtask.targetTime > 0
-            ? `<div class="subtask-target-time">${
-                subtask.targetTime / 60
-              }Min</div>`
-            : "";
-        const isOvertime =
-          subtask.targetTime > 0 && subtask.elapsedTime > subtask.targetTime;
-        item.innerHTML = `<div class="subtask-bullet"></div><div class="subtask-name" onclick="makeEditable(event.target, '${goalId}', '${
-          subtask.id
-        }')">${
-          subtask.name
-        }</div>${targetTimeDisplay}<div class="subtask-timer-controls">${getSubtaskControlsHTML(
-          goalId,
-          subtask,
-          isOvertime
-        )}</div>`;
-        return item;
-      }
-      function getSubtaskControlsHTML(goalId, subtask, isOvertime) {
-        const { id, status, elapsedTime } = subtask;
-        const deleteBtn = `<button class="delete-subtask-btn" onclick="deleteSubtask('${goalId}', '${id}')" title="Delete Task"><i class="ri-delete-bin-line"></i></button>`;
-        if (status === "completed") {
-          return `<span class="subtask-elapsed-time">${formatTimer(
-            elapsedTime || 0
-          )}</span> <i class="ri-checkbox-circle-fill subtask-complete-icon"></i> ${deleteBtn}`;
-        }
-        let buttons = "";
-        if (status === "pending") {
-          buttons = `<button onclick="startSubtask('${goalId}', '${id}')" title="Start"><i class="ri-play-circle-line"></i></button>`;
-        } else {
-          const timerDisplay = `<span class="subtask-elapsed-time ${
-            isOvertime ? "overtime" : ""
-          }">${formatTimer(elapsedTime || 0)}</span>`;
-          if (status === "ongoing") {
-            buttons = `${timerDisplay}<button onclick="pauseSubtask('${goalId}', '${id}')" title="Pause"><i class="ri-pause-circle-fill"></i></button>`;
-          } else if (status === "paused") {
-            buttons = `${timerDisplay}<button onclick="startSubtask('${goalId}', '${id}')" title="Resume"><i class="ri-play-circle-fill"></i></button>`;
-          }
-          buttons += `<button onclick="completeSubtask('${goalId}', '${id}')" title="Complete"><i class="ri-stop-circle-fill"></i></button>`;
-        }
-        return `${buttons} ${deleteBtn}`;
-      }
-      function showNotification(message) {
-        document.getElementById("notification-text").textContent = message;
-        notificationBanner.classList.add("show");
-        setTimeout(() => notificationBanner.classList.remove("show"), 4000);
-      }
-      function playNotificationSound() {
-        notificationSound.currentTime = 0;
-        notificationSound
-          .play()
-          .catch((e) => console.warn("Sound play failed.", e));
-      }
-      function previousMonth() {
-        selectedDate = null;
-        currentDisplayDate.setMonth(currentDisplayDate.getMonth() - 1);
-        generateDateRow(currentDisplayDate);
-      }
-      function nextMonth() {
-        selectedDate = null;
-        currentDisplayDate.setMonth(currentDisplayDate.getMonth() + 1);
-        generateDateRow(currentDisplayDate);
-      }
-      function scrollActiveDateIntoView() {
-        setTimeout(() => {
-          const activeEl = document.querySelector(
-            ".date-item.selected, .date-item.today"
-          );
-          if (activeEl)
-            activeEl.scrollIntoView({
-              behavior: "smooth",
-              inline: "center",
-              block: "nearest",
-            });
-        }, 250);
-      }
-      function generateRecurringInstancesForDate(date) {
-        let goalsModified = false;
-        (recurringGoals || []).forEach((masterGoal) => {
-          if (!masterGoal) return;
-          const isAfterStartDate =
-            new Date(date) >= new Date(masterGoal.startDate);
-          const isNotAnException = !(
-            masterGoal.exceptions && masterGoal.exceptions.includes(date)
-          );
-          const instanceExists = (goals || []).some(
-            (g) => g && g.recurringId === masterGoal.id && g.taskDate === date
-          );
-          if (isAfterStartDate && isNotAnException && !instanceExists) {
-            const instance = deepCopy(masterGoal);
-            instance.id = `g_inst_${Date.now()}_${Math.random()}`;
-            instance.recurringId = masterGoal.id;
-            instance.taskDate = date;
-            instance.isCompleted = false;
-            (instance.subTasks || []).forEach((st) => {
-              st.elapsedTime = 0;
-              st.status = "pending";
-              st.startTime = null;
-            });
-            goals.push(instance);
-            goalsModified = true;
-          }
-        });
-        if (goalsModified) {
           saveDataToDb("goals", goals);
+          displayGoalsForDate(selectedDate);
+          addSubtaskModal.classList.remove("show");
         }
       }
       function deleteGoal(goalId) {
@@ -1626,16 +1488,14 @@
         const updatedRecurring = recurringGoals.filter(
           (rg) => rg.id !== recurringId
         );
-        const updatedGoals = goals.filter(
-          (g) => g && g.recurringId !== recurringId
-        );
+        const updatedGoals = goals.filter((g) => g.recurringId !== recurringId);
         saveDataToDb("recurringGoals", updatedRecurring);
         saveDataToDb("goals", updatedGoals);
         deleteRecurringModal.classList.remove("show");
       }
       function deleteSubtask(goalId, subtaskId) {
         if (confirm("Are you sure you want to delete this task?")) {
-          const goalIndex = goals.findIndex((g) => g && g.id === goalId);
+          const goalIndex = goals.findIndex((g) => g.id === goalId);
           if (goalIndex !== -1) {
             const goal = goals[goalIndex];
             goal.subTasks = goal.subTasks.filter((st) => st.id !== subtaskId);
@@ -1662,7 +1522,7 @@
         }
       }
       function startSubtask(goalId, subtaskId) {
-        const { subtask, goalIndex, subtaskIndex } = findSubtask(
+        const { goal, subtask, goalIndex, subtaskIndex } = findSubtask(
           goalId,
           subtaskId
         );
@@ -1675,7 +1535,6 @@
           () => timerTick(goalId, subtaskId),
           1000
         );
-        startPiPTimer(goalId, subtaskId);
       }
       function pauseSubtask(goalId, subtaskId) {
         const { goal, subtask, goalIndex, subtaskIndex } = findSubtask(
@@ -1690,7 +1549,6 @@
           (Date.now() - subtask.startTime) / 1000
         );
         goals[goalIndex].subTasks[subtaskIndex] = subtask;
-        stopPiPTimer();
         saveDataToDb("goals", goals);
       }
       function completeSubtask(goalId, subtaskId) {
@@ -1707,7 +1565,6 @@
           );
         subtask.status = "completed";
         goals[goalIndex].subTasks[subtaskIndex] = subtask;
-        stopPiPTimer();
         saveDataToDb("goals", goals);
       }
       function timerTick(goalId, subtaskId) {
@@ -1715,7 +1572,6 @@
         if (!subtask || subtask.status !== "ongoing") {
           clearInterval(activeTimers[subtaskId]);
           delete activeTimers[subtaskId];
-          stopPiPTimer();
           return;
         }
         subtask.elapsedTime = Math.floor(
@@ -1765,20 +1621,29 @@
           return 9999;
         }
       }
-      function sortCategoryByTime(categoryName) {
+      function sortGoalsByTime() {
+        if (!selectedDate) return;
         let goalsChanged = false;
-        const goalsInCategory = goals.filter(
-          (g) => g && g.taskDate === selectedDate && g.category === categoryName
-        );
-        goalsInCategory.sort(
+        const goalsForTodayIndices = [];
+        goals.forEach((g, index) => {
+          if (g && g.taskDate === selectedDate)
+            goalsForTodayIndices.push(index);
+        });
+        const goalsForToday = goalsForTodayIndices.map((i) => goals[i]);
+        goalsForToday.sort(
           (a, b) =>
             parseStartTimeTo24HrValue(a.timeFrame) -
             parseStartTimeTo24HrValue(b.timeFrame)
         );
-        goalsInCategory.forEach((sortedGoal, index) => {
-          const originalGoal = goals.find((g) => g && g.id === sortedGoal.id);
-          if (originalGoal && originalGoal.order !== index) {
-            originalGoal.order = index;
+        goalsForToday.forEach((sortedGoal, index) => {
+          const originalIndexInGoals = goals.findIndex(
+            (g) => g && g.id === sortedGoal.id
+          );
+          if (
+            originalIndexInGoals !== -1 &&
+            goals[originalIndexInGoals].order !== index
+          ) {
+            goals[originalIndexInGoals].order = index;
             goalsChanged = true;
           }
         });
@@ -1819,7 +1684,7 @@
         if (goalIndex === -1) return {};
         const goal = goals[goalIndex];
         const subtaskIndex = (goal.subTasks || []).findIndex(
-          (st) => st && st.id === subtaskId
+          (st) => st.id === subtaskId
         );
         const subtask =
           subtaskIndex !== -1 ? goal.subTasks[subtaskIndex] : null;
@@ -1833,7 +1698,6 @@
         return `${min}:${sec}`;
       }
       function formatTotalTime(totalSeconds) {
-        if (!totalSeconds) return "0s";
         if (totalSeconds < 60) return `${totalSeconds}s`;
         const totalMinutes = Math.floor(totalSeconds / 60);
         if (totalMinutes < 60) return `${totalMinutes}min`;
@@ -1872,105 +1736,6 @@
           option.textContent = group;
           select.appendChild(option);
         });
-      }
-
-      // --- ON-PAGE TIMER DISPLAY LOGIC ---
-      // --- PiP TIMER DISPLAY FUNCTIONS ---
-      function drawPiPCanvas(taskName, elapsedSeconds) {
-        const ctx = pipCanvas.getContext("2d");
-        if (!ctx) return;
-
-        // Clear canvas
-        ctx.fillStyle = "#1a1a1a";
-        ctx.fillRect(0, 0, pipCanvas.width, pipCanvas.height);
-
-        // Draw task name
-        ctx.fillStyle = "#ffffff";
-        ctx.font = '24px "Inter", sans-serif';
-        ctx.textAlign = "center";
-        ctx.fillText(taskName, pipCanvas.width / 2, 40);
-
-        // Draw timer
-        const minutes = Math.floor(elapsedSeconds / 60);
-        const seconds = elapsedSeconds % 60;
-        const timeString = `${String(minutes).padStart(2, "0")}:${String(
-          seconds
-        ).padStart(2, "0")}`;
-
-        ctx.font = 'bold 48px "Inter", sans-serif';
-        ctx.fillStyle = "#0a84ff";
-        ctx.fillText(timeString, pipCanvas.width / 2, 90);
-      }
-
-      function drawPiPCanvas(taskName, elapsedSeconds) {
-        const ctx = pipCanvas.getContext("2d");
-        if (!ctx) return;
-
-        // Clear canvas with dark background
-        ctx.fillStyle = "#1a1a1a";
-        ctx.fillRect(0, 0, 160, 90);
-
-        // Draw task name (top left)
-        ctx.fillStyle = "#ffffff";
-        ctx.font = '14px "Inter", sans-serif';
-        ctx.textAlign = "center";
-        ctx.textBaseline = "top";
-        ctx.fillText(taskName.substring(0, 20), 80, 10); // Center horizontally at x=80 (half of 160)
-
-        // Draw timer (bottom right)
-        const minutes = Math.floor(elapsedSeconds / 60);
-        const seconds = elapsedSeconds % 60;
-        const timeString = `${String(minutes).padStart(2, "0")}:${String(
-          seconds
-        ).padStart(2, "0")}`;
-
-        ctx.font = 'bold 32px "Inter", sans-serif'; // Increased font size
-        ctx.fillStyle = "#0a84ff";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(timeString, 80, 55); // Center horizontally and vertically (x=80, y=55)
-      }
-
-      // Update startPiPTimer to set video title
-      function startPiPTimer(goalId, subtaskId) {
-        if (activePiPAnimation) cancelAnimationFrame(activePiPAnimation);
-        pipContainer.classList.add("visible");
-
-        const ctx = pipCanvas.getContext("2d");
-        ctx.imageSmoothingEnabled = true;
-
-        pipVideo.srcObject = pipCanvas.captureStream();
-        pipVideo.title =
-          "ClarityTrack - " +
-          document.querySelector(
-            `[data-subtask-id="${subtaskId}"] .subtask-name`
-          ).textContent;
-
-        pipVideo.play().then(() => {
-          if (document.pictureInPictureEnabled) {
-            pipVideo.requestPictureInPicture();
-          }
-        });
-
-        const drawLoop = () => {
-          const { subtask } = findSubtask(goalId, subtaskId);
-          if (
-            subtask &&
-            (subtask.status === "ongoing" || subtask.status === "paused")
-          ) {
-            drawPiPCanvas(subtask.name, subtask.elapsedTime);
-            activePiPAnimation = requestAnimationFrame(drawLoop);
-          } else {
-            stopPiPTimer();
-          }
-        };
-        drawLoop();
-      }
-
-      function stopPiPTimer() {
-        if (activePiPAnimation) cancelAnimationFrame(activePiPAnimation);
-        activePiPAnimation = null;
-        pipContainer.classList.remove("visible");
       }
     </script>
   </body>
