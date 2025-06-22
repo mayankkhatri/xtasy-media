@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ClarityTrack - Taskboard</title>
+    <!-- Remix Icon CDN -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- SortableJS -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+      :root {
+        --bg-color: #1a1a1a;
+        --surface-color: #2c2c2e;
+        --card-color: #3a3a3c;
+        --primary-accent: #0a84ff;
+        --green-accent: #30d158;
+        --red-accent: #ff453a;
+        --text-primary: #f2f2f7;
+        --text-secondary: #a0a0a5;
+        --border-color: #48484a;
+        --font-family: "Inter", sans-serif;
+      }
+
+      /* --- Base, App Container, and Screens --- */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: var(--font-family);
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      button {
+        font-family: var(--font-family);
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+
+      /* Screen Management */
+      #app-container,
+      #login-screen {
+        display: none;
+      }
+      #loading-screen {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+      }
+
+      /* --- Loading Spinner --- */
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid var(--border-color);
+        border-top-color: var(--primary-accent);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* --- Login Screen --- */
+      #login-screen {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        height: 100vh;
+        padding: 20px;
+      }
+      #login-screen h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+      }
+      #login-screen p {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        margin-bottom: 30px;
+        max-width: 400px;
+      }
+      .google-signin-btn {
+        background-color: #fff;
+        color: #333;
+        border: 1px solid #ddd;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        transition: background-color 0.2s ease;
+      }
+      .google-signin-btn:hover {
+        background-color: #f7f7f7;
+      }
+      .google-signin-btn i {
+        font-size: 1.5rem;
+        color: #db4437;
+      }
+
+      /* --- App Header & Profile Card --- */
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 0;
+        border-bottom: 1px solid var(--border-color);
+      }
+      .logo img {
+        height: 40px;
+      }
+
+      #profile-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      #profile-card img {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 2px solid var(--border-color);
+      }
+      #profile-card .user-name {
+        font-weight: 500;
+      }
+      #profile-card .signout-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-size: 1.2rem;
+        transition: color 0.2s ease;
+        margin-left: 8px;
+      }
+      #profile-card .signout-btn:hover {
+        color: var(--red-accent);
+      }
+
+      /* --- Month & Date Navigation --- */
+      .month-nav-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 15px 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+        position: relative;
+      }
+      .month-nav {
+        cursor: pointer;
+        font-size: 1.8rem;
+        margin: 0 20px;
+        color: var(--text-secondary);
+        transition: color 0.2s ease;
+      }
+      #sort-by-time-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-size: 1.5rem;
+        margin-left: 20px;
+        transition: color 0.2s ease;
+      }
+      #sort-by-time-btn:hover,
+      .month-nav:hover {
+        color: var(--text-primary);
+      }
+
+      /* --- Rest of the styles (unchanged) --- */
+      #dateRow {
+        display: flex;
+        overflow-x: auto;
+        padding: 10px 0;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      #dateRow::-webkit-scrollbar {
+        display: none;
+      }
+      .date-item {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.2s ease-in-out;
+        margin: 0 5px;
+        background-color: var(--surface-color);
+      }
+      .date-item .day-name {
+        font-size: 0.8em;
+        font-weight: 500;
+        color: var(--text-secondary);
+      }
+      .date-item .date-number {
+        font-size: 1.1em;
+        font-weight: 600;
+      }
+      .date-item.today {
+        border-color: var(--primary-accent);
+      }
+      .date-item.selected {
+        background-color: var(--primary-accent);
+        color: #fff;
+        border-color: var(--primary-accent);
+      }
+      .date-item.selected .day-name {
+        color: #eee;
+      }
+      .taskboard {
+        padding: 20px 0;
+        min-height: 40vh;
+      }
+      .category-section h3 {
+        display: flex;
+        align-items: center;
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+        color: var(--text-primary);
+      }
+      .category-section h3 .category-name-text {
+        flex-grow: 1;
+      }
+      .category-section h3 .category-up-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-size: 1.5rem;
+        margin-left: 10px;
+      }
+      .category-up-btn:hover {
+        color: var(--text-primary);
+      }
+      .goal-card {
+        background-color: var(--surface-color);
+        border-radius: 16px;
+        padding: 18px;
+        margin-bottom: 25px;
+        border: 1px solid var(--border-color);
+      }
+      .goal-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .drag-handle {
+        cursor: grab;
+        color: var(--text-secondary);
+        font-size: 1.5rem;
+      }
+      .drag-handle:active {
+        cursor: grabbing;
+      }
+      .goal-checkbox {
+        width: 20px;
+        height: 20px;
+        accent-color: var(--primary-accent);
+        cursor: pointer;
+        margin-top: 2px;
+      }
+      .goal-name {
+        font-size: 1.4rem;
+        font-weight: 600;
+        flex-grow: 1;
+      }
+      .goal-card.completed .goal-name {
+        text-decoration: line-through;
+        color: var(--text-secondary);
+      }
+      .delete-goal-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text-secondary);
+        font-size: 1.2rem;
+        transition: color 0.2s ease;
+      }
+      .delete-goal-btn:hover {
+        color: var(--red-accent);
+      }
+      .goal-meta {
+        color: var(--text-secondary);
+        font-weight: 500;
+        margin-bottom: 20px;
+        padding-left: 55px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .daily-tag {
+        background-color: var(--card-color);
+        color: var(--text-secondary);
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 0.8em;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .daily-tag i {
+        font-size: 1em;
+      }
+      .goal-subtask-list {
+        position: relative;
+        padding-left: 20px;
+        margin-left: 18px;
+      }
+      .timeline {
+        position: absolute;
+        left: 0;
+        top: 5px;
+        bottom: 5px;
+        width: 2px;
+        background: repeating-linear-gradient(
+          var(--border-color),
+          var(--border-color) 4px,
+          transparent 4px,
+          transparent 8px
+        );
+      }
+      .subtask-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 0;
+        gap: 12px;
+        position: relative;
+      }
+      .subtask-bullet {
+        width: 12px;
+        height: 12px;
+        background-color: var(--primary-accent);
+        border-radius: 50%;
+        border: 2px solid var(--bg-color);
+        position: absolute;
+        left: -26px;
+        z-index: 1;
+      }
+      .subtask-item.completed .subtask-bullet {
+        background-color: var(--green-accent);
+      }
+      .subtask-name {
+        flex-grow: 1;
+      }
+      .subtask-item.completed .subtask-name {
+        text-decoration: line-through;
+        color: var(--text-secondary);
+      }
+      .subtask-target-time {
+        background-color: var(--card-color);
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 0.85em;
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+      .subtask-timer-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 500;
+        min-width: 130px;
+        justify-content: flex-end;
+      }
+      .subtask-timer-controls button {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.2s ease;
+      }
+      .subtask-timer-controls button:hover {
+        color: var(--text-primary);
+      }
+      .subtask-timer-controls .delete-subtask-btn:hover {
+        color: var(--red-accent);
+      }
+      .subtask-elapsed-time {
+        font-size: 1rem;
+        color: var(--text-primary);
+      }
+      .subtask-elapsed-time.overtime {
+        color: var(--red-accent);
+      }
+      .subtask-complete-icon {
+        color: var(--green-accent);
+        font-size: 1.2rem;
+      }
+      .goal-footer {
+        margin-top: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-left: 55px;
+      }
+      .add-subtask-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .add-subtask-btn:hover {
+        color: var(--text-primary);
+      }
+      .add-subtask-btn i {
+        font-size: 1.2rem;
+      }
+      .total-time-spent {
+        font-weight: 500;
+        color: var(--text-secondary);
+      }
+      .fab {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        background-color: var(--primary-accent);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        transition: transform 0.2s ease;
+      }
+      .fab:hover {
+        transform: scale(1.05);
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(5px);
+        align-items: center;
+        justify-content: center;
+      }
+      .modal.show {
+        display: flex;
+      }
+      .modal-content {
+        background-color: var(--surface-color);
+        margin: 0;
+        padding: 25px 30px;
+        border: 1px solid var(--border-color);
+        width: 90%;
+        max-width: 450px;
+        border-radius: 16px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+      }
+      .modal-content h2 {
+        margin-bottom: 20px;
+        font-size: 1.5rem;
+      }
+      .modal-content label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: var(--text-secondary);
+      }
+      .modal-content input[type="text"],
+      .modal-content input[type="number"],
+      .modal-content select {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 15px;
+        border: 1px solid var(--border-color);
+        background-color: var(--card-color);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-size: 1rem;
+      }
+      .modal-content .time-input-group {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .modal-content .time-input-group input[type="number"] {
+        width: auto;
+        flex-grow: 1;
+      }
+      .modal-content .am-pm-switcher {
+        display: flex;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+      .modal-content .am-pm-switcher button {
+        padding: 12px 15px;
+        border: none;
+        background-color: var(--card-color);
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s ease;
+      }
+      .modal-content .am-pm-switcher button.active {
+        background-color: var(--primary-accent);
+        color: #fff;
+      }
+      .category-input-group {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .category-input-group select {
+        flex-grow: 1;
+      }
+      .category-input-group button {
+        padding: 12px;
+        background-color: var(--primary-accent);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .daily-task-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 5px 0 15px 0;
+      }
+      .daily-task-group input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--primary-accent);
+        margin-bottom: 0;
+      }
+      .daily-task-group label {
+        margin-bottom: 0;
+      }
+      .modal-content .time-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 15px;
+      }
+      .modal-content .time-options button {
+        background-color: var(--card-color);
+        border: 1px solid transparent;
+        color: var(--text-secondary);
+        padding: 8px 14px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+      .modal-content .time-options button.selected {
+        background-color: var(--primary-accent);
+        color: #fff;
+        border-color: var(--primary-accent);
+      }
+      .modal-action-btn,
+      .modal-secondary-btn {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: opacity 0.2s ease;
+      }
+      .modal-action-btn {
+        background-color: var(--primary-accent);
+        color: white;
+        margin-top: 10px;
+      }
+      .modal-secondary-btn {
+        background-color: var(--card-color);
+        color: var(--text-primary);
+        margin-top: 10px;
+      }
+      .modal-action-btn:hover,
+      .modal-secondary-btn:hover {
+        opacity: 0.9;
+      }
+      #deleteRecurringModal .modal-button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="loading-screen">
+      <div class="spinner"></div>
+    </div>
+
+    <div id="login-screen">
+      <img
+        src="https://i.postimg.cc/k5F70t2x/Logo-2.png"
+        alt="logo"
+        style="height: 60px; margin-bottom: 20px"
+      />
+      <h1>Welcome to ClarityTrack</h1>
+      <p>
+        Your personal dashboard for tracking goals, habits, and time. Sign in to
+        sync your progress across all devices.
+      </p>
+      <button class="google-signin-btn" onclick="signInWithGoogle()">
+        <i class="ri-google-fill"></i>
+        Sign in with Google
+      </button>
+    </div>
+
+    <div id="app-container">
+      <div class="container">
+        <div class="header">
+          <div class="logo">
+            <img src="https://i.postimg.cc/k5F70t2x/Logo-2.png" alt="logo" />
+          </div>
+          <div id="profile-card">
+            <img id="user-photo" src="" alt="User Photo" />
+            <span id="user-name"></span>
+            <button
+              class="signout-btn"
+              onclick="signOutUser()"
+              title="Sign Out"
+            >
+              <i class="ri-logout-box-r-line"></i>
+            </button>
+          </div>
+        </div>
+        <div class="month-nav-header" id="monthNavHeader"></div>
+        <div class="date-row" id="dateRow"></div>
+        <div class="taskboard" id="taskboardContainer"></div>
+      </div>
+      <div class="fab" id="addGoalFab"><i class="ri-add-line"></i></div>
+    </div>
+
+    <!-- Modals (structure unchanged) -->
+    <div id="addGoalModal" class="modal">
+      <div class="modal-content">
+        <h2>Add New Goal</h2>
+        <label for="goalNameInput">Goal Name</label>
+        <input
+          type="text"
+          id="goalNameInput"
+          placeholder="e.g., Morning Workout Routine"
+        />
+        <label for="categorySelect">Category</label>
+        <div class="category-input-group">
+          <select id="categorySelect"></select>
+          <input
+            type="text"
+            id="newCategoryInput"
+            placeholder="New Category"
+            style="margin-bottom: 0"
+          />
+          <button id="addNewCategoryBtn">Add</button>
+        </div>
+        <div class="daily-task-group">
+          <input type="checkbox" id="dailyTaskCheckbox" />
+          <label for="dailyTaskCheckbox"
+            >Make this a daily recurring task</label
+          >
+        </div>
+        <label>Time Frame</label>
+        <div class="time-input-group">
+          <input
+            type="number"
+            id="goalStartHour"
+            placeholder="07"
+            min="1"
+            max="12"
+          /><input
+            type="number"
+            id="goalStartMinute"
+            placeholder="00"
+            min="0"
+            max="59"
+          />
+          <div class="am-pm-switcher" id="goalStartAmPm">
+            <button class="active" data-value="AM">AM</button
+            ><button data-value="PM">PM</button>
+          </div>
+        </div>
+        <div class="time-input-group" style="margin-top: 5px">
+          <input
+            type="number"
+            id="goalEndHour"
+            placeholder="08"
+            min="1"
+            max="12"
+          /><input
+            type="number"
+            id="goalEndMinute"
+            placeholder="00"
+            min="0"
+            max="59"
+          />
+          <div class="am-pm-switcher" id="goalEndAmPm">
+            <button data-value="AM">AM</button
+            ><button class="active" data-value="PM">PM</button>
+          </div>
+        </div>
+        <button class="modal-action-btn" id="addGoalBtn">Add Goal</button>
+      </div>
+    </div>
+    <div id="addSubtaskModal" class="modal">
+      <div class="modal-content">
+        <h2>Add Sub-task</h2>
+        <input type="hidden" id="parentGoalId" />
+        <label for="subtaskNameInput">Sub-task Name</label>
+        <input
+          type="text"
+          id="subtaskNameInput"
+          placeholder="e.g., Stretching"
+        />
+        <label>Target Time</label>
+        <div class="time-options" id="subtaskTimeOptions">
+          <button data-minutes="5">5 Min</button
+          ><button data-minutes="10">10 Min</button
+          ><button data-minutes="15">15 Min</button
+          ><button data-minutes="30">30 Min</button
+          ><button data-minutes="45">45 Min</button
+          ><button data-minutes="0" class="selected">None</button>
+        </div>
+        <input
+          type="number"
+          id="customMinutesInput"
+          placeholder="Or enter custom minutes"
+        />
+        <button class="modal-action-btn" id="addSubtaskBtn">
+          Add Sub-task
+        </button>
+      </div>
+    </div>
+    <div id="deleteRecurringModal" class="modal">
+      <div class="modal-content">
+        <h2>Delete Recurring Task</h2>
+        <p>This is a daily task. How would you like to delete it?</p>
+        <input type="hidden" id="deleteGoalId" />
+        <input type="hidden" id="deleteRecurringId" />
+        <div class="modal-button-group">
+          <button class="modal-secondary-btn" id="deleteTodayBtn">
+            Delete for Today Only
+          </button>
+          <button
+            class="modal-action-btn"
+            id="deleteAllBtn"
+            style="background-color: var(--red-accent)"
+          >
+            Stop All Future Recurrence
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- FIREBASE SETUP ---
+      const firebaseConfig = {
+        apiKey: "AIzaSyDtMlw839uPMmlfpKCoG9L9zlWvGvO9mZs",
+        authDomain: "xtasy-habits.firebaseapp.com",
+        // IMPORTANT: This URL must be correct and your database rules must be set
+        databaseURL:
+          "https://xtasy-habits-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "xtasy-habits",
+        storageBucket: "xtasy-habits.appspot.com",
+        messagingSenderId: "1081060020039",
+        appId: "1:1081060020039:web:340b58a4cf1bf85cba8662",
+        measurementId: "G-9761Z6CHG5",
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.database();
+
+      // --- STATE MANAGEMENT ---
+      let currentUserId = null;
+      let selectedDate = null;
+      let currentDisplayDate = new Date();
+      let goals = [];
+      let groups = [];
+      let recurringGoals = [];
+      let activeTimers = {};
+      let dataListeners = []; // To detach listeners on sign-out
+      const deepCopy = (obj) => JSON.parse(JSON.stringify(obj));
+
+      // --- DOM ELEMENTS ---
+      const loadingScreen = document.getElementById("loading-screen");
+      const loginScreen = document.getElementById("login-screen");
+      const appContainer = document.getElementById("app-container");
+      const taskboardContainer = document.getElementById("taskboardContainer");
+      const addGoalModal = document.getElementById("addGoalModal");
+      const addSubtaskModal = document.getElementById("addSubtaskModal");
+      const deleteRecurringModal = document.getElementById(
+        "deleteRecurringModal"
+      );
+
+      // --- AUTHENTICATION & APP INITIALIZATION ---
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          if (currentUserId !== user.uid) {
+            // New user login
+            currentUserId = user.uid;
+            initializeApplication(user);
+          }
+        } else {
+          // User signed out
+          currentUserId = null;
+          dataListeners.forEach(({ ref, type }) => ref.off(type));
+          dataListeners = [];
+          loadingScreen.style.display = "none";
+          loginScreen.style.display = "flex";
+          appContainer.style.display = "none";
+        }
+      });
+
+      function initializeApplication(user) {
+        document.getElementById("user-name").textContent = user.displayName;
+        document.getElementById("user-photo").src = user.photoURL;
+
+        db.ref(`users/${currentUserId}`).once("value", (snapshot) => {
+          const data = snapshot.val() || {};
+          goals = data.goals || [];
+          recurringGoals = data.recurringGoals || [];
+          groups = data.groups || ["My Day"];
+
+          initializeModals();
+          generateDateRow(currentDisplayDate);
+
+          loadingScreen.style.display = "none";
+          appContainer.style.display = "block";
+
+          initializeDatabaseListeners();
+        });
+      }
+
+      function signInWithGoogle() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).catch((error) => {
+          console.error("Sign-in error", error);
+          alert("Could not sign in. Please check console for errors.");
+        });
+      }
+      function signOutUser() {
+        auth.signOut().catch((error) => console.error("Sign-out error", error));
+      }
+
+      // --- DATABASE ---
+      function initializeDatabaseListeners() {
+        if (!currentUserId) return;
+        const userRef = db.ref(`users/${currentUserId}`);
+        const paths = {
+          goals: (val) => (goals = val || []),
+          recurringGoals: (val) => (recurringGoals = val || []),
+          groups: (val) => (groups = val || ["My Day"]),
+        };
+
+        dataListeners.forEach(({ ref, type }) => ref.off(type));
+        dataListeners = [];
+
+        Object.keys(paths).forEach((path) => {
+          const ref = userRef.child(path);
+          const listener = ref.on("value", (snapshot) => {
+            paths[path](snapshot.val()); // Update the correct local state variable
+            if (selectedDate) {
+              displayGoalsForDate(selectedDate);
+            }
+          });
+          dataListeners.push({ ref: ref, type: "value", listener: listener });
+        });
+      }
+
+      function saveDataToDb(path, data) {
+        if (!currentUserId) return;
+        const cleanData = Array.isArray(data)
+          ? data.filter((item) => item)
+          : data;
+        db.ref(`users/${currentUserId}/${path}`).set(cleanData);
+      }
+
+      // --- The rest of the app's logic with optimistic updates ---
+
+      function generateDateRow(dateToDisplay) {
+        const dateRow = document.getElementById("dateRow");
+        const monthNavHeader = document.getElementById("monthNavHeader");
+        dateRow.innerHTML = "";
+        monthNavHeader.innerHTML = "";
+        const today = new Date();
+        const year = dateToDisplay.getFullYear();
+        const month = dateToDisplay.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const monthNames = [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
+        ];
+        monthNavHeader.innerHTML = `<i class="ri-arrow-left-s-line month-nav" onclick="previousMonth()"></i><span>${monthNames[month]} ${year}</span><button id="sort-by-time-btn" onclick="sortGoalsByTime()" title="Sort by Time"><i class="ri-sort-asc"></i></button><i class="ri-arrow-right-s-line month-nav" onclick="nextMonth()"></i>`;
+        for (let i = 1; i <= daysInMonth; i++) {
+          const dayDate = new Date(year, month, i);
+          const dayName = dayDate.toLocaleDateString("en-US", {
+            weekday: "short",
+          });
+          const dateItem = document.createElement("div");
+          dateItem.classList.add("date-item");
+          dateItem.innerHTML = `<span class="day-name">${dayName}</span><span class="date-number">${i}</span>`;
+          const dateStr = `${year}-${String(month + 1).padStart(
+            2,
+            "0"
+          )}-${String(i).padStart(2, "0")}`;
+          dateItem.dataset.date = dateStr;
+          if (
+            i === today.getDate() &&
+            month === today.getMonth() &&
+            year === today.getFullYear()
+          ) {
+            dateItem.classList.add("today");
+          }
+          dateItem.addEventListener("click", () => {
+            document
+              .querySelectorAll(".date-item.selected")
+              .forEach((el) => el.classList.remove("selected"));
+            dateItem.classList.add("selected");
+            selectedDate = dateStr;
+            displayGoalsForDate(selectedDate);
+          });
+          dateRow.appendChild(dateItem);
+        }
+        const todayEl = dateRow.querySelector(".today");
+        if (todayEl) {
+          todayEl.click();
+        } else if (dateRow.firstChild) {
+          dateRow.firstChild.click();
+        } else {
+          displayGoalsForDate(null);
+        }
+      }
+
+      function displayGoalsForDate(date) {
+        if (!date) {
+          taskboardContainer.innerHTML =
+            "<p>Please select a date to see your goals.</p>";
+          return;
+        }
+        generateRecurringInstancesForDate(date);
+        taskboardContainer.innerHTML = "";
+        const goalsForDate = goals.filter(
+          (goal) => goal && goal.taskDate === date
+        );
+        const groupedGoals = {};
+        goalsForDate.forEach((goal) => {
+          if (!groupedGoals[goal.category]) groupedGoals[goal.category] = [];
+          groupedGoals[goal.category].push(goal);
+        });
+        groups.forEach((groupName) => {
+          if (groupedGoals[groupName] && groupedGoals[groupName].length > 0) {
+            const categorySection = createCategorySection(groupName);
+            const goalContainer =
+              categorySection.querySelector(".goal-container");
+            groupedGoals[groupName]
+              .sort((a, b) => (a.order || 0) - (b.order || 0))
+              .forEach((goal) =>
+                goalContainer.appendChild(createGoalCard(goal))
+              );
+            taskboardContainer.appendChild(categorySection);
+            Sortable.create(goalContainer, {
+              group: "goals",
+              handle: ".drag-handle",
+              animation: 150,
+              onEnd: updateGoalOrder,
+            });
+          }
+        });
+        if (taskboardContainer.children.length === 0) {
+          taskboardContainer.innerHTML =
+            "<p>No goals for this date. Click the '+' to add one!</p>";
+        }
+        scrollActiveDateIntoView();
+      }
+
+      function addGoal() {
+        const name = document.getElementById("goalNameInput").value.trim();
+        const category = document.getElementById("categorySelect").value;
+        if (!name || !category) {
+          alert("Please enter a goal name and select a category.");
+          return;
+        }
+        if (!selectedDate) {
+          alert("Please select a date first.");
+          return;
+        }
+        const sh = document.getElementById("goalStartHour").value || "12";
+        const sm = (
+          document.getElementById("goalStartMinute").value || "00"
+        ).padStart(2, "0");
+        const sam = document.querySelector("#goalStartAmPm .active").dataset
+          .value;
+        const eh = document.getElementById("goalEndHour").value || "12";
+        const em = (
+          document.getElementById("goalEndMinute").value || "00"
+        ).padStart(2, "0");
+        const eam = document.querySelector("#goalEndAmPm .active").dataset
+          .value;
+        const isDaily = document.getElementById("dailyTaskCheckbox").checked;
+        const newGoalData = {
+          category,
+          name,
+          timeFrame: `${sh}:${sm}${sam} to ${eh}:${em}${eam}`,
+          isCompleted: false,
+          order: (goals || []).filter((g) => g && g.taskDate === selectedDate)
+            .length,
+          subTasks: [],
+        };
+        if (isDaily) {
+          newGoalData.id = `g_master_${Date.now()}`;
+          newGoalData.startDate = selectedDate;
+          newGoalData.exceptions = [];
+          recurringGoals.push(newGoalData);
+          saveDataToDb("recurringGoals", recurringGoals);
+        } else {
+          newGoalData.id = `g_single_${Date.now()}`;
+          newGoalData.taskDate = selectedDate;
+          goals.push(newGoalData);
+          saveDataToDb("goals", goals);
+        }
+        // FIX: Optimistic UI update
+        displayGoalsForDate(selectedDate);
+        addGoalModal.classList.remove("show");
+      }
+
+      function addNewCategory() {
+        const input = document.getElementById("newCategoryInput");
+        const newGroup = input.value.trim();
+        if (newGroup && !groups.includes(newGroup)) {
+          // FIX: Optimistic UI Update
+          groups.push(newGroup);
+          populateCategoryDropdown();
+          document.getElementById("categorySelect").value = newGroup;
+          input.value = "";
+          saveDataToDb("groups", groups);
+        } else if (!newGroup) {
+          alert("Category name cannot be empty.");
+        } else {
+          alert("This category already exists.");
+        }
+      }
+
+      // (Helper functions with fixes for optimistic updates)
+      function previousMonth() {
+        selectedDate = null;
+        currentDisplayDate.setMonth(currentDisplayDate.getMonth() - 1);
+        generateDateRow(currentDisplayDate);
+      }
+      function nextMonth() {
+        selectedDate = null;
+        currentDisplayDate.setMonth(currentDisplayDate.getMonth() + 1);
+        generateDateRow(currentDisplayDate);
+      }
+      function scrollActiveDateIntoView() {
+        setTimeout(() => {
+          const activeEl = document.querySelector(
+            ".date-item.selected, .date-item.today"
+          );
+          if (activeEl)
+            activeEl.scrollIntoView({
+              behavior: "smooth",
+              inline: "center",
+              block: "nearest",
+            });
+        }, 150);
+      }
+      function generateRecurringInstancesForDate(date) {
+        let goalsModified = false;
+        recurringGoals.forEach((masterGoal) => {
+          const isAfterStartDate =
+            new Date(date) >= new Date(masterGoal.startDate);
+          const isNotAnException = !(
+            masterGoal.exceptions && masterGoal.exceptions.includes(date)
+          );
+          const instanceExists = goals.some(
+            (g) => g && g.recurringId === masterGoal.id && g.taskDate === date
+          );
+          if (isAfterStartDate && isNotAnException && !instanceExists) {
+            const instance = deepCopy(masterGoal);
+            instance.id = `g_inst_${Date.now()}_${Math.random()}`;
+            instance.recurringId = masterGoal.id;
+            instance.taskDate = date;
+            instance.isCompleted = false;
+            (instance.subTasks || []).forEach((st) => {
+              st.elapsedTime = 0;
+              st.status = "pending";
+              st.startTime = null;
+            });
+            goals.push(instance);
+            goalsModified = true;
+          }
+        });
+        if (goalsModified) {
+          saveDataToDb("goals", goals);
+        }
+      }
+      function createCategorySection(groupName) {
+        const section = document.createElement("div");
+        section.className = "category-section";
+        section.dataset.groupName = groupName;
+        section.innerHTML = `<h3><span class="category-name-text">${groupName}</span><button class="category-up-btn" onclick="moveCategoryUp(event)"><i class="ri-arrow-up-s-line"></i></button></h3><div class="goal-container"></div>`;
+        return section;
+      }
+      function createGoalCard(goal) {
+        if (!goal) return document.createDocumentFragment();
+        const card = document.createElement("div");
+        card.className = `goal-card ${goal.isCompleted ? "completed" : ""}`;
+        card.dataset.goalId = goal.id;
+        const totalTime = (goal.subTasks || []).reduce(
+          (acc, st) => acc + (st.elapsedTime || 0),
+          0
+        );
+        const dailyTagHTML = goal.recurringId
+          ? `<span class="daily-tag"><i class="ri-repeat-line"></i> Daily</span>`
+          : "";
+        card.innerHTML = `<div class="goal-header"><i class="ri-drag-move-2-fill drag-handle"></i><input type="checkbox" class="goal-checkbox" ${
+          goal.isCompleted ? "checked" : ""
+        } onchange="toggleGoalCompletion('${goal.id}')"><h4 class="goal-name">${
+          goal.name
+        }</h4><button class="delete-goal-btn" onclick="deleteGoal('${
+          goal.id
+        }')" title="Delete Goal"><i class="ri-delete-bin-line"></i></button></div><div class="goal-meta"><span>${
+          goal.timeFrame
+        }</span> ${
+          goal.recurringId ? "•" : ""
+        } ${dailyTagHTML}</div><div class="goal-subtask-list">${
+          (goal.subTasks || []).length > 1 ? '<div class="timeline"></div>' : ""
+        }</div><div class="goal-footer"><button class="add-subtask-btn" onclick="openSubtaskModal('${
+          goal.id
+        }')"><i class="ri-add-circle-line"></i> Add Task</button><div class="total-time-spent" id="total-time-${
+          goal.id
+        }">Time Spent: ${formatTotalTime(totalTime)}</div></div>`;
+        const subtaskListEl = card.querySelector(".goal-subtask-list");
+        (goal.subTasks || []).forEach((subtask) =>
+          subtaskListEl.appendChild(createSubtaskItem(goal.id, subtask))
+        );
+        return card;
+      }
+      function createSubtaskItem(goalId, subtask) {
+        const item = document.createElement("div");
+        item.className = `subtask-item ${
+          subtask.status === "completed" ? "completed" : ""
+        }`;
+        item.dataset.subtaskId = subtask.id;
+        const targetTimeDisplay =
+          subtask.targetTime > 0
+            ? `<div class="subtask-target-time">${
+                subtask.targetTime / 60
+              }Min</div>`
+            : "";
+        const isOvertime =
+          subtask.targetTime > 0 && subtask.elapsedTime > subtask.targetTime;
+        item.innerHTML = `<div class="subtask-bullet"></div><div class="subtask-name">${
+          subtask.name
+        }</div>${targetTimeDisplay}<div class="subtask-timer-controls">${getSubtaskControlsHTML(
+          goalId,
+          subtask,
+          isOvertime
+        )}</div>`;
+        return item;
+      }
+      function getSubtaskControlsHTML(goalId, subtask, isOvertime) {
+        const { id, status, elapsedTime } = subtask;
+        if (status === "completed") {
+          return `<span class="subtask-elapsed-time">${formatTimer(
+            elapsedTime || 0
+          )}</span> <i class="ri-checkbox-circle-fill subtask-complete-icon"></i>`;
+        }
+        let buttons = "";
+        if (status === "pending") {
+          buttons = `<button onclick="startSubtask('${goalId}', '${id}')" title="Start"><i class="ri-play-circle-line"></i></button>`;
+        } else if (status === "ongoing") {
+          buttons = `<button onclick="pauseSubtask('${goalId}', '${id}')" title="Pause"><i class="ri-pause-circle-fill"></i></button><button onclick="completeSubtask('${goalId}', '${id}')" title="Complete"><i class="ri-stop-circle-fill"></i></button>`;
+        } else if (status === "paused") {
+          buttons = `<button onclick="startSubtask('${goalId}', '${id}')" title="Resume"><i class="ri-play-circle-fill"></i></button><button onclick="completeSubtask('${goalId}', '${id}')" title="Complete"><i class="ri-stop-circle-fill"></i></button>`;
+        }
+        const timerDisplay =
+          status === "pending"
+            ? ""
+            : `<span class="subtask-elapsed-time ${
+                isOvertime ? "overtime" : ""
+              }">${formatTimer(elapsedTime || 0)}</span>`;
+        const deleteBtn = `<button class="delete-subtask-btn" onclick="deleteSubtask('${goalId}', '${id}')" title="Delete Task"><i class="ri-delete-bin-line"></i></button>`;
+        return `${timerDisplay} ${buttons} ${deleteBtn}`;
+      }
+      function initializeModals() {
+        document.getElementById("addGoalFab").onclick = openGoalModal;
+        window.onclick = (event) => {
+          if (event.target.classList.contains("modal"))
+            event.target.classList.remove("show");
+        };
+        document.getElementById("addGoalBtn").onclick = addGoal;
+        document.getElementById("addNewCategoryBtn").onclick = addNewCategory;
+        document.getElementById("addSubtaskBtn").onclick = addSubtask;
+        document.querySelectorAll(".am-pm-switcher").forEach((s) =>
+          s.addEventListener("click", (e) => {
+            if (e.target.tagName === "BUTTON") {
+              s.querySelectorAll("button").forEach((b) =>
+                b.classList.remove("active")
+              );
+              e.target.classList.add("active");
+            }
+          })
+        );
+        const timeOpts = document.getElementById("subtaskTimeOptions");
+        timeOpts.addEventListener("click", (e) => {
+          if (e.target.tagName === "BUTTON") {
+            timeOpts
+              .querySelectorAll("button")
+              .forEach((b) => b.classList.remove("selected"));
+            e.target.classList.add("selected");
+            document.getElementById("customMinutesInput").value = "";
+          }
+        });
+        document.getElementById("customMinutesInput").oninput = () =>
+          timeOpts
+            .querySelectorAll("button")
+            .forEach((b) => b.classList.remove("selected"));
+        document.getElementById("deleteTodayBtn").onclick =
+          handleDeleteRecurring_JustToday;
+        document.getElementById("deleteAllBtn").onclick =
+          handleDeleteRecurring_AllFuture;
+      }
+      function openGoalModal() {
+        populateCategoryDropdown();
+        document.getElementById("goalNameInput").value = "";
+        document.getElementById("dailyTaskCheckbox").checked = false;
+        addGoalModal.classList.add("show");
+      }
+      function openSubtaskModal(goalId) {
+        document.getElementById("parentGoalId").value = goalId;
+        document.getElementById("subtaskNameInput").value = "";
+        document.getElementById("customMinutesInput").value = "";
+        document
+          .querySelector('#subtaskTimeOptions button[data-minutes="0"]')
+          .click();
+        addSubtaskModal.classList.add("show");
+        document.getElementById("subtaskNameInput").focus();
+      }
+      function addSubtask() {
+        const parentGoalId = document.getElementById("parentGoalId").value;
+        const name = document.getElementById("subtaskNameInput").value.trim();
+        if (!name) {
+          alert("Please enter a sub-task name.");
+          return;
+        }
+        const selectedButton = document.querySelector(
+          "#subtaskTimeOptions button.selected"
+        );
+        let minutes = selectedButton
+          ? parseInt(selectedButton.dataset.minutes)
+          : 0;
+        const customMinutes = parseInt(
+          document.getElementById("customMinutesInput").value
+        );
+        if (!isNaN(customMinutes) && customMinutes > 0) minutes = customMinutes;
+        const goalIndex = goals.findIndex((g) => g.id === parentGoalId);
+        if (goalIndex !== -1) {
+          const goal = goals[goalIndex];
+          const newSubtask = {
+            id: `st_${Date.now()}`,
+            name,
+            status: "pending",
+            targetTime: minutes * 60,
+            elapsedTime: 0,
+            startTime: null,
+          };
+          if (!goal.subTasks) goal.subTasks = [];
+          goal.subTasks.push(newSubtask);
+          if (goal.recurringId) {
+            const masterIndex = recurringGoals.findIndex(
+              (rg) => rg.id === goal.recurringId
+            );
+            if (masterIndex !== -1) {
+              if (!recurringGoals[masterIndex].subTasks)
+                recurringGoals[masterIndex].subTasks = [];
+              recurringGoals[masterIndex].subTasks.push(newSubtask);
+              saveDataToDb("recurringGoals", recurringGoals);
+            }
+          }
+          saveDataToDb("goals", goals);
+          displayGoalsForDate(selectedDate);
+          addSubtaskModal.classList.remove("show");
+        }
+      }
+      function deleteGoal(goalId) {
+        const goal = goals.find((g) => g && g.id === goalId);
+        if (!goal) return;
+        if (goal.recurringId) {
+          document.getElementById("deleteGoalId").value = goal.id;
+          document.getElementById("deleteRecurringId").value = goal.recurringId;
+          deleteRecurringModal.classList.add("show");
+        } else {
+          if (confirm("Are you sure you want to delete this goal?")) {
+            const updatedGoals = goals.filter((g) => g && g.id !== goalId);
+            saveDataToDb("goals", updatedGoals);
+          }
+        }
+      }
+      function handleDeleteRecurring_JustToday() {
+        const goalId = document.getElementById("deleteGoalId").value;
+        const recurringId = document.getElementById("deleteRecurringId").value;
+        const masterIndex = recurringGoals.findIndex(
+          (rg) => rg.id === recurringId
+        );
+        if (masterIndex !== -1) {
+          if (!recurringGoals[masterIndex].exceptions)
+            recurringGoals[masterIndex].exceptions = [];
+          recurringGoals[masterIndex].exceptions.push(selectedDate);
+          saveDataToDb("recurringGoals", recurringGoals);
+        }
+        const updatedGoals = goals.filter((g) => g && g.id !== goalId);
+        saveDataToDb("goals", updatedGoals);
+        deleteRecurringModal.classList.remove("show");
+      }
+      function handleDeleteRecurring_AllFuture() {
+        const recurringId = document.getElementById("deleteRecurringId").value;
+        const updatedRecurring = recurringGoals.filter(
+          (rg) => rg.id !== recurringId
+        );
+        const updatedGoals = goals.filter((g) => g.recurringId !== recurringId);
+        saveDataToDb("recurringGoals", updatedRecurring);
+        saveDataToDb("goals", updatedGoals);
+        deleteRecurringModal.classList.remove("show");
+      }
+      function deleteSubtask(goalId, subtaskId) {
+        if (confirm("Are you sure you want to delete this task?")) {
+          const goalIndex = goals.findIndex((g) => g.id === goalId);
+          if (goalIndex !== -1) {
+            const goal = goals[goalIndex];
+            goal.subTasks = goal.subTasks.filter((st) => st.id !== subtaskId);
+            if (goal.recurringId) {
+              const masterIndex = recurringGoals.findIndex(
+                (rg) => rg.id === goal.recurringId
+              );
+              if (masterIndex !== -1) {
+                recurringGoals[masterIndex].subTasks = recurringGoals[
+                  masterIndex
+                ].subTasks.filter((st) => st.id !== subtaskId);
+                saveDataToDb("recurringGoals", recurringGoals);
+              }
+            }
+            saveDataToDb("goals", goals);
+          }
+        }
+      }
+      function toggleGoalCompletion(goalId) {
+        const goalIndex = goals.findIndex((g) => g && g.id === goalId);
+        if (goalIndex !== -1) {
+          goals[goalIndex].isCompleted = !goals[goalIndex].isCompleted;
+          saveDataToDb("goals", goals);
+        }
+      }
+      function startSubtask(goalId, subtaskId) {
+        const { goal, subtask, goalIndex, subtaskIndex } = findSubtask(
+          goalId,
+          subtaskId
+        );
+        if (!subtask || subtask.status === "ongoing") return;
+        subtask.status = "ongoing";
+        subtask.startTime = Date.now() - (subtask.elapsedTime || 0) * 1000;
+        goals[goalIndex].subTasks[subtaskIndex] = subtask;
+        saveDataToDb("goals", goals);
+        activeTimers[subtaskId] = setInterval(
+          () => timerTick(goalId, subtaskId),
+          1000
+        );
+      }
+      function pauseSubtask(goalId, subtaskId) {
+        const { goal, subtask, goalIndex, subtaskIndex } = findSubtask(
+          goalId,
+          subtaskId
+        );
+        if (!subtask || subtask.status !== "ongoing") return;
+        clearInterval(activeTimers[subtaskId]);
+        delete activeTimers[subtaskId];
+        subtask.status = "paused";
+        subtask.elapsedTime = Math.floor(
+          (Date.now() - subtask.startTime) / 1000
+        );
+        goals[goalIndex].subTasks[subtaskIndex] = subtask;
+        saveDataToDb("goals", goals);
+      }
+      function completeSubtask(goalId, subtaskId) {
+        const { goal, subtask, goalIndex, subtaskIndex } = findSubtask(
+          goalId,
+          subtaskId
+        );
+        if (!subtask) return;
+        clearInterval(activeTimers[subtaskId]);
+        delete activeTimers[subtaskId];
+        if (subtask.status === "ongoing")
+          subtask.elapsedTime = Math.floor(
+            (Date.now() - subtask.startTime) / 1000
+          );
+        subtask.status = "completed";
+        goals[goalIndex].subTasks[subtaskIndex] = subtask;
+        saveDataToDb("goals", goals);
+      }
+      function timerTick(goalId, subtaskId) {
+        const { subtask } = findSubtask(goalId, subtaskId);
+        if (!subtask || subtask.status !== "ongoing") {
+          clearInterval(activeTimers[subtaskId]);
+          delete activeTimers[subtaskId];
+          return;
+        }
+        subtask.elapsedTime = Math.floor(
+          (Date.now() - subtask.startTime) / 1000
+        );
+        const timeEl = document.querySelector(
+          `.subtask-item[data-subtask-id="${subtaskId}"] .subtask-elapsed-time`
+        );
+        if (timeEl) {
+          timeEl.textContent = formatTimer(subtask.elapsedTime);
+          timeEl.classList.toggle(
+            "overtime",
+            subtask.targetTime > 0 && subtask.elapsedTime > subtask.targetTime
+          );
+        }
+        updateTotalTime(goalId);
+      }
+      function resumeActiveTimers() {
+        (goals || []).forEach((goal) =>
+          (goal.subTasks || []).forEach((subtask) => {
+            if (subtask.status === "ongoing") startSubtask(goal.id, subtask.id);
+          })
+        );
+      }
+      function parseStartTimeTo24HrValue(timeFrame) {
+        try {
+          if (!timeFrame) return 9999;
+          const startTimeStr = timeFrame.split(" to ")[0];
+          const timePart = startTimeStr.slice(0, -2);
+          const ampm = startTimeStr.slice(-2).toUpperCase();
+          let [hour, minute] = timePart.split(":").map(Number);
+          if (ampm === "PM" && hour !== 12) {
+            hour += 12;
+          }
+          if (ampm === "AM" && hour === 12) {
+            hour = 0;
+          }
+          return hour * 100 + minute;
+        } catch (e) {
+          return 9999;
+        }
+      }
+      function updateSubtaskUI(goalId, subtaskId) {
+        const { subtask } = findSubtask(goalId, subtaskId);
+        const subtaskEl = document.querySelector(
+          `.subtask-item[data-subtask-id="${subtaskId}"]`
+        );
+        if (subtask && subtaskEl) {
+          const isOvertime =
+            subtask.targetTime > 0 && subtask.elapsedTime > subtask.targetTime;
+          subtaskEl.querySelector(".subtask-timer-controls").innerHTML =
+            getSubtaskControlsHTML(goalId, subtask, isOvertime);
+          subtaskEl.classList.toggle(
+            "completed",
+            subtask.status === "completed"
+          );
+        }
+      }
+      function updateTotalTime(goalId) {
+        const goal = (goals || []).find((g) => g.id === goalId);
+        if (goal) {
+          const totalTime = (goal.subTasks || []).reduce(
+            (acc, st) => acc + (st.elapsedTime || 0),
+            0
+          );
+          const totalTimeEl = document.getElementById(`total-time-${goalId}`);
+          if (totalTimeEl)
+            totalTimeEl.textContent = `Time Spent: ${formatTotalTime(
+              totalTime
+            )}`;
+        }
+      }
+      function findSubtask(goalId, subtaskId) {
+        const goalIndex = (goals || []).findIndex((g) => g && g.id === goalId);
+        if (goalIndex === -1) return {};
+        const goal = goals[goalIndex];
+        const subtaskIndex = (goal.subTasks || []).findIndex(
+          (st) => st.id === subtaskId
+        );
+        const subtask =
+          subtaskIndex !== -1 ? goal.subTasks[subtaskIndex] : null;
+        return { goal, subtask, goalIndex, subtaskIndex };
+      }
+      function formatTimer(seconds) {
+        const min = Math.floor(seconds / 60)
+          .toString()
+          .padStart(2, "0");
+        const sec = (seconds % 60).toString().padStart(2, "0");
+        return `${min}:${sec}`;
+      }
+      function formatTotalTime(totalSeconds) {
+        if (totalSeconds < 60) return `${totalSeconds}s`;
+        const totalMinutes = Math.floor(totalSeconds / 60);
+        if (totalMinutes < 60) return `${totalMinutes}min`;
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        return `${hours}hr ${minutes}min`;
+      }
+      function updateGoalOrder(evt) {
+        const goalIdsInOrder = Array.from(evt.to.children).map(
+          (child) => child.dataset.goalId
+        );
+        goalIdsInOrder.forEach((id, index) => {
+          const goalIndex = goals.findIndex((g) => g && g.id === id);
+          if (goalIndex !== -1) goals[goalIndex].order = index;
+        });
+        saveDataToDb("goals", goals);
+      }
+      function moveCategoryUp(event) {
+        const categorySection = event.target.closest(".category-section");
+        const groupName = categorySection.dataset.groupName;
+        const index = groups.indexOf(groupName);
+        if (index > 0) {
+          [groups[index], groups[index - 1]] = [
+            groups[index - 1],
+            groups[index],
+          ];
+          saveDataToDb("groups", groups);
+        }
+      }
+      function populateCategoryDropdown() {
+        const select = document.getElementById("categorySelect");
+        select.innerHTML = "";
+        groups.forEach((group) => {
+          const option = document.createElement("option");
+          option.value = group;
+          option.textContent = group;
+          select.appendChild(option);
+        });
+      }
+    </script>
+  </body>
+</html>
