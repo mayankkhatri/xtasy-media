@@ -1,0 +1,2509 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ClockTask Pro - Visual Scheduler</title>
+
+    <!-- ADD THIS SCRIPT TAG FOR TIPTAP -->
+    <script type="importmap">
+      {
+        "imports": {
+          "@tiptap/core": "https://esm.sh/@tiptap/core?v=135",
+          "@tiptap/pm/state": "https://esm.sh/@tiptap/pm/state?v=135",
+          "@tiptap/pm/view": "https://esm.sh/@tiptap/pm/view?v=135",
+          "@tiptap/pm/model": "https://esm.sh/@tiptap/pm/model?v=135",
+          "@tiptap/starter-kit": "https://esm.sh/@tiptap/starter-kit?v=135",
+          "@tiptap/extension-task-list": "https://esm.sh/@tiptap/extension-task-list?v=135",
+          "@tiptap/extension-task-item": "https://esm.sh/@tiptap/extension-task-item?v=135",
+          "@tiptap/extension-placeholder": "https://esm.sh/@tiptap/extension-placeholder?v=135",
+          "@tiptap/suggestion": "https://esm.sh/@tiptap/suggestion?v=135"
+        }
+      }
+    </script>
+
+    <style>
+      /* --- GLOBAL STYLES & SETUP --- */
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap");
+
+      :root {
+        --bg-color: #f4f7f9;
+        --clock-bg: #ffffff;
+        --text-color: #333;
+        --primary-color: #007aff;
+        --secondary-color: #8e8e93;
+        --danger-color: #ff3b30;
+        --shadow-color: rgba(0, 0, 0, 0.1);
+        --border-color: #e5e5ea;
+        --completed-color: #555555;
+        --uncompleted-past-color: #d1d1d6;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        overflow: auto;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        padding: 1rem;
+      }
+
+      .app-container {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        grid-template-rows: auto 1fr;
+        gap: 2rem 3rem;
+        align-items: start;
+        max-width: 1200px;
+        width: 100%;
+      }
+
+      /* --- CALENDAR WIDGET --- */
+      .calendar-widget {
+        grid-row: 1 / span 2;
+        background-color: var(--clock-bg);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px var(--shadow-color);
+        border: 1px solid var(--border-color);
+        /* FIX #1: Added vendor prefix for Safari compatibility */
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        color: var(--danger-color);
+      }
+      .month-year {
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .month-year .month {
+        font-size: 1.75rem;
+      }
+      .month-year .year {
+        font-size: 1.25rem;
+        font-weight: 500;
+        opacity: 0.7;
+      }
+      .calendar-nav button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        transition: background-color 0.2s;
+      }
+      .calendar-nav button:hover {
+        background-color: var(--bg-color);
+      }
+      .calendar-nav svg {
+        width: 20px;
+        height: 20px;
+        stroke: var(--secondary-color);
+        stroke-width: 2px;
+      }
+      .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.25rem;
+        text-align: center;
+      }
+      .weekday {
+        font-weight: 700;
+        font-size: 0.8rem;
+        color: var(--secondary-color);
+        padding-bottom: 0.5rem;
+      }
+      .date-cell {
+        font-weight: 500;
+        padding: 0.4rem 0;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+        aspect-ratio: 1/1;
+        display: grid;
+        place-items: center;
+        font-size: 0.9rem;
+      }
+      .date-cell.other-month {
+        color: var(--secondary-color);
+        opacity: 0.5;
+      }
+      .date-cell:not(.other-month):hover {
+        background-color: var(--bg-color);
+      }
+      .date-cell.selected {
+        background-color: var(--primary-color);
+        color: white;
+        font-weight: 700;
+        box-shadow: 0 2px 5px rgba(0, 122, 255, 0.3);
+      }
+      .date-cell.today {
+        border: 2px solid var(--danger-color);
+      }
+      .date-cell.today.selected {
+        border-color: transparent;
+      }
+
+      /* --- CONTROLS --- */
+      .controls {
+        grid-column: 2 / 3;
+        background-color: var(--clock-bg);
+        padding: 0.75rem 1.5rem;
+        border-radius: 99px;
+        box-shadow: 0 4px 15px var(--shadow-color);
+        border: 1px solid var(--border-color);
+        justify-self: center;
+      }
+      .controls,
+      .toggle-group {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+      }
+      .toggle-group {
+        gap: 0;
+      }
+      .toggle-group label {
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        border-radius: 99px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        font-size: 0.9rem;
+        white-space: nowrap;
+      }
+      .toggle-group input[type="radio"] {
+        display: none;
+      }
+      .toggle-group input[type="radio"]:checked + label {
+        background-color: var(--primary-color);
+        color: white;
+        box-shadow: 0 2px 5px rgba(0, 122, 255, 0.3);
+      }
+      #ampm-controls {
+        transition: opacity 0.3s ease, transform 0.3s ease;
+      }
+      #ampm-controls.hidden {
+        opacity: 0;
+        transform: scale(0.9);
+        pointer-events: none;
+      }
+
+      /* --- CLOCK --- */
+      .clock-container {
+        grid-column: 2 / 3;
+        position: relative;
+        width: clamp(300px, 90vw, 600px);
+        aspect-ratio: 1 / 1;
+        background-color: var(--clock-bg);
+        border-radius: 50%;
+        box-shadow: 0 10px 30px var(--shadow-color), 0 0 0 10px var(--clock-bg);
+        border: 1px solid var(--border-color);
+        /* FIX #1: Added vendor prefix for Safari compatibility */
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      #clock-svg {
+        width: 100%;
+        height: 100%;
+      }
+      #click-target {
+        cursor: crosshair;
+      }
+      .clock-tick,
+      .clock-tick-small {
+        stroke: var(--secondary-color);
+      }
+      .clock-tick {
+        stroke-width: 1.5;
+      }
+      .clock-tick-small {
+        stroke-width: 0.75;
+        opacity: 0.7;
+      }
+      .clock-number {
+        fill: var(--text-color);
+        font-size: clamp(14px, 3.5vw, 18px);
+        font-weight: 500;
+        text-anchor: middle;
+        dominant-baseline: middle;
+        pointer-events: none;
+      }
+      .task-pie-slice {
+        stroke: rgba(0, 0, 0, 0.1);
+        stroke-width: 1px;
+        cursor: pointer;
+        transition: filter 0.2s, fill 0.2s;
+      }
+      .task-pie-slice:hover {
+        filter: brightness(1.1);
+      }
+      .task-label-group {
+        cursor: pointer;
+      }
+      .task-label {
+        font-size: clamp(10px, 2.2vw, 13px);
+        font-weight: 700;
+        dominant-baseline: middle;
+        paint-order: stroke;
+      }
+      .task-checkbox rect {
+        fill: rgba(255, 255, 255, 0.7);
+        stroke: var(--secondary-color);
+        stroke-width: 1.5;
+        transition: opacity 0.2s;
+        /* FIX #3: Removed rx and ry; they are set as attributes by JS for better compatibility */
+      }
+      .task-checkbox path {
+        stroke: var(--primary-color);
+        stroke-width: 3;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .task-label-group .task-checkbox {
+        opacity: 0;
+      }
+      .task-label-group:hover .task-checkbox {
+        opacity: 1;
+      }
+      .preview-arc {
+        fill: var(--primary-color);
+        fill-opacity: 0.25;
+        pointer-events: none;
+      }
+      .clock-center {
+        fill: var(--text-color);
+      }
+      #hands-container {
+        pointer-events: none;
+      }
+      #hands-container.faded line {
+        stroke: var(--uncompleted-past-color) !important;
+      }
+      #hands-container.faded #second-hand {
+        stroke: #ff9a96 !important;
+      }
+      #hands-container line {
+        stroke-linecap: round;
+        transform-origin: 200px 200px;
+        transition: transform 0.5s cubic-bezier(0.4, 2.3, 0.6, 1);
+      }
+      #second-hand.no-transition {
+        transition: none !important;
+      }
+      #hour-hand {
+        stroke: var(--text-color);
+        stroke-width: 6;
+      }
+      #minute-hand {
+        stroke: var(--text-color);
+        stroke-width: 4;
+      }
+      #second-hand {
+        stroke: var(--danger-color);
+        stroke-width: 2;
+      }
+
+      /* --- MODAL --- */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+        display: grid;
+        place-items: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        z-index: 1000;
+      }
+      .modal-overlay.visible {
+        opacity: 1;
+        visibility: visible;
+      }
+      .modal {
+        background-color: var(--clock-bg);
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        width: clamp(280px, 80vw, 400px);
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+      .modal-overlay.visible .modal {
+        transform: scale(1);
+      }
+      .modal h2 {
+        font-size: 1.5rem;
+        text-align: center;
+      }
+      .modal-time {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 1.1rem;
+        font-weight: 500;
+      }
+      .modal-time input[type="time"] {
+        background-color: var(--bg-color);
+        border: 1px solid var(--border-color);
+        padding: 0.5rem;
+        border-radius: 8px;
+        font-family: "Inter", sans-serif;
+        font-size: 1rem;
+      }
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .form-group label {
+        font-weight: 500;
+        color: var(--secondary-color);
+      }
+      .form-group input[type="text"] {
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 1rem;
+      }
+      .form-group input[type="text"]:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+      }
+      .form-group.checkbox-group {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.75rem;
+        /* FIX #1: Added vendor prefix for Safari compatibility */
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      .form-group.checkbox-group input {
+        width: 18px;
+        height: 18px;
+      }
+      .color-selector {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
+      }
+      .color-option {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 3px solid transparent;
+      }
+      .color-option:hover {
+        transform: scale(1.1);
+      }
+      .color-option.selected {
+        border-color: var(--clock-bg);
+        box-shadow: 0 0 0 2px var(--primary-color);
+      }
+      .modal-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+      .modal-actions button {
+        flex-grow: 1;
+        padding: 0.75rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      #save-task-btn {
+        background-color: var(--primary-color);
+        color: white;
+      }
+      #save-task-btn:hover {
+        background-color: #0056b3;
+      }
+      #cancel-task-btn {
+        background-color: var(--border-color);
+        color: var(--text-color);
+      }
+      #cancel-task-btn:hover {
+        background-color: #d1d1d6;
+      }
+      #delete-task-btn {
+        background-color: var(--danger-color);
+        color: white;
+        flex-grow: 0;
+        padding: 0.75rem 1rem;
+      }
+      #delete-task-btn.hidden {
+        display: none;
+      }
+
+      /* --- Time of Day & Drag Styles --- */
+      .time-of-day-arc {
+        fill-opacity: 0.25;
+        stroke: var(--border-color);
+        stroke-width: 0.5px;
+        transition: opacity 0.3s ease-in-out;
+      }
+      #time-of-day-container.hidden .time-of-day-arc {
+        opacity: 0;
+      }
+      #time-of-day-container {
+        pointer-events: none;
+      }
+      .time-of-day-icon-group .feather {
+        stroke: var(--text-color);
+        stroke-width: 1.5;
+        opacity: 0.6;
+        transition: opacity 0.3s ease-in-out;
+      }
+      #time-of-day-container.hidden .time-of-day-icon-group {
+        opacity: 0;
+      }
+
+      /* FIX #4: Moved inline styles to stylesheet */
+      #drag-labels-container {
+        visibility: hidden;
+        font-size: 16px;
+        font-weight: 500;
+        pointer-events: none;
+      }
+      #drag-time-label {
+        paint-order: stroke;
+        stroke: #fff;
+        stroke-width: 4px;
+        stroke-linejoin: round;
+      }
+
+      /* --- BLOCKS VIEW --- */
+      .hidden {
+        display: none !important;
+      }
+      .blocks-view-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 90%;
+        max-width: 800px;
+        margin: 20px auto;
+        position: relative;
+        padding-top: 20px;
+        padding-bottom: 10px;
+      }
+      .day-block-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .day-block-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #555;
+        padding-left: 5px;
+      }
+      .day-block {
+        position: relative;
+        height: 80px;
+        background-color: #f0f0f0;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #ddd;
+      }
+      #today-block {
+        cursor: crosshair;
+        border-color: #bbb;
+      }
+      #yesterday-block-wrapper,
+      #tomorrow-block-wrapper {
+        opacity: 0.7;
+      }
+      .day-block-grid {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: repeating-linear-gradient(
+          to right,
+          #ddd,
+          #ddd 1px,
+          transparent 1px,
+          transparent calc(100% / 24)
+        );
+        pointer-events: none;
+      }
+      .day-block-hours {
+        position: absolute;
+        top: 2px;
+        left: 0;
+        right: 0;
+        pointer-events: none;
+      }
+      .day-block-hours span {
+        position: absolute;
+        font-size: 10px;
+        color: #888;
+        font-family: monospace;
+        transform: translateX(3px);
+      }
+      /* FIX #4: Position hardcoded hour labels via CSS */
+      .day-block-hours span:nth-child(1) {
+        left: 0%;
+      }
+      .day-block-hours span:nth-child(2) {
+        left: 25%;
+      }
+      .day-block-hours span:nth-child(3) {
+        left: 50%;
+      }
+      .day-block-hours span:nth-child(4) {
+        left: 75%;
+      }
+
+      .day-block-tasks {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+      }
+      .task-block {
+        position: absolute;
+        top: 25%;
+        height: 50%;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 0 8px;
+        color: white;
+        font-size: 12px;
+        font-weight: 500;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+      }
+      .task-block:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+      }
+      .current-time-line {
+        position: absolute;
+        top: -10px;
+        bottom: -10px;
+        width: 2px;
+        background-color: #ff3b30;
+        pointer-events: none;
+        z-index: 10;
+        display: none;
+        box-shadow: 0 0 5px #ff3b30;
+      }
+      .current-time-line::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: -4px;
+        width: 10px;
+        height: 10px;
+        background: #ff3b30;
+        border-radius: 50%;
+        transform: translateY(-50%);
+      }
+      .task-preview-block {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        background: rgba(0, 122, 255, 0.4);
+        border: 1px dashed rgba(0, 122, 255, 0.8);
+        pointer-events: none;
+        z-index: 5;
+        display: none;
+      }
+      .day-block-hours span.subtle {
+        opacity: 0.6;
+      }
+
+      /* --- NOTES WIDGET --- */
+      .notes-widget {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        width: 400px;
+        height: 500px;
+        min-width: 300px;
+        min-height: 250px;
+        background-color: var(--bg-color);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        box-shadow: 0 8px 25px var(--shadow-color);
+        display: flex;
+        flex-direction: column;
+        resize: both;
+        overflow: hidden; /* Important for resize */
+        z-index: 1001;
+      }
+
+      .notes-widget-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+        cursor: move;
+        background-color: var(--clock-bg);
+        flex-shrink: 0;
+      }
+
+      .notes-tabs .notes-tab {
+        background: none;
+        border: none;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--secondary-color);
+        cursor: pointer;
+        border-radius: 8px;
+        transition: background-color 0.2s, color 0.2s;
+      }
+
+      .notes-tabs .notes-tab:hover {
+        background-color: var(--bg-color);
+      }
+
+      .notes-tabs .notes-tab.active {
+        color: var(--primary-color);
+        font-weight: 700;
+      }
+
+      .notes-widget-body {
+        flex-grow: 1;
+        position: relative;
+        overflow-y: auto;
+        background-color: #ffffff; /* Explicitly white background */
+        color: #000000; /* Explicitly black text */
+      }
+
+      #scroll-to-bottom-btn {
+        position: absolute;
+        bottom: 1.5rem; /* Positioned relative to the body */
+        right: 1.5rem;
+        z-index: 10;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        transition: opacity 0.3s, transform 0.3s;
+        opacity: 0;
+        transform: translateY(10px);
+        pointer-events: none;
+      }
+
+      #scroll-to-bottom-btn.visible {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: all;
+      }
+
+      .notes-widget-footer {
+        padding: 0.5rem;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        gap: 0.25rem;
+        background-color: var(--clock-bg);
+        flex-shrink: 0;
+        flex-wrap: wrap;
+      }
+
+      .notes-toolbar-btn {
+        background: none;
+        border: 1px solid transparent;
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        color: var(--secondary-color);
+      }
+
+      .notes-toolbar-btn:hover {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+      }
+
+      .notes-toolbar-btn.is-active {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      /* --- TIPTAP EDITOR STYLES --- */
+      #notes-editor-container {
+        height: 100%;
+        outline: none;
+      }
+
+      .ProseMirror {
+        outline: none;
+        padding: 1rem;
+        min-height: 100%;
+      }
+
+      .ProseMirror h1,
+      .ProseMirror h2,
+      .ProseMirror h3 {
+        line-height: 1.1;
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+      }
+      .ProseMirror h1 {
+        font-size: 1.8em;
+      }
+      .ProseMirror h2 {
+        font-size: 1.5em;
+      }
+      .ProseMirror h3 {
+        font-size: 1.2em;
+      }
+
+      .ProseMirror p {
+        margin: 0;
+      }
+
+      .ProseMirror p + p {
+        margin-top: 0.75em;
+      }
+
+      .ProseMirror pre {
+        background: #0d0d0d;
+        color: #fff;
+        font-family: "JetBrainsMono", monospace;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        margin: 1rem 0;
+      }
+      .ProseMirror pre code {
+        color: inherit;
+        padding: 0;
+        background: none;
+        font-size: 0.8rem;
+      }
+
+      .ProseMirror ul[data-type="taskList"] {
+        list-style: none;
+        padding: 0;
+        margin: 1rem 0;
+      }
+
+      .ProseMirror li[data-type="taskItem"] {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0.25rem 0;
+      }
+
+      .ProseMirror li[data-type="taskItem"] > label {
+        flex: 0 0 auto;
+        margin-right: 0.5rem;
+        user-select: none;
+      }
+
+      .ProseMirror li[data-type="taskItem"] > div {
+        flex: 1 1 auto;
+      }
+
+      .ProseMirror li[data-type="taskItem"] input[type="checkbox"] {
+        cursor: pointer;
+      }
+
+      /* Custom Date Separator Node */
+      .date-separator {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 2rem 0 1rem;
+        color: var(--secondary-color);
+        font-weight: 500;
+        font-size: 0.9rem;
+        user-select: none;
+      }
+      .date-separator hr {
+        flex-grow: 1;
+        border: none;
+        border-top: 1px solid var(--border-color);
+      }
+      .date-separator button {
+        background: none;
+        border: 1px solid var(--border-color);
+        color: var(--secondary-color);
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        line-height: 18px;
+        transition: all 0.2s;
+      }
+      .date-separator button:hover {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+      }
+      .date-separator.today .date-text {
+        color: var(--danger-color, #ff3b30);
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- CALENDAR WIDGET (No Changes) -->
+      <div class="calendar-widget">
+        <div class="calendar-header">
+          <div class="month-year" id="month-year-header">
+            <span class="month" id="calendar-month"></span>
+            <span class="year" id="calendar-year"></span>
+          </div>
+          <div class="calendar-nav">
+            <button id="prev-month-btn" aria-label="Previous Month">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+            <button id="next-month-btn" aria-label="Next Month">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="calendar-grid" id="calendar-weekdays"></div>
+        <div class="calendar-grid" id="calendar-dates"></div>
+      </div>
+
+      <!-- CONTROLS (No Changes) -->
+      <div class="controls">
+        <div class="toggle-group">
+          <input
+            type="radio"
+            id="mode-24h"
+            name="clockMode"
+            value="24h"
+            checked
+          />
+          <label for="mode-24h">24 Hour</label>
+          <input type="radio" id="mode-12h" name="clockMode" value="12h" />
+          <label for="mode-12h">12 Hour</label>
+        </div>
+        <div class="toggle-group hidden" id="ampm-controls">
+          <input type="radio" id="mode-am" name="ampm" value="am" checked />
+          <label for="mode-am">AM</label>
+          <input type="radio" id="mode-pm" name="ampm" value="pm" />
+          <label for="mode-pm">PM</label>
+        </div>
+        <div class="toggle-group" id="view-mode-controls">
+          <input
+            type="radio"
+            id="view-mode-clock"
+            name="viewMode"
+            value="clock"
+            checked
+          />
+          <label for="view-mode-clock">Clock</label>
+          <input
+            type="radio"
+            id="view-mode-blocks"
+            name="viewMode"
+            value="blocks"
+          />
+          <label for="view-mode-blocks">Blocks</label>
+        </div>
+      </div>
+
+      <!-- CLOCK CONTAINER (No Changes) -->
+      <div class="clock-container">
+        <svg id="clock-svg" viewBox="0 0 400 400">
+          <g id="time-of-day-container"></g>
+          <path id="preview-arc" class="preview-arc"></path>
+          <g id="tasks-container"></g>
+          <g id="ticks-container"></g>
+          <g id="numbers-container"></g>
+          <circle
+            id="click-target"
+            cx="200"
+            cy="200"
+            r="198"
+            fill="transparent"
+          />
+          <g id="labels-container"></g>
+          <g id="drag-labels-container">
+            <text id="drag-time-label" fill="#333" text-anchor="middle"></text>
+          </g>
+          <g id="hands-container">
+            <line id="hour-hand" x1="200" y1="200" x2="200" y2="120"></line>
+            <line id="minute-hand" x1="200" y1="200" x2="200" y2="70"></line>
+            <line id="second-hand" x1="200" y1="200" x2="200" y2="60"></line>
+          </g>
+          <circle class="clock-center" cx="200" cy="200" r="5"></circle>
+        </svg>
+      </div>
+
+      <!-- BLOCKS VIEW (No Changes) -->
+      <div class="blocks-view-container hidden" id="blocks-view-container">
+        <div class="day-block-wrapper" id="yesterday-block-wrapper">
+          <div class="day-block-label" id="yesterday-label"></div>
+          <div class="day-block" id="yesterday-block">
+            <div class="day-block-tasks" id="yesterday-tasks-container"></div>
+            <div class="day-block-grid"></div>
+            <div class="day-block-hours">
+              <span>00</span><span>06</span><span>12</span><span>18</span>
+            </div>
+            <div class="task-preview-block"></div>
+          </div>
+        </div>
+        <div class="day-block-wrapper" id="today-block-wrapper">
+          <div class="day-block-label" id="today-label"></div>
+          <div class="day-block" id="today-block">
+            <div class="day-block-tasks" id="today-tasks-container"></div>
+            <div class="day-block-grid"></div>
+            <div class="day-block-hours">
+              <span>00</span><span>06</span><span>12</span><span>18</span>
+            </div>
+            <div class="task-preview-block"></div>
+            <div class="current-time-line" id="current-time-line"></div>
+          </div>
+        </div>
+        <div class="day-block-wrapper" id="tomorrow-block-wrapper">
+          <div class="day-block-label" id="tomorrow-label"></div>
+          <div class="day-block" id="tomorrow-block">
+            <div class="day-block-tasks" id="tomorrow-tasks-container"></div>
+            <div class="day-block-grid"></div>
+            <div class="day-block-hours">
+              <span>00</span><span>06</span><span>12</span><span>18</span>
+            </div>
+            <div class="task-preview-block"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL (No Changes) -->
+    <div class="modal-overlay" id="task-modal">
+      <div class="modal">
+        <h2 id="modal-title">New Task</h2>
+        <div class="modal-time">
+          <input type="time" id="task-start-time" step="300" />
+          <span>&ndash;</span>
+          <input type="time" id="task-end-time" step="300" />
+        </div>
+        <input type="hidden" id="task-id" />
+        <div class="form-group">
+          <label for="task-name">Task Name</label>
+          <input type="text" id="task-name" placeholder="e.g., Team Meeting" />
+        </div>
+        <div class="form-group">
+          <label>Color</label>
+          <div class="color-selector" id="color-selector"></div>
+        </div>
+        <div class="form-group checkbox-group">
+          <input type="checkbox" id="task-completed-checkbox" />
+          <label for="task-completed-checkbox">Mark as Completed</label>
+        </div>
+        <div class="modal-actions">
+          <button id="delete-task-btn" class="hidden">Delete</button>
+          <button id="cancel-task-btn">Cancel</button>
+          <button id="save-task-btn">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTES WIDGET (Updated HTML Structure) -->
+    <div class="notes-widget" id="notes-widget">
+      <div class="notes-widget-header" id="notes-widget-header">
+        <div class="notes-tabs">
+          <button class="notes-tab active" data-tab="notes">Notes</button>
+          <button class="notes-tab" data-tab="events">Events</button>
+          <button class="notes-tab" data-tab="tasks">Tasks</button>
+        </div>
+      </div>
+      <div class="notes-widget-body" id="notes-widget-body">
+        <!-- The tiptap editor will be rendered inside this element -->
+        <div id="notes-editor-container"></div>
+        <button id="scroll-to-bottom-btn" title="Scroll to Today">↓</button>
+      </div>
+      <div class="notes-widget-footer" id="notes-widget-footer">
+        <button
+          id="notes-h1"
+          class="notes-toolbar-btn"
+          title="Heading 1 (Ctrl+Shift+1)"
+        >
+          <b>H1</b>
+        </button>
+        <button
+          id="notes-h2"
+          class="notes-toolbar-btn"
+          title="Heading 2 (Ctrl+Shift+2)"
+        >
+          <b>H2</b>
+        </button>
+        <button
+          id="notes-h3"
+          class="notes-toolbar-btn"
+          title="Heading 3 (Ctrl+Shift+3)"
+        >
+          <b>H3</b>
+        </button>
+        <button id="notes-bold" class="notes-toolbar-btn" title="Bold (Ctrl+B)">
+          <b>B</b>
+        </button>
+        <button
+          id="notes-italic"
+          class="notes-toolbar-btn"
+          title="Italic (Ctrl+I)"
+        >
+          <i>I</i>
+        </button>
+        <button
+          id="notes-task"
+          class="notes-toolbar-btn"
+          title="Task List ([])"
+        >
+          ✓
+        </button>
+        <!-- Removed the code block button as it wasn't in the design spec, but can be added back -->
+      </div>
+    </div>
+
+    <script type="module">
+      document.addEventListener("DOMContentLoaded", async () => {
+        // --- Dynamic Imports for Tiptap ---
+        const { Editor } = await import("@tiptap/core");
+        const { default: StarterKit } = await import("@tiptap/starter-kit");
+        const { default: TaskList } = await import(
+          "@tiptap/extension-task-list"
+        );
+        const { default: TaskItem } = await import(
+          "@tiptap/extension-task-item"
+        );
+        const { Node } = await import("@tiptap/core");
+
+        // --- EXISTING DOM Elements ---
+        const svg = document.getElementById("clock-svg");
+        const clockContainer = document.querySelector(".clock-container");
+        // ... (all other existing DOM element variables remain the same)
+        const tasksContainer = document.getElementById("tasks-container");
+        const labelsContainer = document.getElementById("labels-container");
+        const previewArc = document.getElementById("preview-arc");
+        const handsContainer = document.getElementById("hands-container");
+        const hourHand = document.getElementById("hour-hand");
+        const minuteHand = document.getElementById("minute-hand");
+        const secondHand = document.getElementById("second-hand");
+        const ampmControls = document.getElementById("ampm-controls");
+        const viewModeControls = document.getElementById("view-mode-controls");
+        const blocksViewContainer = document.getElementById(
+          "blocks-view-container"
+        );
+        const yesterdayBlock = document.getElementById("yesterday-block");
+        const todayBlock = document.getElementById("today-block");
+        const tomorrowBlock = document.getElementById("tomorrow-block");
+        const currentTimeLine = document.getElementById("current-time-line");
+        const modal = document.getElementById("task-modal");
+        const modalTitle = document.getElementById("modal-title");
+        const taskIdInput = document.getElementById("task-id");
+        const taskNameInput = document.getElementById("task-name");
+        const colorSelector = document.getElementById("color-selector");
+        const saveTaskBtn = document.getElementById("save-task-btn");
+        const cancelTaskBtn = document.getElementById("cancel-task-btn");
+        const deleteTaskBtn = document.getElementById("delete-task-btn");
+        const taskStartTimeInput = document.getElementById("task-start-time");
+        const taskEndTimeInput = document.getElementById("task-end-time");
+        const taskCompletedCheckbox = document.getElementById(
+          "task-completed-checkbox"
+        );
+        const calendarMonthEl = document.getElementById("calendar-month");
+        const calendarYearEl = document.getElementById("calendar-year");
+        const prevMonthBtn = document.getElementById("prev-month-btn");
+        const nextMonthBtn = document.getElementById("next-month-btn");
+        const calendarDatesEl = document.getElementById("calendar-dates");
+        const calendarWeekdaysEl = document.getElementById("calendar-weekdays");
+        const dragLabelsContainer = document.getElementById(
+          "drag-labels-container"
+        );
+        const dragTimeLabel = document.getElementById("drag-time-label");
+
+        // --- NEW: Notes Widget DOM Elements ---
+        const notesWidget = document.getElementById("notes-widget");
+        const notesWidgetHeader = document.getElementById(
+          "notes-widget-header"
+        );
+        const notesEditorElement = document.getElementById(
+          "notes-editor-container"
+        ); // Changed ID
+        const notesToolbar = document.getElementById("notes-widget-footer");
+        const notesWidgetBody = document.getElementById("notes-widget-body");
+        const scrollToBottomBtn = document.getElementById(
+          "scroll-to-bottom-btn"
+        );
+
+        // --- State (No changes to existing state variables) ---
+        let clockMode = "24h",
+          ampm = "am",
+          viewMode = "clock";
+        let tasksByDate =
+          JSON.parse(localStorage.getItem("clockTasksPro")) || {};
+        let selectedDate = new Date();
+        let displayedDate = new Date();
+        let isDragging = false,
+          dragStartHour = null,
+          dragEndHour = null;
+        let isBlockDragging = false,
+          blockDragStartHour = null;
+        let activeDragBlock = null;
+        let activeDragDate = null;
+
+        // --- NEW: Notes Widget State ---
+        let notesData =
+          JSON.parse(localStorage.getItem("clockTaskProNotes")) || {};
+        let notesWidgetConfig =
+          JSON.parse(localStorage.getItem("clockTaskProNotesConfig")) || {};
+        let tiptapEditor = null;
+        let isNotesWidgetDragging = false;
+        let notesDragOffsetX, notesDragOffsetY;
+
+        // --- Constants (No changes) ---
+        const CENTER_X = 200,
+          CENTER_Y = 200,
+          RADIUS = 180,
+          TASK_PIE_RADIUS = 180;
+        const COLORS = [
+          "#FF9500",
+          "#FF2D55",
+          "#AF52DE",
+          "#5856D6",
+          "#34C759",
+          "#00C7BE",
+        ];
+        const TIME_OF_DAY_SEGMENTS_AM = [
+          { start: 0, end: 3, image: "https://i.postimg.cc/L8PSs5c3/1.webp" },
+          {
+            start: 3,
+            end: 6,
+            image: "https://i.postimg.cc/fTrHrvrM/Clock-Periphery.webp",
+          },
+          { start: 6, end: 9, image: "https://i.postimg.cc/YCF7S058/3.webp" },
+          { start: 9, end: 12, image: "https://i.postimg.cc/zGhNfvsj/4.webp" },
+        ].map((s) => ({ ...s, color: "#fff" }));
+        const TIME_OF_DAY_SEGMENTS_PM = [
+          { start: 0, end: 3, image: "https://i.postimg.cc/zGhNfvsj/4.webp" },
+          { start: 3, end: 6, image: "https://i.postimg.cc/YCF7S058/3.webp" },
+          { start: 6, end: 9, image: "https://i.postimg.cc/zX655Kct/7.webp" },
+          { start: 9, end: 12, image: "https://i.postimg.cc/RZtm0hk1/8.webp" },
+        ].map((s) => ({ ...s, color: "#fff" }));
+        const SVG_NS = "http://www.w3.org/2000/svg";
+        const COMPLETED_COLOR =
+          getComputedStyle(document.documentElement)
+            .getPropertyValue("--completed-color")
+            .trim() || "#D1D1D6";
+        const UNCOMPLETED_PAST_COLOR =
+          getComputedStyle(document.documentElement)
+            .getPropertyValue("--uncompleted-past-color")
+            .trim() || "#A1A1A6";
+
+        // --- Date & Time Helpers ---
+        const getDateKey = (date) =>
+          `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+            2,
+            "0"
+          )}-${String(date.getDate()).padStart(2, "0")}`;
+        const isToday = (date) => getDateKey(date) === getDateKey(new Date());
+        // ... (all other helper functions remain the same)
+        const isPast = (date) => getDateKey(date) < getDateKey(new Date());
+        const polarToCartesian = (cx, cy, r, angle) => ({
+          x: cx + r * Math.cos(((angle - 90) * Math.PI) / 180),
+          y: cy + r * Math.sin(((angle - 90) * Math.PI) / 180),
+        });
+        const describePieSlice = (x, y, r, startAngle, endAngle) => {
+          if (Math.abs(startAngle - endAngle) < 1e-9) return "";
+          if (Math.abs(endAngle - startAngle) >= 359.999)
+            endAngle = startAngle + 359.999;
+          const startPoint = polarToCartesian(x, y, r, startAngle);
+          const endPoint = polarToCartesian(x, y, r, endAngle);
+          let angleDiff = endAngle - startAngle;
+          if (angleDiff < 0) angleDiff += 360;
+          const largeArcFlag = angleDiff <= 180 ? "0" : "1";
+          const d = [
+            "M",
+            x,
+            y,
+            "L",
+            startPoint.x,
+            startPoint.y,
+            "A",
+            r,
+            r,
+            0,
+            largeArcFlag,
+            "1",
+            endPoint.x,
+            endPoint.y,
+            "Z",
+          ].join(" ");
+          return d;
+        };
+        const getHourFromMouseEvent = (e) => {
+          const rect = svg.getBoundingClientRect();
+          const x = e.clientX - rect.left,
+            y = e.clientY - rect.top;
+          const svgX = (x / rect.width) * 400,
+            svgY = (y / rect.height) * 400;
+          const angle =
+            ((Math.atan2(svgY - CENTER_Y, svgX - CENTER_X) * 180) / Math.PI +
+              90 +
+              360) %
+            360;
+          const totalHours = clockMode === "24h" ? 24 : 12;
+          const hour = (angle / 360) * totalHours;
+          return Math.round(hour * 12) / 12;
+        };
+        const formatHourToTimeInput = (hour) => {
+          let h = Math.floor(hour),
+            m = Math.round((hour % 1) * 60);
+          if (m === 60) {
+            h = (h + 1) % 24;
+            m = 0;
+          }
+          return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+        };
+        const formatHourToAMPM = (hour24) => {
+          if (hour24 == null) return "";
+          let h = Math.floor(hour24),
+            m = Math.round((hour24 % 1) * 60);
+          if (m === 60) {
+            h = h + 1;
+            m = 0;
+          }
+          h = h % 24;
+          const period = h >= 12 ? "PM" : "AM";
+          const h12 = h % 12 === 0 ? 12 : h % 12;
+          return `${h12}:${String(m).padStart(2, "0")} ${period}`;
+        };
+        const parseTimeInputToHour = (timeString) => {
+          const [h, m] = timeString.split(":").map(Number);
+          return h + m / 60;
+        };
+
+        // --- Main View Controller (No Changes) ---
+        function renderAppView() {
+          const isBlocksVisible = clockMode === "24h" && viewMode === "blocks";
+          clockContainer.classList.toggle("hidden", isBlocksVisible);
+          blocksViewContainer.classList.toggle("hidden", !isBlocksVisible);
+          if (isBlocksVisible) {
+            renderBlocksView();
+          } else {
+            renderClockFace();
+            renderTimeOfDayLabels();
+            renderTasks();
+          }
+          updateClockHands();
+        }
+
+        // --- Clock & Blocks Render Functions (No Changes) ---
+        // ... (renderClockFace, renderTimeOfDayLabels, renderTasks, updateClockHands, etc., all remain the same)
+        function renderClockFace() {
+          const t = document.getElementById("ticks-container"),
+            e = document.getElementById("numbers-container");
+          (t.innerHTML = ""), (e.innerHTML = "");
+          const n = "24h" === clockMode ? 24 : 12,
+            o = "12h" === clockMode ? 6 : 12;
+          for (let r = 0; r < n * o; r++) {
+            const s = r * (360 / (n * o)),
+              a = r % o == 0,
+              i = document.createElementNS(SVG_NS, "line"),
+              l = polarToCartesian(CENTER_X, CENTER_Y, RADIUS, s),
+              c = polarToCartesian(
+                CENTER_X,
+                CENTER_Y,
+                RADIUS - (a ? 10 : 5),
+                s
+              );
+            i.setAttribute("class", a ? "clock-tick" : "clock-tick-small"),
+              i.setAttribute("x1", l.x),
+              i.setAttribute("y1", l.y),
+              i.setAttribute("x2", c.x),
+              i.setAttribute("y2", c.y),
+              t.appendChild(i);
+          }
+          for (let d = 0; d < n; d++) {
+            const h = d * (360 / n),
+              p = polarToCartesian(CENTER_X, CENTER_Y, RADIUS - 25, h),
+              u = "12h" === clockMode ? (0 === d ? 12 : d) : d,
+              m = document.createElementNS(SVG_NS, "text");
+            m.setAttribute("class", "clock-number"),
+              m.setAttribute("x", p.x),
+              m.setAttribute("y", p.y),
+              (m.textContent = u),
+              e.appendChild(m);
+          }
+        }
+        function renderTimeOfDayLabels() {
+          const t = document.getElementById("time-of-day-container");
+          (t.innerHTML = ""), t.classList.toggle("hidden", "24h" === clockMode);
+          if ("24h" === clockMode) return;
+          const e =
+            "am" === ampm ? TIME_OF_DAY_SEGMENTS_AM : TIME_OF_DAY_SEGMENTS_PM;
+          e.forEach((n) => {
+            const o = (n.start / 12) * 360,
+              r = (n.end / 12) * 360,
+              s = o + (r - o) / 2,
+              a = RADIUS + 1,
+              i = RADIUS + 18,
+              l = polarToCartesian(CENTER_X, CENTER_Y, i, o),
+              c = polarToCartesian(CENTER_X, CENTER_Y, i, r),
+              d = polarToCartesian(CENTER_X, CENTER_Y, a, r),
+              h = polarToCartesian(CENTER_X, CENTER_Y, a, o),
+              p = [
+                `M ${l.x} ${l.y}`,
+                `A ${i} ${i} 0 ${n.end - n.start <= 6 ? "0" : "1"} 1 ${c.x} ${
+                  c.y
+                }`,
+                `L ${d.x} ${d.y}`,
+                `A ${a} ${a} 0 ${n.end - n.start <= 6 ? "0" : "1"} 0 ${h.x} ${
+                  h.y
+                }`,
+                "Z",
+              ].join(" "),
+              u = document.createElementNS(SVG_NS, "path");
+            u.setAttribute("d", p),
+              u.setAttribute("class", "time-of-day-arc"),
+              u.setAttribute("fill", n.color),
+              t.appendChild(u);
+            const m = RADIUS + 10,
+              g = polarToCartesian(CENTER_X, CENTER_Y, m, s),
+              k = 16,
+              v = document.createElementNS(SVG_NS, "image");
+            v.setAttributeNS("http://www.w3.org/1999/xlink", "href", n.image),
+              v.setAttribute("width", k),
+              v.setAttribute("height", k),
+              v.setAttribute("x", g.x - k / 2),
+              v.setAttribute("y", g.y - k / 2),
+              v.setAttribute("preserveAspectRatio", "xMidYMid meet"),
+              t.appendChild(v);
+          });
+        }
+        function renderTasks() {
+          tasksContainer.innerHTML = "";
+          labelsContainer.innerHTML = "";
+          const dateKey = getDateKey(selectedDate);
+          const tasksForDay = tasksByDate[dateKey] || [];
+          const now = new Date();
+          const currentHour24 =
+            now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
+          const visibleTasks = tasksForDay.filter((task) => {
+            if (clockMode === "24h") {
+              return true;
+            }
+            const periodStart = ampm === "am" ? 0 : 12;
+            const periodEnd = ampm === "am" ? 12 : 24;
+            return task.startHour < periodEnd && task.endHour > periodStart;
+          });
+          visibleTasks.forEach((task) => {
+            const totalHours = clockMode === "24h" ? 24 : 12;
+            let sliceStartHour = task.startHour;
+            let sliceEndHour = task.endHour;
+            if (clockMode === "12h") {
+              const periodStart = ampm === "am" ? 0 : 12;
+              const periodEnd = ampm === "am" ? 12 : 24;
+              sliceStartHour = Math.max(task.startHour, periodStart);
+              sliceEndHour = Math.min(task.endHour, periodEnd);
+              if (ampm === "pm") {
+                sliceStartHour -= 12;
+                sliceEndHour -= 12;
+              }
+            }
+            if (sliceEndHour <= 0 && task.endHour > 0) {
+              sliceEndHour = totalHours;
+            }
+            const startAngle = (sliceStartHour / totalHours) * 360;
+            const endAngle = (sliceEndHour / totalHours) * 360;
+            let sliceFillColor;
+            let sliceFillOpacity = "0.4";
+            const isTaskInPast =
+              isPast(selectedDate) ||
+              (isToday(selectedDate) && currentHour24 >= task.endHour);
+            if (task.completed) {
+              sliceFillColor = COMPLETED_COLOR;
+              sliceFillOpacity = "0.6";
+            } else if (isTaskInPast) {
+              sliceFillColor = UNCOMPLETED_PAST_COLOR;
+              sliceFillOpacity = "0.6";
+            } else {
+              sliceFillColor = task.color;
+            }
+            const taskSlicePath = document.createElementNS(SVG_NS, "path");
+            taskSlicePath.setAttribute("class", "task-pie-slice");
+            taskSlicePath.setAttribute(
+              "d",
+              describePieSlice(
+                CENTER_X,
+                CENTER_Y,
+                TASK_PIE_RADIUS,
+                startAngle,
+                endAngle
+              )
+            );
+            taskSlicePath.setAttribute("fill", sliceFillColor);
+            taskSlicePath.setAttribute("fill-opacity", sliceFillOpacity);
+            taskSlicePath.addEventListener("click", () =>
+              showModal(task, selectedDate)
+            );
+            tasksContainer.appendChild(taskSlicePath);
+            const isTaskOngoing =
+              isToday(selectedDate) &&
+              currentHour24 > task.startHour &&
+              currentHour24 < task.endHour;
+            if (!task.completed && isTaskOngoing) {
+              let currentHourInSlice = currentHour24;
+              let showProgress = false;
+              if (clockMode === "12h") {
+                if (
+                  !(
+                    (ampm === "am" && currentHour24 >= 12) ||
+                    (ampm === "pm" && currentHour24 < 12)
+                  )
+                ) {
+                  if (ampm === "pm") {
+                    currentHourInSlice -= 12;
+                  }
+                  if (currentHourInSlice > sliceStartHour) {
+                    showProgress = true;
+                  }
+                }
+              } else {
+                showProgress = true;
+              }
+              if (showProgress) {
+                const progressEndAngle =
+                  (currentHourInSlice / totalHours) * 360;
+                const progressPath = document.createElementNS(SVG_NS, "path");
+                progressPath.setAttribute(
+                  "d",
+                  describePieSlice(
+                    CENTER_X,
+                    CENTER_Y,
+                    TASK_PIE_RADIUS,
+                    startAngle,
+                    progressEndAngle
+                  )
+                );
+                progressPath.setAttribute("fill", UNCOMPLETED_PAST_COLOR);
+                progressPath.setAttribute("fill-opacity", "0.6");
+                progressPath.setAttribute("pointer-events", "none");
+                tasksContainer.appendChild(progressPath);
+              }
+            }
+            const labelAngle =
+              startAngle +
+              ((endAngle <= startAngle ? endAngle + 360 : endAngle) -
+                startAngle) /
+                2;
+            const labelPos = polarToCartesian(
+              CENTER_X,
+              CENTER_Y,
+              TASK_PIE_RADIUS * 0.7,
+              labelAngle
+            );
+            let textRotation = labelAngle - 90;
+            if (labelAngle > 90 && labelAngle < 270) {
+              textRotation += 180;
+            }
+            const labelGroup = document.createElementNS(SVG_NS, "g");
+            labelGroup.setAttribute("class", "task-label-group");
+            labelGroup.addEventListener("click", () =>
+              showModal(task, selectedDate)
+            );
+            const taskLabelText = document.createElementNS(SVG_NS, "text");
+            taskLabelText.setAttribute("class", "task-label");
+            taskLabelText.setAttribute("x", labelPos.x);
+            taskLabelText.setAttribute("y", labelPos.y);
+            taskLabelText.setAttribute("text-anchor", "middle");
+            taskLabelText.setAttribute(
+              "transform",
+              `rotate(${textRotation} ${labelPos.x} ${labelPos.y})`
+            );
+            taskLabelText.setAttribute(
+              "fill",
+              task.completed ? COMPLETED_COLOR : task.color
+            );
+            taskLabelText.textContent = task.name;
+            const checkboxSize = 14;
+            const checkboxGroup = document.createElementNS(SVG_NS, "g");
+            checkboxGroup.setAttribute("class", "task-checkbox");
+            const checkboxPos = polarToCartesian(
+              CENTER_X,
+              CENTER_Y,
+              TASK_PIE_RADIUS - checkboxSize * 1.5,
+              labelAngle
+            );
+            checkboxGroup.setAttribute(
+              "transform",
+              `translate(${checkboxPos.x - checkboxSize / 2}, ${
+                checkboxPos.y - checkboxSize / 2
+              }) rotate(${textRotation}, ${checkboxSize / 2}, ${
+                checkboxSize / 2
+              })`
+            );
+            checkboxGroup.addEventListener("click", (evt) => {
+              evt.stopPropagation();
+              toggleTaskCompletion(task.id);
+            });
+            const checkboxRect = document.createElementNS(SVG_NS, "rect");
+            checkboxRect.setAttribute("width", checkboxSize);
+            checkboxRect.setAttribute("height", checkboxSize);
+            checkboxRect.setAttribute("rx", 2);
+            checkboxRect.setAttribute("ry", 2);
+            checkboxGroup.appendChild(checkboxRect);
+            if (task.completed) {
+              const checkmarkPath = document.createElementNS(SVG_NS, "path");
+              checkmarkPath.setAttribute(
+                "d",
+                `M3 ${checkboxSize / 2} L${checkboxSize / 2.5} ${
+                  checkboxSize - 4
+                } L${checkboxSize - 3} 4`
+              );
+              checkboxGroup.appendChild(checkmarkPath);
+            }
+            labelGroup.appendChild(taskLabelText);
+            labelGroup.appendChild(checkboxGroup);
+            labelsContainer.appendChild(labelGroup);
+          });
+        }
+        function updateClockHands() {
+          const t = new Date(),
+            e = t.getSeconds(),
+            n = t.getMinutes(),
+            o = t.getHours();
+          0 === e
+            ? secondHand.classList.add("no-transition")
+            : secondHand.classList.contains("no-transition") &&
+              secondHand.classList.remove("no-transition");
+          const r = 6 * e,
+            s = 6 * n + 0.1 * e,
+            a = "24h" === clockMode ? 24 : 12,
+            i = o % a,
+            l = (i / a) * 360 + (n / 60) * (360 / a);
+          (secondHand.style.transform = `rotate(${r}deg)`),
+            (minuteHand.style.transform = `rotate(${s}deg)`),
+            (hourHand.style.transform = `rotate(${l}deg)`);
+          let c = !isToday(selectedDate);
+          isToday(selectedDate) &&
+            "12h" === clockMode &&
+            (("am" === ampm && o >= 12) || ("pm" === ampm && o < 12)) &&
+            (c = !0),
+            handsContainer.classList.toggle("faded", c);
+        }
+        function renderBlocksView() {
+          const today = selectedDate;
+          const yesterday = new Date(today);
+          yesterday.setDate(today.getDate() - 1);
+          const tomorrow = new Date(today);
+          tomorrow.setDate(today.getDate() + 1);
+          const options = { weekday: "long", day: "numeric", month: "short" };
+          document.getElementById(
+            "yesterday-label"
+          ).textContent = `Yesterday: ${yesterday.toLocaleDateString(
+            undefined,
+            options
+          )}`;
+          document.getElementById(
+            "today-label"
+          ).textContent = `Today: ${today.toLocaleDateString(
+            undefined,
+            options
+          )}`;
+          document.getElementById(
+            "tomorrow-label"
+          ).textContent = `Tomorrow: ${tomorrow.toLocaleDateString(
+            undefined,
+            options
+          )}`;
+          renderDayBlock(
+            yesterday,
+            document.getElementById("yesterday-tasks-container")
+          );
+          renderDayBlock(
+            today,
+            document.getElementById("today-tasks-container")
+          );
+          renderDayBlock(
+            tomorrow,
+            document.getElementById("tomorrow-tasks-container")
+          );
+          updateCurrentTimeLine();
+        }
+        function renderDayBlock(date, container) {
+          container.innerHTML = "";
+          const dayKey = getDateKey(date);
+          const tasksForDay = tasksByDate[dayKey] || [];
+          const now = new Date();
+          const currentHour24 = now.getHours() + now.getMinutes() / 60;
+          const isPastDay = getDateKey(date) < getDateKey(new Date());
+          const isToday_local = getDateKey(date) === getDateKey(new Date());
+          tasksForDay.forEach((task) => {
+            const taskEl = document.createElement("div");
+            taskEl.className = "task-block";
+            taskEl.textContent = task.name;
+            taskEl.setAttribute("title", task.name);
+            taskEl.style.left = `${(task.startHour / 24) * 100}%`;
+            taskEl.style.width = `${
+              ((task.endHour - task.startHour) / 24) * 100
+            }%`;
+            let background;
+            if (task.completed) {
+              background = COMPLETED_COLOR;
+            } else if (
+              isPastDay ||
+              (isToday_local && currentHour24 >= task.endHour)
+            ) {
+              background = UNCOMPLETED_PAST_COLOR;
+            } else if (
+              isToday_local &&
+              currentHour24 > task.startHour &&
+              currentHour24 < task.endHour
+            ) {
+              const progressPercent =
+                ((currentHour24 - task.startHour) /
+                  (task.endHour - task.startHour)) *
+                100;
+              background = `linear-gradient(to right, ${UNCOMPLETED_PAST_COLOR} ${progressPercent}%, ${task.color} ${progressPercent}%)`;
+            } else {
+              background = task.color;
+            }
+            taskEl.style.background = background;
+            taskEl.addEventListener("click", () => showModal(task, date));
+            container.appendChild(taskEl);
+          });
+        }
+        function updateCurrentTimeLine() {
+          if (
+            clockMode === "24h" &&
+            viewMode === "blocks" &&
+            isToday(selectedDate)
+          ) {
+            const now = new Date();
+            const percentOfDay =
+              ((now.getHours() * 60 + now.getMinutes()) / (24 * 60)) * 100;
+            currentTimeLine.style.left = `${percentOfDay}%`;
+            currentTimeLine.style.display = "block";
+          } else {
+            currentTimeLine.style.display = "none";
+          }
+        }
+
+        // --- Drag, Modal, & Calendar Logic (No Changes) ---
+        // ... (handleDragStart, showModal, saveTask, renderCalendar, etc., all remain the same)
+        const handleDragStart = (t) => {
+          t.preventDefault(),
+            (isDragging = !0),
+            (dragStartHour = getHourFromMouseEvent(t)),
+            (dragEndHour = dragStartHour),
+            (svg.style.cursor = "grabbing"),
+            updateDragLabels(t),
+            (dragLabelsContainer.style.visibility = "visible"),
+            window.addEventListener("mousemove", handleDragMove),
+            window.addEventListener("mouseup", handleDragEnd);
+        };
+        const handleDragMove = (t) => {
+          if (!isDragging) return;
+          (dragEndHour = getHourFromMouseEvent(t)), updateDragLabels(t);
+          const e = "24h" === clockMode ? 24 : 12,
+            n = (dragStartHour / e) * 360,
+            o = (dragEndHour / e) * 360;
+          previewArc.setAttribute(
+            "d",
+            describePieSlice(CENTER_X, CENTER_Y, TASK_PIE_RADIUS, n, o)
+          );
+        };
+        const handleDragEnd = () => {
+          window.removeEventListener("mousemove", handleDragMove),
+            window.removeEventListener("mouseup", handleDragEnd);
+          if (!isDragging) return;
+          (isDragging = !1),
+            (svg.style.cursor = "crosshair"),
+            previewArc.setAttribute("d", ""),
+            (dragLabelsContainer.style.visibility = "hidden");
+          if (null == dragEndHour || dragStartHour === dragEndHour) return;
+          let t = Math.min(dragStartHour, dragEndHour),
+            e = Math.max(dragStartHour, dragEndHour);
+          "12h" === clockMode && "pm" === ampm && ((t += 12), (e += 12)),
+            showModal(null, selectedDate, { startHour: t, endHour: e });
+        };
+        function updateDragLabels(t) {
+          if (!isDragging) return;
+          const e = svg.getBoundingClientRect(),
+            n = ((t.clientX - e.left) / e.width) * 400,
+            o = ((t.clientY - e.top) / e.height) * 400;
+          let r = dragStartHour,
+            s = dragEndHour;
+          s < r && ([r, s] = [s, r]),
+            "12h" === clockMode && "pm" === ampm && ((r += 12), (s += 12)),
+            (dragTimeLabel.textContent = `${formatHourToAMPM(
+              r
+            )} - ${formatHourToAMPM(s)}`),
+            dragTimeLabel.setAttribute("x", n),
+            dragTimeLabel.setAttribute("y", o + 30);
+        }
+        const getHourFromBlockEvent = (e, block) => {
+          const rect = block.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const hour = Math.max(0, Math.min(24, (x / rect.width) * 24));
+          return Math.round(hour * 4) / 4;
+        };
+        const handleBlockDragStart = (e, date, blockElement) => {
+          e.preventDefault();
+          isBlockDragging = true;
+          activeDragDate = date;
+          activeDragBlock = blockElement;
+          blockDragStartHour = getHourFromBlockEvent(e, activeDragBlock);
+          const previewBlock = activeDragBlock.querySelector(
+            ".task-preview-block"
+          );
+          if (previewBlock) {
+            previewBlock.style.display = "block";
+          }
+          updateBlockPreview(e);
+          window.addEventListener("mousemove", handleBlockDragMove);
+          window.addEventListener("mouseup", handleBlockDragEnd);
+        };
+        const handleBlockDragMove = (e) => {
+          if (!isBlockDragging) return;
+          updateBlockPreview(e);
+        };
+        const handleBlockDragEnd = (e) => {
+          if (!isBlockDragging) return;
+          const endHour = getHourFromBlockEvent(e, activeDragBlock);
+          const previewBlock = activeDragBlock.querySelector(
+            ".task-preview-block"
+          );
+          if (previewBlock) {
+            previewBlock.style.display = "none";
+          }
+          window.removeEventListener("mousemove", handleBlockDragMove);
+          window.removeEventListener("mouseup", handleBlockDragEnd);
+          isBlockDragging = false;
+          if (Math.abs(endHour - blockDragStartHour) < 0.25) return;
+          const startH = Math.min(blockDragStartHour, endHour);
+          const endH = Math.max(blockDragStartHour, endHour);
+          showModal(null, activeDragDate, { startHour: startH, endHour: endH });
+        };
+        function updateBlockPreview(e) {
+          const previewBlock = activeDragBlock.querySelector(
+            ".task-preview-block"
+          );
+          if (!previewBlock) return;
+          const currentHour = getHourFromBlockEvent(e, activeDragBlock);
+          const startPercent =
+            (Math.min(blockDragStartHour, currentHour) / 24) * 100;
+          const widthPercent =
+            (Math.abs(currentHour - blockDragStartHour) / 24) * 100;
+          previewBlock.style.left = `${startPercent}%`;
+          previewBlock.style.width = `${widthPercent}%`;
+        }
+        let modalTaskDate = null;
+        function showModal(t = null, e, n = null) {
+          (modalTaskDate = e || selectedDate),
+            t
+              ? ((modalTitle.textContent = "Edit Task"),
+                (taskIdInput.value = t.id),
+                (taskNameInput.value = t.name),
+                deleteTaskBtn.classList.remove("hidden"),
+                (taskStartTimeInput.value = formatHourToTimeInput(t.startHour)),
+                (taskEndTimeInput.value = formatHourToTimeInput(t.endHour)),
+                (taskCompletedCheckbox.checked = t.completed),
+                document
+                  .querySelectorAll(".color-option")
+                  .forEach((e) =>
+                    e.classList.toggle("selected", e.dataset.color === t.color)
+                  ))
+              : ((modalTitle.textContent = "New Task"),
+                (taskIdInput.value = ""),
+                (taskNameInput.value = ""),
+                taskNameInput.focus(),
+                deleteTaskBtn.classList.add("hidden"),
+                (taskStartTimeInput.value = formatHourToTimeInput(n.startHour)),
+                (taskEndTimeInput.value = formatHourToTimeInput(n.endHour)),
+                (taskCompletedCheckbox.checked = !1),
+                document
+                  .querySelector(".color-option.selected")
+                  ?.classList.remove("selected"),
+                document
+                  .querySelector(".color-option")
+                  ?.classList.add("selected")),
+            modal.classList.add("visible");
+        }
+        const hideModal = () => {
+          modal.classList.remove("visible"),
+            (dragLabelsContainer.style.visibility = "hidden");
+        };
+        function saveTask() {
+          const taskName = taskNameInput.value.trim();
+          const color = document.querySelector(".color-option.selected")
+            ?.dataset.color;
+          const taskId = taskIdInput.value ? Number(taskIdInput.value) : null;
+          let startHour = parseTimeInputToHour(taskStartTimeInput.value);
+          let endHour = parseTimeInputToHour(taskEndTimeInput.value);
+          const completed = taskCompletedCheckbox.checked;
+          if (!taskName || !color) {
+            return alert("Please provide a task name and select a color.");
+          }
+          if (endHour === 0) {
+            endHour = 24;
+          }
+          if (endHour <= startHour) {
+            return alert("End time must be after start time.");
+          }
+          const dateKey = getDateKey(modalTaskDate);
+          if (!tasksByDate[dateKey]) {
+            tasksByDate[dateKey] = [];
+          }
+          if (taskId) {
+            const taskIndex = tasksByDate[dateKey].findIndex(
+              (task) => task.id === taskId
+            );
+            if (taskIndex > -1) {
+              tasksByDate[dateKey][taskIndex] = {
+                ...tasksByDate[dateKey][taskIndex],
+                name: taskName,
+                color: color,
+                startHour: startHour,
+                endHour: endHour,
+                completed: completed,
+              };
+            }
+          } else {
+            tasksByDate[dateKey].push({
+              id: Date.now(),
+              name: taskName,
+              color: color,
+              startHour: startHour,
+              endHour: endHour,
+              completed: completed,
+            });
+          }
+          localStorage.setItem("clockTasksPro", JSON.stringify(tasksByDate));
+          renderAppView(), hideModal();
+        }
+        function deleteTask() {
+          const t = Number(taskIdInput.value);
+          if (!t || !confirm("Are you sure you want to delete this task?"))
+            return;
+          const e = getDateKey(modalTaskDate);
+          (tasksByDate[e] = tasksByDate[e].filter((e) => e.id !== t)),
+            0 === tasksByDate[e].length && delete tasksByDate[e],
+            localStorage.setItem("clockTasksPro", JSON.stringify(tasksByDate)),
+            renderAppView(),
+            hideModal();
+        }
+        function toggleTaskCompletion(t) {
+          const e = getDateKey(selectedDate),
+            n = tasksByDate[e]?.find((e) => e.id === t);
+          n &&
+            ((n.completed = !n.completed),
+            localStorage.setItem("clockTasksPro", JSON.stringify(tasksByDate)),
+            renderAppView());
+        }
+        function renderCalendar() {
+          calendarDatesEl.innerHTML = "";
+          const t = displayedDate.getMonth(),
+            e = displayedDate.getFullYear();
+          (calendarMonthEl.textContent = displayedDate.toLocaleDateString(
+            "en-US",
+            { month: "long" }
+          )),
+            (calendarYearEl.textContent = e);
+          const n = new Date(e, t, 1).getDay(),
+            o = new Date(e, t + 1, 0).getDate(),
+            r = 0 === n ? 6 : n - 1,
+            s = new Date(e, t, 0),
+            a = s.getDate();
+          for (let i = r; i > 0; i--) {
+            const l = a - i + 1,
+              c = new Date(s.getFullYear(), s.getMonth(), l);
+            calendarDatesEl.appendChild(createDateCell(l, c, !0));
+          }
+          for (let d = 1; d <= o; d++) {
+            const h = new Date(e, t, d);
+            calendarDatesEl.appendChild(createDateCell(d, h, !1));
+          }
+          const p = new Date(e, t + 1, 1);
+          let u = 1;
+          for (; calendarDatesEl.children.length < 42; ) {
+            const m = new Date(p.getFullYear(), p.getMonth(), u);
+            calendarDatesEl.appendChild(createDateCell(u, m, !0)), u++;
+          }
+        }
+        function createDateCell(t, e, n) {
+          const o = document.createElement("div");
+          return (
+            (o.className = "date-cell"),
+            n && o.classList.add("other-month"),
+            (o.textContent = t),
+            isToday(e) && o.classList.add("today"),
+            getDateKey(e) === getDateKey(selectedDate) &&
+              o.classList.add("selected"),
+            o.addEventListener("click", () => {
+              (selectedDate = e),
+                (e.getMonth() === displayedDate.getMonth() &&
+                  e.getFullYear() === displayedDate.getFullYear()) ||
+                  (displayedDate = new Date(e.getFullYear(), e.getMonth(), 1)),
+                renderCalendar(),
+                renderAppView();
+            }),
+            o
+          );
+        }
+
+        // --- NEW/FIXED: Notes Widget Functions ---
+
+        // 1. Custom Tiptap Node for Date Separators
+        const DateSeparatorNode = Node.create({
+          name: "dateSeparator",
+          group: "block",
+          atom: true, // Makes it behave like a single, non-editable block
+          draggable: false,
+          attrs: { date: { default: null } },
+          parseHTML() {
+            return [{ tag: "div.date-separator-wrapper" }];
+          },
+          renderHTML({ HTMLAttributes }) {
+            // This is a fallback and not what's actually rendered due to addNodeView
+            return [
+              "div",
+              { class: "date-separator-wrapper" },
+              [
+                "div",
+                { class: "date-separator", "data-date": HTMLAttributes.date },
+              ],
+            ];
+          },
+          addNodeView() {
+            return (node, view, getPos) => {
+              const dom = document.createElement("div");
+              dom.classList.add("date-separator");
+              const dateKey = node.attrs.date;
+
+              if (isToday(new Date(dateKey))) {
+                dom.classList.add("today");
+              }
+
+              const date = new Date(dateKey);
+              const dateText = document.createElement("span");
+              dateText.className = "date-text";
+              // Make date timezone-safe by using UTC methods
+              const utcDate = new Date(
+                date.getUTCFullYear(),
+                date.getUTCMonth(),
+                date.getUTCDate()
+              );
+              dateText.textContent = utcDate.toLocaleDateString(undefined, {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                timeZone: "UTC",
+              });
+
+              const hr = document.createElement("hr");
+              const button = document.createElement("button");
+              button.textContent = "+";
+              button.title = "Add note for this day";
+              button.addEventListener("click", () => {
+                const pos = getPos();
+                // Insert a new paragraph *after* this node and focus the editor
+                const transaction = view.state.tr.insert(
+                  pos + node.nodeSize,
+                  view.state.schema.nodes.paragraph.create()
+                );
+                view.dispatch(transaction);
+                view.focus();
+              });
+
+              dom.append(dateText, hr, button);
+              return { dom };
+            };
+          },
+        });
+
+        // 2. Main initialization function for the notes widget
+        function initNotesWidget() {
+          // Restore widget size and position from localStorage
+          if (notesWidgetConfig.width && notesWidgetConfig.height) {
+            notesWidget.style.width = notesWidgetConfig.width;
+            notesWidget.style.height = notesWidgetConfig.height;
+          }
+          if (
+            notesWidgetConfig.x !== undefined &&
+            notesWidgetConfig.y !== undefined
+          ) {
+            notesWidget.style.right = "auto";
+            notesWidget.style.bottom = "auto";
+            notesWidget.style.left = `${notesWidgetConfig.x}px`;
+            notesWidget.style.top = `${notesWidgetConfig.y}px`;
+          }
+
+          const initialDoc = buildInitialNotesDocument();
+
+          tiptapEditor = new Editor({
+            element: notesEditorElement,
+            extensions: [
+              StarterKit.configure({
+                heading: { levels: [1, 2, 3] }, // Only allow H1, H2, H3
+              }),
+              TaskList,
+              TaskItem.configure({
+                nested: true,
+              }),
+              DateSeparatorNode,
+            ],
+            content: initialDoc,
+            onUpdate: ({ editor }) => {
+              saveNotes(editor.getJSON());
+            },
+            editorProps: {
+              // Allows creating a task list by typing `[ ] `
+              handleTextInput: (view, from, to, text) => {
+                if (
+                  text === " " &&
+                  view.state.doc.textBetween(from - 3, to - 1, " ", " ") ===
+                    "[ ]"
+                ) {
+                  const { $from } = view.state.selection;
+                  const node = $from.node($from.depth);
+                  if (node.type.name === "paragraph") {
+                    const tr = view.state.tr.delete(from - 3, to);
+                    view.dispatch(tr);
+                    tiptapEditor.chain().focus().toggleTaskList().run();
+                    return true;
+                  }
+                }
+                return false;
+              },
+            },
+          });
+
+          setupNotesToolbar();
+          setupNotesWidgetDrag();
+          setupNotesWidgetResize();
+          setupScrollToBottom();
+
+          // Scroll to today's notes on initial load
+          setTimeout(() => {
+            const todayEl = notesEditorElement.querySelector(
+              ".date-separator.today"
+            );
+            if (todayEl) {
+              todayEl.scrollIntoView({ behavior: "auto", block: "center" });
+            }
+          }, 100);
+        }
+
+        // 3. Build the single Tiptap document from stored date-keyed notes
+        function buildInitialNotesDocument() {
+          const doc = { type: "doc", content: [] };
+          const sortedKeys = Object.keys(notesData).sort();
+          const today = new Date();
+          const todayKey = getDateKey(today);
+
+          // If there are no notes, just start with today's separator
+          if (sortedKeys.length === 0) {
+            doc.content.push({
+              type: "dateSeparator",
+              attrs: { date: todayKey },
+            });
+            return doc;
+          }
+
+          // Find the earliest date with a note and today's date
+          const startDate = new Date(sortedKeys[0]);
+
+          // Loop from the first day with a note until today, creating separators for every day
+          for (
+            let d = new Date(startDate);
+            d <= today;
+            d.setDate(d.getDate() + 1)
+          ) {
+            const key = getDateKey(d);
+            doc.content.push({ type: "dateSeparator", attrs: { date: key } });
+
+            // If notes exist for this day, append them
+            if (notesData[key] && notesData[key].content) {
+              const contentNodes = notesData[key].content.filter(
+                (node) => !(node.type === "paragraph" && !node.content)
+              );
+              if (contentNodes.length > 0) {
+                doc.content.push(...contentNodes);
+              }
+            }
+          }
+          return doc;
+        }
+
+        // 4. Save notes by splitting the single Tiptap document back into date-keyed objects
+        function saveNotes(fullDoc) {
+          const newNotesData = {};
+          let currentDateKey = null;
+
+          fullDoc.content.forEach((node) => {
+            if (node.type === "dateSeparator") {
+              currentDateKey = node.attrs.date;
+              // Initialize an entry for this date if it doesn't exist
+              if (!newNotesData[currentDateKey]) {
+                newNotesData[currentDateKey] = { type: "doc", content: [] };
+              }
+            } else if (currentDateKey) {
+              // Don't save empty placeholder paragraphs
+              const isMeaningful =
+                node.type !== "paragraph" ||
+                (node.content && node.content.length > 0);
+              if (isMeaningful) {
+                newNotesData[currentDateKey].content.push(node);
+              }
+            }
+          });
+
+          // Clean up days with no actual content
+          Object.keys(newNotesData).forEach((key) => {
+            if (newNotesData[key].content.length === 0) {
+              delete newNotesData[key];
+            }
+          });
+
+          notesData = newNotesData;
+          localStorage.setItem("clockTaskProNotes", JSON.stringify(notesData));
+        }
+
+        // 5. Setup event listeners for the toolbar buttons
+        function setupNotesToolbar() {
+          const toolbarButtons = {
+            "notes-h1": () =>
+              tiptapEditor.chain().focus().toggleHeading({ level: 1 }).run(),
+            "notes-h2": () =>
+              tiptapEditor.chain().focus().toggleHeading({ level: 2 }).run(),
+            "notes-h3": () =>
+              tiptapEditor.chain().focus().toggleHeading({ level: 3 }).run(),
+            "notes-bold": () => tiptapEditor.chain().focus().toggleBold().run(),
+            "notes-italic": () =>
+              tiptapEditor.chain().focus().toggleItalic().run(),
+            "notes-task": () =>
+              tiptapEditor.chain().focus().toggleTaskList().run(),
+          };
+
+          for (const [id, action] of Object.entries(toolbarButtons)) {
+            document.getElementById(id)?.addEventListener("click", action);
+          }
+
+          // Update toolbar button states based on editor selection
+          tiptapEditor.on("transaction", () => {
+            document
+              .getElementById("notes-h1")
+              ?.classList.toggle(
+                "is-active",
+                tiptapEditor.isActive("heading", { level: 1 })
+              );
+            document
+              .getElementById("notes-h2")
+              ?.classList.toggle(
+                "is-active",
+                tiptapEditor.isActive("heading", { level: 2 })
+              );
+            document
+              .getElementById("notes-h3")
+              ?.classList.toggle(
+                "is-active",
+                tiptapEditor.isActive("heading", { level: 3 })
+              );
+            document
+              .getElementById("notes-bold")
+              ?.classList.toggle("is-active", tiptapEditor.isActive("bold"));
+            document
+              .getElementById("notes-italic")
+              ?.classList.toggle("is-active", tiptapEditor.isActive("italic"));
+            document
+              .getElementById("notes-task")
+              ?.classList.toggle(
+                "is-active",
+                tiptapEditor.isActive("taskList")
+              );
+          });
+        }
+
+        // 6. Setup dragging for the widget window
+        function setupNotesWidgetDrag() {
+          notesWidgetHeader.addEventListener("mousedown", (e) => {
+            if (e.target.tagName === "BUTTON") return; // Don't drag when clicking tabs
+            isNotesWidgetDragging = true;
+            const rect = notesWidget.getBoundingClientRect();
+            notesDragOffsetX = e.clientX - rect.left;
+            notesDragOffsetY = e.clientY - rect.top;
+            notesWidget.style.right = "auto";
+            notesWidget.style.bottom = "auto";
+            document.body.style.userSelect = "none"; // Prevent text selection while dragging
+          });
+
+          window.addEventListener("mousemove", (e) => {
+            if (!isNotesWidgetDragging) return;
+            let newX = e.clientX - notesDragOffsetX;
+            let newY = e.clientY - notesDragOffsetY;
+            newX = Math.max(
+              0,
+              Math.min(newX, window.innerWidth - notesWidget.offsetWidth)
+            );
+            newY = Math.max(
+              0,
+              Math.min(newY, window.innerHeight - notesWidget.offsetHeight)
+            );
+            notesWidget.style.left = `${newX}px`;
+            notesWidget.style.top = `${newY}px`;
+          });
+
+          window.addEventListener("mouseup", () => {
+            if (isNotesWidgetDragging) {
+              isNotesWidgetDragging = false;
+              document.body.style.userSelect = "";
+              notesWidgetConfig.x = notesWidget.offsetLeft;
+              notesWidgetConfig.y = notesWidget.offsetTop;
+              localStorage.setItem(
+                "clockTaskProNotesConfig",
+                JSON.stringify(notesWidgetConfig)
+              );
+            }
+          });
+        }
+
+        // 7. Setup resizing using ResizeObserver to save dimensions
+        function setupNotesWidgetResize() {
+          const resizeObserver = new ResizeObserver(() => {
+            if (tiptapEditor) {
+              // Only save after initialization
+              notesWidgetConfig.width = notesWidget.style.width;
+              notesWidgetConfig.height = notesWidget.style.height;
+              localStorage.setItem(
+                "clockTaskProNotesConfig",
+                JSON.stringify(notesWidgetConfig)
+              );
+            }
+          });
+          resizeObserver.observe(notesWidget);
+        }
+
+        // 8. Setup scroll-to-bottom button logic using IntersectionObserver
+        function setupScrollToBottom() {
+          const todayEl = notesEditorElement.querySelector(
+            ".date-separator.today"
+          );
+          if (!todayEl) {
+            scrollToBottomBtn.style.display = "none";
+            return;
+          }
+
+          const observer = new IntersectionObserver(
+            ([entry]) => {
+              // Show button if today's separator is NOT visible
+              scrollToBottomBtn.classList.toggle(
+                "visible",
+                !entry.isIntersecting
+              );
+            },
+            {
+              root: notesWidgetBody, // Watch for intersection within the scrollable area
+              threshold: 0.1, // Fire when 10% of the element is visible/hidden
+            }
+          );
+          observer.observe(todayEl);
+
+          scrollToBottomBtn.addEventListener("click", () => {
+            todayEl.scrollIntoView({ behavior: "smooth", block: "center" });
+          });
+        }
+
+        // --- Initialization ---
+        function init() {
+          // Event Listeners for Toggles (No Changes)
+          document.querySelectorAll('input[name="clockMode"]').forEach((r) =>
+            r.addEventListener("change", (e) => {
+              clockMode = e.target.value;
+              ampmControls.classList.toggle("hidden", clockMode === "24h");
+              viewModeControls.classList.toggle("hidden", clockMode !== "24h");
+              renderAppView();
+            })
+          );
+          document.querySelectorAll('input[name="ampm"]').forEach((r) =>
+            r.addEventListener("change", (e) => {
+              ampm = e.target.value;
+              renderAppView();
+            })
+          );
+          document.querySelectorAll('input[name="viewMode"]').forEach((r) =>
+            r.addEventListener("change", (e) => {
+              viewMode = e.target.value;
+              renderAppView();
+            })
+          );
+
+          // Event Listeners for Dragging (No Changes)
+          svg.addEventListener("mousedown", handleDragStart);
+          todayBlock.addEventListener("mousedown", (e) => {
+            handleBlockDragStart(e, selectedDate, todayBlock);
+          });
+          yesterdayBlock.addEventListener("mousedown", (e) => {
+            const yesterday = new Date(selectedDate);
+            yesterday.setDate(selectedDate.getDate() - 1);
+            handleBlockDragStart(e, yesterday, yesterdayBlock);
+          });
+          tomorrowBlock.addEventListener("mousedown", (e) => {
+            const tomorrow = new Date(selectedDate);
+            tomorrow.setDate(selectedDate.getDate() + 1);
+            handleBlockDragStart(e, tomorrow, tomorrowBlock);
+          });
+
+          // Event Listeners for Modal (No Changes)
+          saveTaskBtn.addEventListener("click", saveTask);
+          cancelTaskBtn.addEventListener("click", hideModal);
+          deleteTaskBtn.addEventListener("click", deleteTask);
+          modal.parentElement.addEventListener("click", (e) => {
+            if (e.target === modal.parentElement) hideModal();
+          });
+          modal.addEventListener("click", (e) => e.stopPropagation());
+
+          // Event Listeners for Calendar (No Changes)
+          prevMonthBtn.addEventListener("click", () => {
+            displayedDate.setMonth(displayedDate.getMonth() - 1);
+            renderCalendar();
+          });
+          nextMonthBtn.addEventListener("click", () => {
+            displayedDate.setMonth(displayedDate.getMonth() + 1);
+            renderCalendar();
+          });
+          document
+            .getElementById("month-year-header")
+            .addEventListener("click", () => {
+              const newYear = prompt(
+                "Enter year:",
+                displayedDate.getFullYear()
+              );
+              if (!newYear || isNaN(newYear)) return;
+              const newMonth = prompt(
+                "Enter month (1-12):",
+                displayedDate.getMonth() + 1
+              );
+              if (!newMonth || isNaN(newMonth) || newMonth < 1 || newMonth > 12)
+                return;
+              displayedDate = new Date(newYear, newMonth - 1, 1);
+              renderCalendar();
+            });
+
+          // Initialize Color Selector (No Changes)
+          COLORS.forEach((color, index) => {
+            const option = document.createElement("div");
+            option.className = "color-option";
+            option.style.backgroundColor = color;
+            option.dataset.color = color;
+            if (index === 0) option.classList.add("selected");
+            option.addEventListener("click", () => {
+              document
+                .querySelector(".color-option.selected")
+                ?.classList.remove("selected");
+              option.classList.add("selected");
+            });
+            colorSelector.appendChild(option);
+          });
+          calendarWeekdaysEl.innerHTML = [
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat",
+            "Sun",
+          ]
+            .map((day) => `<div class="weekday">${day}</div>`)
+            .join("");
+
+          // Initial render
+          renderCalendar();
+          renderAppView();
+
+          // NEW: Initialize Notes Widget
+          initNotesWidget();
+
+          // Intervals for real-time updates (No Changes)
+          let lastRenderMinute = -1;
+          setInterval(() => {
+            updateClockHands();
+            const now = new Date();
+            if (now.getMinutes() !== lastRenderMinute) {
+              if (
+                (clockMode === "24h" && viewMode === "blocks") ||
+                isToday(selectedDate)
+              ) {
+                renderAppView();
+              }
+              lastRenderMinute = now.getMinutes();
+            }
+          }, 1000);
+        }
+        init();
+      });
+    </script>
+  </body>
+</html>

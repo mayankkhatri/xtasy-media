@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ClockTask Pro - Visual Scheduler</title>
+    <style>
+      /* --- GLOBAL STYLES & SETUP --- */
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap");
+
+      :root {
+        --bg-color: #f4f7f9;
+        --clock-bg: #ffffff;
+        --text-color: #333;
+        --primary-color: #007aff;
+        --secondary-color: #8e8e93;
+        --danger-color: #ff3b30;
+        --shadow-color: rgba(0, 0, 0, 0.1);
+        --border-color: #e5e5ea;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+        overflow: hidden;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      .app-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+        padding: 2rem;
+        width: 100%;
+      }
+
+      /* --- CONTROLS --- */
+      .controls {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+        background-color: var(--clock-bg);
+        padding: 0.75rem 1.5rem;
+        border-radius: 99px;
+        box-shadow: 0 4px 15px var(--shadow-color);
+        border: 1px solid var(--border-color);
+      }
+
+      .toggle-group {
+        display: flex;
+        background-color: var(--bg-color);
+        border-radius: 99px;
+        padding: 4px;
+      }
+
+      .toggle-group label {
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        border-radius: 99px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        font-size: 0.9rem;
+        white-space: nowrap;
+      }
+
+      .toggle-group input[type="radio"] {
+        display: none;
+      }
+
+      .toggle-group input[type="radio"]:checked + label {
+        background-color: var(--primary-color);
+        color: white;
+        box-shadow: 0 2px 5px rgba(0, 122, 255, 0.3);
+      }
+
+      #ampm-controls {
+        transition: opacity 0.3s ease, transform 0.3s ease;
+      }
+
+      #ampm-controls.hidden {
+        opacity: 0;
+        transform: scale(0.9);
+        pointer-events: none;
+      }
+
+      /* --- CLOCK --- */
+      .clock-container {
+        position: relative;
+        width: clamp(300px, 90vw, 600px);
+        aspect-ratio: 1 / 1;
+        background-color: var(--clock-bg);
+        border-radius: 50%;
+        box-shadow: 0 10px 30px var(--shadow-color), 0 0 0 10px var(--clock-bg);
+        border: 1px solid var(--border-color);
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      #clock-svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      #click-target {
+        cursor: crosshair;
+      }
+
+      .clock-face {
+        fill: none;
+      }
+      .clock-tick {
+        stroke: var(--secondary-color);
+        stroke-width: 1.5;
+      }
+
+      .clock-number {
+        fill: var(--text-color);
+        font-size: clamp(14px, 3.5vw, 18px);
+        font-weight: 500;
+        text-anchor: middle;
+        dominant-baseline: middle;
+        pointer-events: none;
+      }
+
+      .task-pie-slice {
+        stroke: rgba(0, 0, 0, 0.1);
+        stroke-width: 1px;
+        cursor: pointer;
+        transition: filter 0.2s ease;
+      }
+      .task-pie-slice:hover {
+        filter: brightness(1.1);
+      }
+
+      /* FEATURE: Text anchor is now set in JS, removed from here */
+      .task-label {
+        font-size: clamp(10px, 2.2vw, 13px); /* Slightly larger for clarity */
+        font-weight: 700; /* Bolder for emphasis */
+        dominant-baseline: middle;
+        /* The fill color and stroke will be set dynamically in JS */
+        /* text-shadow has been removed in favor of a crisp SVG stroke */
+        pointer-events: none;
+        paint-order: stroke; /* Ensures stroke is drawn behind the fill */
+      }
+
+      .preview-arc {
+        fill: var(--primary-color);
+        fill-opacity: 0.25;
+        pointer-events: none;
+      }
+
+      .clock-center {
+        fill: var(--text-color);
+      }
+
+      #hands-container {
+        pointer-events: none;
+      }
+
+      #hands-container line {
+        stroke-linecap: round;
+        transform-origin: 200px 200px;
+        transition: transform 0.5s cubic-bezier(0.4, 2.3, 0.6, 1);
+      }
+      #hour-hand {
+        stroke: var(--text-color);
+        stroke-width: 6;
+      }
+      #minute-hand {
+        stroke: var(--text-color);
+        stroke-width: 4;
+      }
+      #second-hand {
+        stroke: var(--danger-color);
+        stroke-width: 2;
+      }
+      /* --- MODAL --- */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+        display: grid;
+        place-items: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        z-index: 1000;
+      }
+
+      .modal-overlay.visible {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .modal {
+        background-color: var(--clock-bg);
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        width: clamp(280px, 80vw, 400px);
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .modal-overlay.visible .modal {
+        transform: scale(1);
+      }
+      .modal h2 {
+        font-size: 1.5rem;
+        text-align: center;
+      }
+      .modal-time {
+        text-align: center;
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--secondary-color);
+        background-color: var(--bg-color);
+        padding: 0.5rem;
+        border-radius: 8px;
+      }
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .form-group label {
+        font-weight: 500;
+        color: var(--secondary-color);
+      }
+      .form-group input[type="text"] {
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 1rem;
+        font-family: "Inter", sans-serif;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .form-group input[type="text"]:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+      }
+      .color-selector {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
+      }
+      .color-option {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 3px solid transparent;
+      }
+      .color-option:hover {
+        transform: scale(1.1);
+      }
+      .color-option.selected {
+        border-color: var(--clock-bg);
+        box-shadow: 0 0 0 2px var(--primary-color);
+      }
+      .modal-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+      .modal-actions button {
+        flex-grow: 1;
+        padding: 0.75rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      #save-task-btn {
+        background-color: var(--primary-color);
+        color: white;
+      }
+      #save-task-btn:hover {
+        background-color: #0056b3;
+      }
+      #cancel-task-btn {
+        background-color: var(--border-color);
+        color: var(--text-color);
+      }
+      #cancel-task-btn:hover {
+        background-color: #d1d1d6;
+      }
+      #delete-task-btn {
+        background-color: var(--danger-color);
+        color: white;
+        flex-grow: 0;
+        padding: 0.75rem 1rem;
+      }
+      #delete-task-btn.hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <div class="controls">
+        <div class="toggle-group">
+          <input
+            type="radio"
+            id="mode-24h"
+            name="clockMode"
+            value="24h"
+            checked
+          />
+          <label for="mode-24h">24 Hour</label>
+          <input type="radio" id="mode-12h" name="clockMode" value="12h" />
+          <label for="mode-12h">12 Hour</label>
+        </div>
+        <div class="toggle-group hidden" id="ampm-controls">
+          <input type="radio" id="mode-am" name="ampm" value="am" checked />
+          <label for="mode-am">AM</label>
+          <input type="radio" id="mode-pm" name="ampm" value="pm" />
+          <label for="mode-pm">PM</label>
+        </div>
+      </div>
+
+      <div class="clock-container">
+        <svg id="clock-svg" viewBox="0 0 400 400">
+          <!-- These layers are drawn first, in the back -->
+          <path id="preview-arc" class="preview-arc"></path>
+          <g id="ticks-container"></g>
+          <g id="numbers-container"></g>
+
+          <!-- BUG FIX: The invisible click target is now BEHIND the tasks. -->
+          <!-- Events on empty space will go to this circle. -->
+          <circle
+            id="click-target"
+            cx="200"
+            cy="200"
+            r="198"
+            fill="transparent"
+          />
+
+          <!-- BUG FIX: Tasks and their labels are now drawn ON TOP of the click target. -->
+          <!-- This allows their individual click events to be captured correctly. -->
+          <g id="tasks-container"></g>
+          <g id="labels-container"></g>
+
+          <!-- Hands and center dot are drawn last, on the very top -->
+          <g id="hands-container">
+            <line id="hour-hand" x1="200" y1="200" x2="200" y2="120"></line>
+            <line id="minute-hand" x1="200" y1="200" x2="200" y2="70"></line>
+            <line id="second-hand" x1="200" y1="200" x2="200" y2="60"></line>
+          </g>
+          <circle class="clock-center" cx="200" cy="200" r="5"></circle>
+        </svg>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="task-modal">
+      <div class="modal">
+        <h2 id="modal-title">New Task</h2>
+        <div class="modal-time" id="modal-time-display"></div>
+        <input type="hidden" id="task-id" />
+        <div class="form-group">
+          <label for="task-name">Task Name</label>
+          <input type="text" id="task-name" placeholder="e.g., Team Meeting" />
+        </div>
+        <div class="form-group">
+          <label>Color</label>
+          <div class="color-selector" id="color-selector"></div>
+        </div>
+        <div class="modal-actions">
+          <button id="delete-task-btn" class="hidden">Delete</button>
+          <button id="cancel-task-btn">Cancel</button>
+          <button id="save-task-btn">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // --- DOM Elements ---
+        const clickTarget = document.getElementById("click-target");
+        const tasksContainer = document.getElementById("tasks-container");
+        const labelsContainer = document.getElementById("labels-container");
+        const previewArc = document.getElementById("preview-arc");
+        const hourHand = document.getElementById("hour-hand");
+        const minuteHand = document.getElementById("minute-hand");
+        const secondHand = document.getElementById("second-hand");
+        const ampmControls = document.getElementById("ampm-controls");
+
+        const modal = document.getElementById("task-modal");
+        const modalTitle = document.getElementById("modal-title");
+        const modalTimeDisplay = document.getElementById("modal-time-display");
+        const taskIdInput = document.getElementById("task-id");
+        const taskNameInput = document.getElementById("task-name");
+        const colorSelector = document.getElementById("color-selector");
+        const saveTaskBtn = document.getElementById("save-task-btn");
+        const cancelTaskBtn = document.getElementById("cancel-task-btn");
+        const deleteTaskBtn = document.getElementById("delete-task-btn");
+
+        // --- State ---
+        let clockMode = "24h",
+          ampm = "am";
+        let tasks = JSON.parse(localStorage.getItem("clockTasksPro")) || [];
+        let isDragging = false,
+          dragStartHour = null,
+          dragEndHour = null;
+
+        // --- Constants ---
+        const CENTER_X = 200,
+          CENTER_Y = 200,
+          RADIUS = 180;
+        const TASK_PIE_RADIUS = 180;
+
+        const COLORS = [
+          "#FF9500",
+          "#FF2D55",
+          "#AF52DE",
+          "#5856D6",
+          "#34C759",
+          "#00C7BE",
+        ];
+
+        // --- Helpers ---
+        const polarToCartesian = (cx, cy, r, angle) => ({
+          x: cx + r * Math.cos(((angle - 90) * Math.PI) / 180),
+          y: cy + r * Math.sin(((angle - 90) * Math.PI) / 180),
+        });
+
+        const getDarkerColor = (hex, factor = 0.6) => {
+          // Remove the # if present
+          const color = hex.replace("#", "");
+
+          // Parse the hex color into RGB
+          const r = parseInt(color.substr(0, 2), 16);
+          const g = parseInt(color.substr(2, 2), 16);
+          const b = parseInt(color.substr(4, 2), 16);
+
+          // Make it darker by multiplying by the factor
+          const newR = Math.floor(r * factor);
+          const newG = Math.floor(g * factor);
+          const newB = Math.floor(b * factor);
+
+          // Convert back to hex
+          return `#${newR.toString(16).padStart(2, "0")}${newG
+            .toString(16)
+            .padStart(2, "0")}${newB.toString(16).padStart(2, "0")}`;
+        };
+
+        const describePieSlice = (x, y, r, startAngle, endAngle) => {
+          if (endAngle - startAngle >= 360) {
+            endAngle = startAngle + 359.99;
+          }
+
+          const start = polarToCartesian(x, y, r, endAngle);
+          const end = polarToCartesian(x, y, r, startAngle);
+          const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+
+          return `M ${x} ${y} L ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 0 ${end.x} ${end.y} Z`;
+        };
+
+        const getHourFromMouseEvent = (e) => {
+          const rect = clickTarget.getBoundingClientRect();
+          const scaleX = 400 / rect.width;
+          const scaleY = 400 / rect.height;
+          const x = (e.clientX - rect.left) * scaleX;
+          const y = (e.clientY - rect.top) * scaleY;
+          const angle =
+            ((Math.atan2(y - CENTER_Y, x - CENTER_X) * 180) / Math.PI +
+              90 +
+              360) %
+            360;
+          const totalHours = clockMode === "24h" ? 24 : 12;
+          const hour = (angle / 360) * totalHours;
+          return Math.round(hour * 4) / 4;
+        };
+
+        const formatHour = (hour, is24h, ampmStr = "") => {
+          let h = Math.floor(hour);
+          let m = Math.round((hour % 1) * 60);
+
+          if (m === 60) {
+            h = h + 1;
+            m = 0;
+          }
+
+          if (is24h) {
+            h = h % 24;
+            return `${String(h).padStart(2, "0")}:${String(m).padStart(
+              2,
+              "0"
+            )}`;
+          } else {
+            const currentAmpm = h >= 12 && h < 24 ? "pm" : "am";
+            h = h % 12;
+            if (h === 0) h = 12;
+            return `${h}:${String(m).padStart(2, "0")} ${
+              ampmStr.toUpperCase() || currentAmpm.toUpperCase()
+            }`;
+          }
+        };
+
+        // --- Render Functions ---
+        function renderClockFace() {
+          const ticksContainer = document.getElementById("ticks-container");
+          const numbersContainer = document.getElementById("numbers-container");
+          ticksContainer.innerHTML = "";
+          numbersContainer.innerHTML = "";
+          const totalHours = clockMode === "24h" ? 24 : 12;
+          const angleStep = 360 / totalHours;
+          for (let i = 0; i < totalHours; i++) {
+            const angle = i * angleStep;
+            const p1 = polarToCartesian(CENTER_X, CENTER_Y, RADIUS, angle);
+            const p2 = polarToCartesian(CENTER_X, CENTER_Y, RADIUS - 10, angle);
+            ticksContainer.innerHTML += `<line class="clock-tick" x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" />`;
+            const numPos = polarToCartesian(
+              CENTER_X,
+              CENTER_Y,
+              RADIUS - 25,
+              angle
+            );
+            const num = clockMode === "12h" ? (i === 0 ? 12 : i) : i;
+            numbersContainer.innerHTML += `<text class="clock-number" x="${numPos.x}" y="${numPos.y}">${num}</text>`;
+          }
+        }
+
+        function renderTasks() {
+          tasksContainer.innerHTML = "";
+          labelsContainer.innerHTML = "";
+          const visibleTasks = tasks.filter(
+            (task) =>
+              clockMode === "24h" ||
+              (ampm === "am" && task.startHour < 12) ||
+              (ampm === "pm" && task.startHour >= 12)
+          );
+          visibleTasks.forEach((task) => {
+            let startHour = task.startHour,
+              endHour = task.endHour;
+            const totalHours = clockMode === "24h" ? 24 : 12;
+
+            if (clockMode === "12h") {
+              if (startHour >= 12) startHour -= 12;
+              if (endHour > 12 && endHour < 24) endHour -= 12;
+              else if (endHour === 24) endHour = 12;
+            }
+            if (endHour === 0 && task.endHour > 0) endHour = totalHours;
+
+            const startAngle = (startHour / totalHours) * 360;
+            const endAngle = (endHour / totalHours) * 360;
+
+            const pieSlice = document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "path"
+            );
+            pieSlice.setAttribute("class", "task-pie-slice");
+            pieSlice.setAttribute(
+              "d",
+              describePieSlice(
+                CENTER_X,
+                CENTER_Y,
+                TASK_PIE_RADIUS,
+                startAngle,
+                endAngle
+              )
+            );
+            pieSlice.setAttribute("fill", task.color);
+            pieSlice.setAttribute("fill-opacity", "0.35");
+            pieSlice.addEventListener("click", () => showModal(task));
+            tasksContainer.appendChild(pieSlice);
+
+            const midAngle =
+              startAngle +
+              ((endAngle <= startAngle ? endAngle + 360 : endAngle) -
+                startAngle) /
+                2;
+
+            // --- ROBUST RADIAL TEXT LOGIC (WITH FIXED STYLING) ---
+            const textRadius = TASK_PIE_RADIUS * 0.6;
+            const textPos = polarToCartesian(
+              CENTER_X,
+              CENTER_Y,
+              textRadius,
+              midAngle
+            );
+
+            let rotation = midAngle - 90;
+            const normalizedAngle = ((midAngle % 360) + 360) % 360;
+            if (normalizedAngle > 90 && normalizedAngle <= 270) {
+              rotation += 180;
+            }
+
+            const text = document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "text"
+            );
+            text.setAttribute("class", "task-label");
+            text.setAttribute("x", textPos.x);
+            text.setAttribute("y", textPos.y);
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute(
+              "transform",
+              `rotate(${rotation} ${textPos.x} ${textPos.y})`
+            );
+
+            // ✨ FIXED: Dynamic color matching! ✨
+            // 1. Create a darker version of the task's background color
+            const darkerColor = getDarkerColor(task.color, 0.6); // 60% darker
+            text.setAttribute("fill", darkerColor);
+
+            text.textContent = task.name;
+            labelsContainer.appendChild(text);
+          });
+        }
+
+        function updateClockHands() {
+          const now = new Date(),
+            s = now.getSeconds(),
+            m = now.getMinutes(),
+            h = now.getHours();
+
+          // BUG FIX: Calculate a continuously increasing angle for the second hand.
+          // Instead of s * 6 (which resets every minute), we calculate the total
+          // seconds passed in the day, ensuring the angle only ever increases.
+          // The transition from 59s to 0s becomes a small step forward, not a rewind.
+          const totalSecondsInDay = h * 3600 + m * 60 + s;
+          const secAngle = totalSecondsInDay * 6;
+
+          const minAngle = m * 6 + s * 0.1;
+          const hourValue = clockMode === "24h" ? h : h % 12;
+          const totalHours = clockMode === "24h" ? 24 : 12;
+          const hourAngle =
+            (hourValue / totalHours) * 360 + (m / 60) * (360 / totalHours);
+
+          // To prevent the second hand from having its transition disabled
+          // after a full revolution, we remove the transition on the jump
+          // and re-add it immediately. A more robust way is to never reset the angle.
+          // This new implementation with `totalSecondsInDay` is the robust way.
+
+          secondHand.style.transform = `rotate(${secAngle}deg)`;
+          minuteHand.style.transform = `rotate(${minAngle}deg)`;
+          hourHand.style.transform = `rotate(${hourAngle}deg)`;
+        }
+
+        // --- Event Handlers ---
+        const handleDragStart = (e) => {
+          e.preventDefault();
+          isDragging = true;
+          dragStartHour = getHourFromMouseEvent(e);
+          dragEndHour = null;
+          clickTarget.style.cursor = "grabbing";
+          window.addEventListener("mousemove", handleDragMove);
+          window.addEventListener("mouseup", handleDragEnd);
+        };
+
+        const handleDragMove = (e) => {
+          if (!isDragging) return;
+          dragEndHour = getHourFromMouseEvent(e);
+          if (dragStartHour === dragEndHour) {
+            return previewArc.setAttribute("d", "");
+          }
+          let start = Math.min(dragStartHour, dragEndHour);
+          let end = Math.max(dragStartHour, dragEndHour);
+          const totalHours = clockMode === "24h" ? 24 : 12;
+          const startAngle = (start / totalHours) * 360;
+          const endAngle = (end / totalHours) * 360;
+          previewArc.setAttribute(
+            "d",
+            describePieSlice(
+              CENTER_X,
+              CENTER_Y,
+              TASK_PIE_RADIUS,
+              startAngle,
+              endAngle
+            )
+          );
+        };
+
+        const handleDragEnd = () => {
+          window.removeEventListener("mousemove", handleDragMove);
+          window.removeEventListener("mouseup", handleDragEnd);
+
+          if (!isDragging || dragStartHour == null) {
+            isDragging = false;
+            return;
+          }
+
+          if (dragEndHour == null || dragStartHour === dragEndHour) {
+            dragEndHour = dragStartHour + 0.25;
+          }
+
+          isDragging = false;
+          clickTarget.style.cursor = "crosshair";
+          previewArc.setAttribute("d", "");
+
+          if (dragEndHour < dragStartHour) {
+            [dragStartHour, dragEndHour] = [dragEndHour, dragStartHour];
+          }
+
+          showModal();
+        };
+
+        // --- Modal Logic ---
+        function showModal(taskToEdit = null) {
+          if (taskToEdit) {
+            modalTitle.textContent = "Edit Task";
+            taskIdInput.value = taskToEdit.id;
+            taskNameInput.value = taskToEdit.name;
+            deleteTaskBtn.classList.remove("hidden");
+            document
+              .querySelectorAll(".color-option")
+              .forEach((el) =>
+                el.classList.toggle(
+                  "selected",
+                  el.dataset.color === taskToEdit.color
+                )
+              );
+
+            const is24h = clockMode === "24h";
+
+            modalTimeDisplay.textContent = `${formatHour(
+              taskToEdit.startHour,
+              is24h
+            )} - ${formatHour(taskToEdit.endHour, is24h)}`;
+          } else {
+            modalTitle.textContent = "New Task";
+            taskIdInput.value = "";
+            taskNameInput.value = "";
+            taskNameInput.focus();
+            deleteTaskBtn.classList.add("hidden");
+            document
+              .querySelector(".color-option.selected")
+              ?.classList.remove("selected");
+            document.querySelector(".color-option")?.classList.add("selected");
+
+            modalTimeDisplay.textContent = `${formatHour(
+              dragStartHour,
+              clockMode === "24h",
+              ampm
+            )} - ${formatHour(dragEndHour, clockMode === "24h", ampm)}`;
+          }
+          modal.classList.add("visible");
+        }
+
+        const hideModal = () => {
+          modal.classList.remove("visible");
+          dragStartHour = null;
+          dragEndHour = null;
+        };
+
+        function saveTask() {
+          const name = taskNameInput.value.trim();
+          const color = document.querySelector(".color-option.selected")
+            ?.dataset.color;
+          const id = taskIdInput.value ? Number(taskIdInput.value) : null;
+
+          if (!name || !color) {
+            return alert("Please provide a task name and select a color.");
+          }
+
+          if (id) {
+            const taskIndex = tasks.findIndex((t) => t.id === id);
+            if (taskIndex > -1) {
+              tasks[taskIndex].name = name;
+              tasks[taskIndex].color = color;
+            }
+          } else {
+            let start = dragStartHour,
+              end = dragEndHour;
+
+            if (clockMode === "12h" && ampm === "pm") {
+              if (start < 12) start += 12;
+              if (dragEndHour === 12)
+                end = 24; // If dragging ends exactly on 12pm, it's midnight
+              else if (end < 12) end += 12;
+            }
+
+            tasks.push({
+              id: Date.now(),
+              name,
+              color,
+              startHour: start,
+              endHour: end,
+            });
+          }
+          localStorage.setItem("clockTasksPro", JSON.stringify(tasks));
+          renderTasks();
+          hideModal();
+        }
+
+        function deleteTask() {
+          const id = Number(taskIdInput.value);
+          if (!id || !confirm("Are you sure you want to delete this task?"))
+            return;
+          tasks = tasks.filter((t) => t.id !== id);
+          localStorage.setItem("clockTasksPro", JSON.stringify(tasks));
+          renderTasks();
+          hideModal();
+        }
+
+        // --- Initialization ---
+        function init() {
+          clickTarget.addEventListener("mousedown", handleDragStart);
+          saveTaskBtn.addEventListener("click", saveTask);
+          cancelTaskBtn.addEventListener("click", hideModal);
+          deleteTaskBtn.addEventListener("click", deleteTask);
+          modal.parentElement.addEventListener("click", (e) => {
+            if (e.target === modal.parentElement) hideModal();
+          });
+          modal.addEventListener("click", (e) => e.stopPropagation());
+
+          document.querySelectorAll('input[name="clockMode"]').forEach((r) =>
+            r.addEventListener("change", (e) => {
+              clockMode = e.target.value;
+              ampmControls.classList.toggle("hidden", clockMode === "24h");
+              renderClockFace();
+              renderTasks();
+              updateClockHands();
+            })
+          );
+          document.querySelectorAll('input[name="ampm"]').forEach((r) =>
+            r.addEventListener("change", (e) => {
+              ampm = e.target.value;
+              renderTasks();
+            })
+          );
+
+          COLORS.forEach((color, index) => {
+            const option = document.createElement("div");
+            option.className = "color-option";
+            option.style.backgroundColor = color;
+            option.dataset.color = color;
+            if (index === 0) option.classList.add("selected");
+            option.addEventListener("click", () => {
+              document
+                .querySelector(".color-option.selected")
+                ?.classList.remove("selected");
+              option.classList.add("selected");
+            });
+            colorSelector.appendChild(option);
+          });
+
+          renderClockFace();
+          renderTasks();
+          setInterval(updateClockHands, 1000);
+          updateClockHands();
+        }
+        init();
+      });
+    </script>
+  </body>
+</html>
