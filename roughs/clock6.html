@@ -1162,7 +1162,7 @@
         cursor: pointer;
       }
 
-      /* CODE TO REPLACE: Replace your entire "NOTES WIDGET STYLES" section with this block */
+      /* --- CODE TO ADD: Place this at the end of the <style> tag --- */
 
       /* ================================== */
       /* ==      NOTES WIDGET STYLES     == */
@@ -1172,9 +1172,9 @@
         position: fixed;
         bottom: 1.5rem;
         right: 1.5rem;
-        width: clamp(320px, 22vw, 450px);
-        max-height: 60vh;
-        min-height: 300px;
+        width: clamp(300px, 20vw, 420px);
+        max-height: 50vh;
+        min-height: 300px; /* Ensures widget has a minimum usable height */
         background-color: var(--clock-bg);
         border-radius: 16px;
         box-shadow: 0 8px 30px var(--shadow-color);
@@ -1182,6 +1182,7 @@
         z-index: 500;
         display: flex;
         flex-direction: column;
+        /* Smooth entrance animation */
         opacity: 0;
         transform: translateY(20px);
         animation: fadeInWidget 0.5s 0.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
@@ -1202,17 +1203,17 @@
         font-weight: 700;
         color: var(--text-color);
         border-bottom: 1px solid var(--border-color);
-        flex-shrink: 0;
+        flex-shrink: 0; /* Prevents header from shrinking */
       }
 
       .notes-content-container {
-        padding: 0.5rem 0.25rem 1rem 1.25rem;
+        padding: 0.5rem 0.25rem 1rem 1.25rem; /* Extra padding on left for content, less on right for scrollbar */
         flex-grow: 1;
         overflow-y: auto;
         scroll-behavior: smooth;
-        cursor: text; /* Notion-like affordance for creating new lines */
       }
 
+      /* Custom scrollbar for a refined look */
       .notes-content-container::-webkit-scrollbar {
         width: 8px;
       }
@@ -1233,215 +1234,36 @@
         font-size: 0.8rem;
         font-weight: 700;
         color: var(--secondary-color);
-        padding: 0.75rem 0 0.5rem;
+        padding: 0.75rem 0 0.25rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
       }
-      .note-section.is-today .note-section-header {
-        color: var(--danger-color);
+
+      .note-separator {
+        border: none;
+        height: 1px;
+        background-color: var(--border-color);
+        margin: 0.25rem 1rem 0.5rem 0; /* Align with text padding */
       }
 
-      .note-editor {
+      .note-textarea {
         width: 100%;
+        border: none;
         outline: none;
+        resize: none;
         background-color: transparent;
         font-family: "Inter", sans-serif;
         font-size: 1rem;
         line-height: 1.6;
         color: var(--text-color);
-        padding-right: 1rem;
-        min-height: 80px;
-        -webkit-user-select: text;
-        user-select: text;
-      }
-      .note-editor:focus {
-        outline: none;
-      }
-      /* Ensure the editor always has at least one line */
-      .note-editor:empty::before {
-        content: "Start typing...";
-        color: var(--secondary-color);
-        opacity: 0.7;
-        pointer-events: none;
-        display: block;
+        padding-right: 1rem; /* Space away from scrollbar */
+        min-height: 80px; /* Minimum typing area */
+        scroll-behavior: smooth;
       }
 
-      /* --- Block Element Styling --- */
-
-      .note-editor > * {
-        margin: 0.25em 0; /* Consistent vertical rhythm for all block elements */
-      }
-
-      /* Headings (BUG FIX: separator line removed) */
-      .note-editor h1,
-      .note-editor h2,
-      .note-editor h3 {
-        margin: 1.2em 0 0.6em;
-        font-weight: 700;
-        line-height: 1.3;
-      }
-      .note-editor h1 {
-        font-size: 1.8em;
-      }
-      .note-editor h2 {
-        font-size: 1.5em;
-      }
-      .note-editor h3 {
-        font-size: 1.25em;
-      }
-
-      .note-editor strong,
-      .note-editor b {
-        font-weight: 700;
-      }
-      .note-editor u {
-        text-decoration-color: rgba(0, 122, 255, 0.5);
-        text-decoration-thickness: 2px;
-      }
-
-      /* Indentation & Blockquotes (BUG FIX: Ugly style removed) */
-      .note-editor blockquote {
-        padding-left: 1.5em;
-        border-left: 3px solid var(--border-color);
-        color: inherit; /* Use default text color */
-        background-color: transparent; /* No background */
-      }
-
-      /* Bulleted Lists (NEW) */
-      .note-editor ul {
-        list-style-type: disc;
-        padding-inline-start: 2em;
-      }
-      .note-editor li {
-        margin: 0.1em 0;
-        padding-left: 0.5em;
-      }
-
-      /* Checklists (BUG FIX: Style remains, behavior fixed in JS) */
-      .note-editor .checklist {
-        display: flex;
-        align-items: flex-start;
-        gap: 0.5rem;
-      }
-      .note-editor .checklist-box {
-        margin-top: 0.25em;
-        width: 16px;
-        height: 16px;
-        flex-shrink: 0;
-      }
-      .note-editor .checklist-text {
-        flex-grow: 1;
-        outline: none;
-      }
-      .note-editor .checklist.checked .checklist-text {
-        text-decoration: line-through;
-        color: var(--secondary-color);
-        opacity: 0.8;
-      }
-
-      /* Collapsible Toggles (NEW) */
-      .note-editor .toggle-block details {
-        padding: 0.25em 0;
-      }
-      .note-editor .toggle-block summary {
-        display: flex;
-        align-items: center;
-        cursor: pointer;
-        list-style: none; /* Remove default marker */
-        font-weight: 500;
-        outline: none;
-      }
-      .note-editor .toggle-block summary::-webkit-details-marker {
-        display: none; /* Remove default marker for Chrome */
-      }
-      .note-editor .toggle-block summary::before {
-        content: "";
-        display: inline-block;
-        width: 0;
-        height: 0;
-        border-top: 4px solid transparent;
-        border-bottom: 4px solid transparent;
-        border-left: 6px solid currentColor; /* Triangle */
-        margin-right: 0.5em;
-        transition: transform 0.2s ease-in-out;
-        transform-origin: 25% 50%;
-      }
-      .note-editor .toggle-block details[open] > summary::before {
-        transform: rotate(90deg); /* Triangle points down when open */
-      }
-      .note-editor .toggle-title {
-        flex-grow: 1;
-        min-width: 0;
-        outline: none;
-      }
-      .note-editor .toggle-title:empty::before {
-        content: "Toggle Title";
-        color: var(--secondary-color);
-        opacity: 0.7;
-        pointer-events: none;
-      }
-      .note-editor .toggle-content {
-        padding-left: 1.5em; /* Indent the content */
-        margin-top: 0.25em;
-        outline: none;
-      }
-      .note-editor .toggle-content:empty::before {
-        content: "Empty toggle...";
-        color: var(--secondary-color);
-        opacity: 0.7;
-        pointer-events: none;
-      }
-
-      /* --- Toolbar & Utility --- */
-
-      .notes-toolbar {
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-        padding: 0.5rem 1.25rem;
-        border-bottom: 1px solid var(--border-color);
-        flex-shrink: 0;
-        background-color: #fcfcfc;
-        flex-wrap: wrap;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-      }
-
-      .notes-toolbar-btn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 0.5rem;
-        border-radius: 6px;
-        display: grid;
-        place-items: center;
-        transition: background-color 0.2s, color 0.2s;
-        color: var(--secondary-color);
-      }
-      .notes-toolbar-btn:hover {
-        background-color: var(--bg-color);
-        color: var(--text-color);
-      }
-      .notes-toolbar-btn.active {
-        background-color: #e0e8ff;
-        color: var(--primary-color);
-      }
-      .notes-toolbar-btn svg {
-        width: 20px;
-        height: 20px;
-        stroke: currentColor;
-        stroke-width: 2;
-        fill: none;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-      }
-
-      .notes-toolbar-separator {
-        width: 1px;
-        height: 20px;
-        background-color: var(--border-color);
-        margin: 0 0.5rem;
+      /* Special styling for the currently focused day's note area */
+      .note-section.focused .note-textarea {
+        min-height: 250px; /* Give the focused note more initial space */
       }
 
       .jump-to-today-btn {
@@ -1466,16 +1288,25 @@
         transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
         z-index: 10;
       }
+
       .jump-to-today-btn.visible {
         opacity: 1;
         visibility: visible;
         transform: translateX(-50%) translateY(0);
       }
+
       .jump-to-today-btn svg {
         width: 16px;
         height: 16px;
         stroke: currentColor;
         stroke-width: 2.5;
+      }
+
+      /* --- CODE TO ADD: Place this after the .note-section-header rule --- */
+
+      /* Highlights the header for the current day's note section */
+      .note-section.is-today .note-section-header {
+        color: var(--danger-color);
       }
     </style>
   </head>
@@ -1758,15 +1589,8 @@
 
     <!-- CODE TO ADD: Place this after the modal-overlay div -->
 
-    <!-- CODE TO REPLACE: notes-widget (adds toolbar container) -->
     <div class="notes-widget" id="notes-widget">
       <div class="notes-widget-header">Notes</div>
-
-      <!-- The new rich text toolbar -->
-      <div class="notes-toolbar" id="notes-toolbar">
-        <!-- Toolbar buttons will be dynamically added by JavaScript -->
-      </div>
-
       <div class="notes-content-container" id="notes-content-container">
         <!-- Note sections will be dynamically inserted here by JavaScript -->
       </div>
@@ -1866,8 +1690,6 @@
         );
         const jumpToTodayBtn = document.getElementById("jump-to-today-btn");
 
-        const notesToolbar = document.getElementById("notes-toolbar");
-
         // --- State ---
         let clockMode = "24h",
           ampm = "am",
@@ -1892,7 +1714,6 @@
         let notesByDate = {};
         let currentNotesDate = new Date(); // The date the notes widget is focused on
         let todayObserver = null; // To track if today's note is visible
-        let activeNoteEditor = null; // To track the currently focused editor
 
         // --- Constants ---
         const CENTER_X = 200,
@@ -2690,318 +2511,25 @@
             renderAppView());
         }
 
-        // CODE TO REPLACE: The entire "UPGRADED NOTES WIDGET LOGIC" section
+        // --- CODE TO ADD: Place this after the toggleTaskCompletion function ---
 
-        // ============================================
-        // == UPGRADED NOTES WIDGET LOGIC (Rich Text) ==
-        // ============================================
-
-        /**
-         * [HELPER] Gets detailed information about the current cursor position or selection,
-         * crucial for contextual formatting.
-         * @param {HTMLElement} editor - The contenteditable editor element.
-         * @returns {object|null} An object with selection, range, and the current block element.
-         */
-        function getSelectionInfo(editor) {
-          const selection = window.getSelection();
-          if (!selection || selection.rangeCount === 0) return null;
-
-          const range = selection.getRangeAt(0);
-          let container = range.startContainer;
-
-          // Traverse up to find the direct child of the editor that contains the selection
-          let block =
-            container.nodeType === 3 ? container.parentElement : container;
-          let parentWrapper = block;
-          while (parentWrapper && parentWrapper.parentElement !== editor) {
-            parentWrapper = parentWrapper.parentElement;
-          }
-          block = parentWrapper || block;
-
-          return {
-            selection,
-            range,
-            block, // The top-level block element inside the editor
-            isCollapsed: range.collapsed,
-            text: block ? block.textContent : "",
-          };
-        }
+        // ==================================
+        // ==     NOTES WIDGET LOGIC       ==
+        // ==================================
 
         /**
-         * [HELPER] Precisely sets the cursor to a specific node.
-         * @param {Node} node - The DOM node to place the cursor in.
-         * @param {string} position - 'start' or 'end' of the node.
-         */
-        function setCursor(node, position = "end") {
-          if (!node) return;
-          const selection = window.getSelection();
-          const range = document.createRange();
-
-          let targetNode =
-            node.querySelector('[contenteditable="true"]') || node;
-          while (targetNode.firstChild) {
-            targetNode = targetNode.lastChild;
-          }
-
-          try {
-            const length =
-              targetNode.nodeType === 3
-                ? targetNode.length
-                : node.childNodes.length;
-            range.setStart(targetNode, position === "start" ? 0 : length);
-            range.collapse(true);
-            selection.removeAllRanges();
-            selection.addRange(range);
-            node.closest(".note-editor").focus();
-          } catch (e) {
-            console.error("Failed to set cursor:", e, "on node:", node);
-            node.focus(); // Fallback
-          }
-        }
-
-        /**
-         * [REPLACEMENT] Initializes the notes toolbar with a full suite of rich text controls.
-         */
-        function initNotesToolbar() {
-          const controls = {
-            H1: {
-              icon: `<path d="M4 4v6h4V4H4zm0 8h4v6H4v-6zM12 4h4v16h-4V4zm6 0h4v6h-4V4zm0 8h4v6h-4v-6z"/>`,
-              action: () => formatDoc("formatBlock", "H1"),
-            },
-            H2: {
-              icon: `<path d="M4 4v6h4V4H4zm0 8h4v6H4v-6zM12 4h4v6h-4V4zm0 8h4v6h-4v-6zm6-8h4v6h-4V4z"/>`,
-              action: () => formatDoc("formatBlock", "H2"),
-            },
-            H3: {
-              icon: `<path d="M4 4v6h4V4H4zm0 8h4v6H4v-6zM12 4h4v6h-4V4zm0 8h4v6h-4v-6z"/>`,
-              action: () => formatDoc("formatBlock", "H3"),
-            },
-            separator1: { type: "separator" },
-            Bold: {
-              icon: `<path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>`,
-              action: () => formatDoc("bold"),
-            },
-            Italic: {
-              icon: `<line x1="19" y1="4" x2="10" y2="4"></line><line x1="14" y1="20" x2="5" y2="20"></line><line x1="15" y1="4" x2="9" y2="20"></line>`,
-              action: () => formatDoc("italic"),
-            },
-            Underline: {
-              icon: `<path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"></path><line x1="4" y1="21" x2="20" y2="21"></line>`,
-              action: () => formatDoc("underline"),
-            },
-            separator2: { type: "separator" },
-            Quote: {
-              icon: `<path d="M3 21c3 0 7-1 7-8V5c0-1.25-.75-2-2-2H4c-1.25 0-2 .75-2 2v6c0 7 4 8 8 8Z"></path><path d="M14 21c3 0 7-1 7-8V5c0-1.25-.75-2-2-2h-4c-1.25 0-2 .75-2 2v6c0 7 4 8 8 8Z"></path>`,
-              action: () => formatDoc("formatBlock", "BLOCKQUOTE"),
-            },
-            Checklist: {
-              icon: `<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><path d="m9 12 2 2 4-4"></path>`,
-              action: () => createBlockElement("checklist"),
-            },
-            BulletList: {
-              icon: `<line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line>`,
-              action: () => formatDoc("insertUnorderedList"),
-            },
-            Toggle: {
-              icon: `<polyline points="9 18 15 12 9 6"></polyline>`,
-              title: "Collapsible Toggle",
-              action: () => createBlockElement("toggle"),
-            },
-          };
-
-          notesToolbar.innerHTML = "";
-          for (const key in controls) {
-            const control = controls[key];
-            if (control.type === "separator") {
-              const sep = document.createElement("div");
-              sep.className = "notes-toolbar-separator";
-              notesToolbar.appendChild(sep);
-            } else {
-              const btn = document.createElement("button");
-              btn.className = "notes-toolbar-btn";
-              btn.title = control.title || key;
-              btn.innerHTML = `<svg viewBox="0 0 24 24">${control.icon}</svg>`;
-              btn.addEventListener("mousedown", (e) => {
-                e.preventDefault();
-                control.action();
-              });
-              notesToolbar.appendChild(btn);
-            }
-          }
-        }
-
-        /**
-         * [REPLACEMENT] Executes a formatting command and sanitizes the editor state afterward.
-         */
-        function formatDoc(command, value = null) {
-          if (!activeNoteEditor) return;
-          activeNoteEditor.focus();
-          document.execCommand(command, false, value);
-          sanitizeEditor(activeNoteEditor);
-          saveCurrentNote();
-        }
-
-        /**
-         * [HELPER] Creates a new default block element (a div with a break tag).
-         */
-        function createDefaultBlock() {
-          const div = document.createElement("div");
-          div.innerHTML = "<br>";
-          return div;
-        }
-
-        /**
-         * [NEW] Creates complex, multi-part block elements like checklists or toggles.
-         */
-        function createBlockElement(type) {
-          if (!activeNoteEditor) return;
-          const info = getSelectionInfo(activeNoteEditor);
-          let newBlock;
-
-          switch (type) {
-            case "checklist":
-              newBlock = document.createElement("div");
-              newBlock.className = "checklist";
-              newBlock.innerHTML = `<input type="checkbox" class="checklist-box"><div class="checklist-text" contenteditable="true"><br></div>`;
-              break;
-            case "toggle":
-              newBlock = document.createElement("div");
-              newBlock.className = "toggle-block";
-              newBlock.innerHTML = `<details><summary><div class="toggle-title" contenteditable="true"></div></summary><div class="toggle-content" contenteditable="true"><br></div></details>`;
-              break;
-            default:
-              return;
-          }
-
-          if (info && info.block && info.text.trim() === "") {
-            info.block.replaceWith(newBlock);
-          } else if (info && info.block) {
-            info.block.after(newBlock);
-          } else {
-            activeNoteEditor.appendChild(newBlock);
-          }
-
-          setCursor(newBlock);
-          saveCurrentNote();
-        }
-
-        /**
-         * [NEW] Handles markdown-style shortcuts like #, -, and [] followed by a space.
-         */
-        function handleMarkdownShortcuts(info) {
-          if (!info || !info.block) return false;
-
-          // Use non-breaking space to handle different space types
-          const text = info.text.replace(/\u00A0/g, " ").trim();
-
-          const transformations = {
-            "#": "H1",
-            "##": "H2",
-            "###": "H3",
-          };
-
-          if (transformations[text]) {
-            formatDoc("formatBlock", transformations[text]);
-            const newBlock = getSelectionInfo(activeNoteEditor).block;
-            if (newBlock) newBlock.textContent = "";
-          } else if (text === "-") {
-            formatDoc("insertUnorderedList");
-          } else if (text === "[]") {
-            createBlockElement("checklist");
-          } else if (text === ">>") {
-            createBlockElement("toggle");
-          } else if (text === ">") {
-            formatDoc("formatBlock", "BLOCKQUOTE");
-            const newBlock = getSelectionInfo(activeNoteEditor).block;
-            if (newBlock) newBlock.textContent = "";
-          }
-        }
-
-        /**
-         * [NEW] Intercepts key presses to provide advanced editor behavior (Enter, Tab, etc.).
-         */
-        function handleKeyDown(e) {
-          const editor = e.target.closest(".note-editor");
-          if (!editor) return;
-          const info = getSelectionInfo(editor);
-          if (!info || !info.block) return;
-
-          // --- Enter Key Logic ---
-          if (e.key === "Enter" && !e.shiftKey) {
-            const block = info.block;
-            const parentChecklist = block.closest(".checklist");
-            const parentListItem = block.closest("li");
-
-            if (parentChecklist) {
-              e.preventDefault();
-              if (block.textContent.trim() === "") {
-                // Exit from empty checklist
-                const newBlock = createDefaultBlock();
-                parentChecklist.replaceWith(newBlock);
-                setCursor(newBlock);
-              } else {
-                // Create new checklist item
-                const newChecklist = parentChecklist.cloneNode(true);
-                newChecklist.querySelector("input").checked = false;
-                newChecklist.querySelector(".checklist-text").innerHTML =
-                  "<br>";
-                parentChecklist.after(newChecklist);
-                setCursor(newChecklist);
-              }
-            } else if (parentListItem && block.textContent.trim() === "") {
-              e.preventDefault();
-              formatDoc("outdent"); // Exits the list
-            } else if (
-              block.tagName === "BLOCKQUOTE" &&
-              block.textContent.trim() === ""
-            ) {
-              e.preventDefault();
-              formatDoc("formatBlock", "DIV"); // Exits the blockquote
-            }
-          }
-
-          // --- Tab Key Logic for Indentation ---
-          if (e.key === "Tab") {
-            e.preventDefault();
-            formatDoc(e.shiftKey ? "outdent" : "indent");
-          }
-        }
-
-        /**
-         * [NEW] Ensures the editor DOM is clean and predictable, wrapping stray text nodes.
-         */
-        function sanitizeEditor(editor) {
-          editor.childNodes.forEach((node) => {
-            if (node.nodeType === 3 && node.textContent.trim() !== "") {
-              const div = document.createElement("div");
-              div.textContent = node.textContent;
-              node.replaceWith(div);
-            }
-          });
-          if (!editor.firstChild || editor.innerHTML.trim() === "") {
-            editor.innerHTML = "<div><br></div>";
-          }
-        }
-
-        /**
-         * [NEW] Centralized function to save the content of the currently active note editor.
-         */
-        function saveCurrentNote() {
-          if (!activeNoteEditor) return;
-          const dateKey = activeNoteEditor.dataset.datekey;
-          if (dateKey) {
-            notesByDate[dateKey] = activeNoteEditor.innerHTML;
-            saveNotes();
-          }
-        }
-
-        /**
-         * [REPLACEMENT] Loads and saves notes from/to local storage.
+         * Loads notes from local storage into the state.
          */
         function loadNotes() {
           const savedNotes = localStorage.getItem("clockTasksProNotes");
-          notesByDate = savedNotes ? JSON.parse(savedNotes) : {};
+          if (savedNotes) {
+            notesByDate = JSON.parse(savedNotes);
+          }
         }
+
+        /**
+         * Saves the current notes state to local storage.
+         */
         function saveNotes() {
           localStorage.setItem(
             "clockTasksProNotes",
@@ -3010,98 +2538,149 @@
         }
 
         /**
-         * [REPLACEMENT] Formats the date for display in the note section header.
+         * Formats a date for display in the note header. Provides context like "Today", "Yesterday".
+         * @param {Date} date - The date to format.
+         * @returns {string} A human-readable date string.
          */
         function formatNoteDateHeader(date) {
           const today = new Date();
           const yesterday = new Date();
           yesterday.setDate(today.getDate() - 1);
+
           const options = { day: "numeric", month: "long", year: "numeric" };
-          if (getDateKey(date) === getDateKey(today))
+
+          if (getDateKey(date) === getDateKey(today)) {
             return `Today · ${today.toLocaleDateString("en-US", options)}`;
-          if (getDateKey(date) === getDateKey(yesterday))
+          }
+          if (getDateKey(date) === getDateKey(yesterday)) {
             return `Yesterday · ${yesterday.toLocaleDateString(
               "en-US",
               options
             )}`;
+          }
           return date.toLocaleDateString("en-US", options);
         }
 
         /**
-         * [REPLACEMENT] Creates the DOM elements for a single day's note section.
+         * Dynamically adjusts a textarea's height to fit its content.
+         * @param {HTMLTextAreaElement} textarea - The textarea element to resize.
          */
+        function autoResizeTextarea(textarea) {
+          textarea.style.height = "auto";
+          textarea.style.height = `${textarea.scrollHeight}px`;
+        }
+
+        /**
+
+ * Creates the DOM elements for a single day's note section.
+ * @param {Date} date - The date for this note section.
+ * @param {boolean} isFocused - Whether this is the main, focused note.
+ * @returns {HTMLElement} The complete note section element.
+ */
         function createNoteSection(date, isFocused) {
           const dateKey = getDateKey(date);
           const section = document.createElement("div");
           section.className = "note-section";
           section.id = `note-section-${dateKey}`;
-          if (isFocused) section.classList.add("focused");
-          if (getDateKey(date) === getDateKey(new Date()))
+          if (isFocused) {
+            section.classList.add("focused");
+          }
+
+          // --- ADD THIS BLOCK --- //
+          // Check if this section's date is today and apply a special class
+          if (getDateKey(date) === getDateKey(new Date())) {
             section.classList.add("is-today");
+          }
+          // --- END OF ADDED BLOCK --- //
 
           const header = document.createElement("h3");
           header.className = "note-section-header";
           header.textContent = formatNoteDateHeader(date);
 
-          const editor = document.createElement("div");
-          editor.className = "note-editor";
-          editor.contentEditable = true;
-          editor.dataset.datekey = dateKey;
-          editor.setAttribute("spellcheck", "false");
-          editor.innerHTML = notesByDate[dateKey] || "<div><br></div>";
+          const separator = document.createElement("hr");
+          separator.className = "note-separator";
+
+          const textarea = document.createElement("textarea");
+          textarea.className = "note-textarea";
+          textarea.placeholder = isFocused
+            ? "Write a note for the day..."
+            : "No note for this day.";
+          textarea.dataset.datekey = dateKey;
+          textarea.value = notesByDate[dateKey] || "";
 
           section.appendChild(header);
-          section.appendChild(editor);
+          section.appendChild(separator);
+          section.appendChild(textarea);
+
+          // Set initial size after appending to DOM
+          setTimeout(() => autoResizeTextarea(textarea), 0);
 
           return section;
         }
 
         /**
-         * [REPLACEMENT] Renders the entire content of the notes widget.
+         * Renders the entire content of the notes widget based on the current state.
          */
         function renderNotesWidget() {
-          const focusedDateKey = getDateKey(currentNotesDate);
-          const todayKey = getDateKey(new Date());
           notesContainer.innerHTML = "";
+          const todayKey = getDateKey(new Date());
 
-          const datesToRender = new Set(
-            Object.keys(notesByDate).filter((key) =>
-              notesByDate[key]?.replace(/<[^>]*>?/gm, "").trim()
-            )
-          );
-          datesToRender.add(focusedDateKey);
+          // Get all dates with notes, plus the currently focused date
+          const datesWithNotes = Object.keys(notesByDate)
+            .filter((key) => notesByDate[key].trim() !== "")
+            .map((key) => new Date(key + "T00:00:00")); // Ensure correct date parsing
 
-          const sortedDateKeys = Array.from(datesToRender).sort();
+          // Add the focused date to the list if it's not already there
+          const focusedDateKey = getDateKey(currentNotesDate);
+          if (!datesWithNotes.some((d) => getDateKey(d) === focusedDateKey)) {
+            datesWithNotes.push(currentNotesDate);
+          }
 
-          sortedDateKeys.forEach((dateKey) => {
-            const date = new Date(dateKey + "T00:00:00");
-            const isFocused = dateKey === focusedDateKey;
+          // Sort all dates chronologically
+          const sortedDates = datesWithNotes.sort((a, b) => a - b);
+
+          // Create and append all sections
+          sortedDates.forEach((date) => {
+            const isFocused = getDateKey(date) === focusedDateKey;
             const section = createNoteSection(date, isFocused);
             notesContainer.appendChild(section);
           });
 
+          // Scroll the focused note into view
+          // --- CODE TO REPLACE in the renderNotesWidget function ---
+
+          // Scroll the focused note into view with a smooth animation
           const focusedElement = document.querySelector(
             ".note-section.focused"
           );
           if (focusedElement) {
-            focusedElement.scrollIntoView({ behavior: "auto", block: "start" });
+            focusedElement.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
           }
 
+          // Set up the Intersection Observer to watch today's actual note section
           if (todayObserver) todayObserver.disconnect();
           const todayElement = document.getElementById(
             `note-section-${todayKey}`
           );
+
           if (todayElement) {
             todayObserver = new IntersectionObserver(
-              (entries) =>
+              (entries) => {
+                // If today's note is not visible on screen, show the 'Jump to Today' button
                 jumpToTodayBtn.classList.toggle(
                   "visible",
                   !entries[0].isIntersecting
-                ),
+                );
+              },
               { root: notesContainer, threshold: 0.1 }
             );
             todayObserver.observe(todayElement);
           } else {
+            // If today is not rendered (e.g., no note and not focused), always show the button
+            // unless the current view IS today.
             jumpToTodayBtn.classList.toggle(
               "visible",
               focusedDateKey !== todayKey
@@ -3833,62 +3412,18 @@
 
           // Event Listeners for Notes Widget
           loadNotes();
-          initNotesToolbar();
-
-          notesContainer.addEventListener("focusin", (e) => {
-            if (e.target.closest(".note-editor")) {
-              activeNoteEditor = e.target.closest(".note-editor");
-            }
-          });
-
           notesContainer.addEventListener("input", (e) => {
-            const editor = e.target.closest(".note-editor");
-            if (editor && e.data === " ") {
-              handleMarkdownShortcuts(getSelectionInfo(editor));
-            }
-            // Debounce saving to prevent excessive localStorage writes
-            clearTimeout(window.saveTimeout);
-            window.saveTimeout = setTimeout(saveCurrentNote, 500);
-          });
-
-          notesContainer.addEventListener("keydown", handleKeyDown);
-
-          notesContainer.addEventListener("click", (e) => {
-            // Handle clicking on checkboxes
-            if (e.target.matches(".checklist-box")) {
-              e.target.closest(".checklist").classList.toggle("checked");
-              saveCurrentNote();
-            }
-            // Notion-like "click below to add new line" feature
-            else if (e.target === notesContainer) {
-              const lastEditor = notesContainer.querySelector(
-                ".note-editor:last-of-type"
-              );
-              if (lastEditor) {
-                const rect = lastEditor.getBoundingClientRect();
-                if (e.clientY > rect.bottom - 10) {
-                  // Clicked in the bottom margin
-                  const newBlock = createDefaultBlock();
-                  lastEditor.appendChild(newBlock);
-                  setCursor(newBlock);
-                }
-              }
-            }
-          });
-
-          // Clean up the editor's HTML structure on blur for consistency
-          notesContainer.addEventListener("focusout", (e) => {
-            const editor = e.target.closest(".note-editor");
-            if (editor) {
-              sanitizeEditor(editor);
-              saveCurrentNote(); // Final save on blur
+            if (e.target.classList.contains("note-textarea")) {
+              const dateKey = e.target.dataset.datekey;
+              notesByDate[dateKey] = e.target.value;
+              saveNotes();
+              autoResizeTextarea(e.target);
             }
           });
 
           jumpToTodayBtn.addEventListener("click", () => {
-            const todayKey = getDateKey(new Date());
             const todayElement = document.getElementById(
-              `note-section-${todayKey}`
+              `note-section-${getDateKey(new Date())}`
             );
             if (todayElement) {
               todayElement.scrollIntoView({
@@ -3896,7 +3431,7 @@
                 block: "start",
               });
             } else {
-              // If today's note doesn't exist, create it by focusing
+              // If today's note doesn't exist yet, focus on it to create it
               currentNotesDate = new Date();
               renderNotesWidget();
             }

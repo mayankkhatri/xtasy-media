@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ClockTask Pro - Visual Scheduler</title>
-
     <style>
       /* --- GLOBAL STYLES & SETUP --- */
       @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap");
@@ -649,7 +648,7 @@
         position: fixed;
         bottom: 1.5rem;
         left: 1.5rem;
-        width: clamp(400px, 20vw, 420px);
+        width: clamp(250px, 20vw, 320px);
         background-color: var(--clock-bg);
         border-radius: 12px;
         padding: 1rem;
@@ -666,11 +665,6 @@
 
         transition: max-height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
           box-shadow 0.3s ease;
-
-        max-height: 40vh;
-        overflow-y: scroll;
-        scrollbar-width: none;
-        scroll-behavior: smooth;
       }
 
       .progress-widget:not(.hidden) {
@@ -734,7 +728,6 @@
         align-items: center;
         /* The background color will be set by JS to the task's color */
         transition: background-color 0.5s ease;
-        border: 1px solid var(--border-color);
       }
       .progress-bar-elapsed {
         height: 100%;
@@ -749,7 +742,7 @@
         position: absolute;
         left: 10px;
         color: black;
-        font-size: 0.79rem;
+        font-size: 0.8rem;
         font-weight: 800;
         pointer-events: none;
       }
@@ -942,541 +935,6 @@
         color: #8e8e93;
         font-size: 14px;
       }
-
-      /* --- Subtask Feature Styling --- */
-      .subtasks-section {
-        padding: 8px 16px 12px;
-        border-top: 1px solid #e5e5e5;
-        margin-top: 12px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .subtask-card {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        padding: 10px;
-        margin: 7px auto;
-        background-color: #f5f5f7;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-      }
-
-      .subtask-card.completed {
-        background-color: #e9f9ec;
-        opacity: 0.7;
-      }
-
-      .subtask-card.completed .subtask-name {
-        text-decoration: line-through;
-        color: #8e8e93;
-      }
-
-      .subtask-main {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .subtask-checkbox {
-        flex-shrink: 0;
-        width: 20px;
-        height: 20px;
-        border: 2px solid #c7c7cc;
-        border-radius: 50%;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .subtask-card.completed .subtask-checkbox {
-        background-color: #34c759;
-        border-color: #34c759;
-      }
-
-      .subtask-checkbox svg {
-        width: 12px;
-        height: 12px;
-        stroke: #ffffff;
-        stroke-width: 3;
-        opacity: 0;
-        transform: scale(0.5);
-        transition: all 0.2s ease;
-      }
-
-      .subtask-card.completed .subtask-checkbox svg {
-        opacity: 1;
-        transform: scale(1);
-      }
-
-      .subtask-name {
-        flex-grow: 1;
-        font-size: 15px;
-        font-weight: 500;
-        color: #1d1d1f;
-        outline: none;
-        border: 1px solid transparent;
-        padding: 2px 4px;
-        border-radius: 4px;
-        transition: border-color 0.2s;
-      }
-      .subtask-name:focus {
-        border-color: #007aff;
-        background-color: #fff;
-        box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
-      }
-
-      .subtask-time-controls {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        flex-shrink: 0;
-      }
-
-      .subtask-time-input {
-        width: 45px;
-        padding: 4px 6px;
-        border-radius: 5px;
-        border: 1px solid #e0e0e0;
-        text-align: center;
-        font-size: 14px;
-        -moz-appearance: textfield; /* Firefox */
-      }
-      .subtask-time-input::-webkit-outer-spin-button,
-      .subtask-time-input::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-      }
-
-      .subtask-time-btn {
-        background: none;
-        border: none;
-        padding: 4px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #8e8e93;
-        transition: color 0.2s ease, transform 0.2s ease;
-      }
-      .subtask-time-btn:hover {
-        color: #007aff;
-        transform: scale(1.1);
-      }
-      .subtask-time-btn svg {
-        width: 20px;
-        height: 20px;
-      }
-
-      .subtask-timer-display {
-        font-size: 13px;
-        font-weight: 500;
-        color: #333;
-        background-color: #e9e9eb;
-        padding: 4px 8px;
-        border-radius: 5px;
-        white-space: nowrap;
-      }
-      .subtask-timer-display.overtime {
-        color: #ff3b30;
-        background-color: #ffebee;
-      }
-
-      .subtask-progress-container {
-        height: 6px;
-        background-color: rgba(120, 120, 128, 0.16);
-        border-radius: 3px;
-        overflow: hidden;
-        position: relative;
-      }
-
-      .subtask-progress-bar {
-        height: 100%;
-        width: 0%;
-        border-radius: 3px;
-        transition: width 0.5s linear;
-      }
-      .subtask-progress-bar.overtime {
-        background-color: #ff3b30 !important;
-      }
-
-      .add-subtask-btn {
-        width: 100%;
-        padding: 10px;
-        background-color: rgba(0, 122, 255, 0.08);
-        border: 1px dashed #007aff;
-        color: #007aff;
-        font-weight: 600;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        font-size: 14px;
-      }
-      .add-subtask-btn:hover {
-        background-color: rgba(0, 122, 255, 0.15);
-        border-style: solid;
-      }
-      .add-subtask-btn svg {
-        width: 18px;
-        height: 18px;
-      }
-
-      .subtask-limit-notice {
-        text-align: center;
-        padding: 10px;
-        font-size: 13px;
-        color: #8e8e93;
-        background-color: #f5f5f7;
-        border-radius: 8px;
-      }
-      .subtask-delete-btn {
-        background: none;
-        border: none;
-        padding: 4px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #c7c7cc; /* A muted default color */
-        transition: color 0.2s ease, transform 0.2s ease;
-        margin-left: 4px;
-      }
-      .subtask-delete-btn:hover {
-        color: #ff3b30; /* Danger color on hover */
-        transform: scale(1.1);
-      }
-      .subtask-delete-btn svg {
-        width: 18px;
-        height: 18px;
-      }
-      /* Add a pointer cursor to the timer display to indicate it's clickable */
-      .subtask-timer-display {
-        cursor: pointer;
-      }
-
-      /* CODE TO REPLACE: Replace your entire "NOTES WIDGET STYLES" section with this block */
-
-      /* ================================== */
-      /* ==      NOTES WIDGET STYLES     == */
-      /* ================================== */
-
-      .notes-widget {
-        position: fixed;
-        bottom: 1.5rem;
-        right: 1.5rem;
-        width: clamp(320px, 22vw, 450px);
-        max-height: 60vh;
-        min-height: 300px;
-        background-color: var(--clock-bg);
-        border-radius: 16px;
-        box-shadow: 0 8px 30px var(--shadow-color);
-        border: 1px solid var(--border-color);
-        z-index: 500;
-        display: flex;
-        flex-direction: column;
-        opacity: 0;
-        transform: translateY(20px);
-        animation: fadeInWidget 0.5s 0.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-        user-select: none;
-        -webkit-user-select: none;
-      }
-
-      @keyframes fadeInWidget {
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .notes-widget-header {
-        padding: 1rem 1.25rem 0.75rem;
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--text-color);
-        border-bottom: 1px solid var(--border-color);
-        flex-shrink: 0;
-      }
-
-      .notes-content-container {
-        padding: 0.5rem 0.25rem 1rem 1.25rem;
-        flex-grow: 1;
-        overflow-y: auto;
-        scroll-behavior: smooth;
-        cursor: text; /* Notion-like affordance for creating new lines */
-      }
-
-      .notes-content-container::-webkit-scrollbar {
-        width: 8px;
-      }
-      .notes-content-container::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      .notes-content-container::-webkit-scrollbar-thumb {
-        background-color: #d1d1d6;
-        border-radius: 10px;
-        border: 2px solid var(--clock-bg);
-      }
-
-      .note-section {
-        padding-bottom: 1rem;
-      }
-
-      .note-section-header {
-        font-size: 0.8rem;
-        font-weight: 700;
-        color: var(--secondary-color);
-        padding: 0.75rem 0 0.5rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-      .note-section.is-today .note-section-header {
-        color: var(--danger-color);
-      }
-
-      .note-editor {
-        width: 100%;
-        outline: none;
-        background-color: transparent;
-        font-family: "Inter", sans-serif;
-        font-size: 1rem;
-        line-height: 1.6;
-        color: var(--text-color);
-        padding-right: 1rem;
-        min-height: 80px;
-        -webkit-user-select: text;
-        user-select: text;
-      }
-      .note-editor:focus {
-        outline: none;
-      }
-      /* Ensure the editor always has at least one line */
-      .note-editor:empty::before {
-        content: "Start typing...";
-        color: var(--secondary-color);
-        opacity: 0.7;
-        pointer-events: none;
-        display: block;
-      }
-
-      /* --- Block Element Styling --- */
-
-      .note-editor > * {
-        margin: 0.25em 0; /* Consistent vertical rhythm for all block elements */
-      }
-
-      /* Headings (BUG FIX: separator line removed) */
-      .note-editor h1,
-      .note-editor h2,
-      .note-editor h3 {
-        margin: 1.2em 0 0.6em;
-        font-weight: 700;
-        line-height: 1.3;
-      }
-      .note-editor h1 {
-        font-size: 1.8em;
-      }
-      .note-editor h2 {
-        font-size: 1.5em;
-      }
-      .note-editor h3 {
-        font-size: 1.25em;
-      }
-
-      .note-editor strong,
-      .note-editor b {
-        font-weight: 700;
-      }
-      .note-editor u {
-        text-decoration-color: rgba(0, 122, 255, 0.5);
-        text-decoration-thickness: 2px;
-      }
-
-      /* Indentation & Blockquotes (BUG FIX: Ugly style removed) */
-      .note-editor blockquote {
-        padding-left: 1.5em;
-        border-left: 3px solid var(--border-color);
-        color: inherit; /* Use default text color */
-        background-color: transparent; /* No background */
-      }
-
-      /* Bulleted Lists (NEW) */
-      .note-editor ul {
-        list-style-type: disc;
-        padding-inline-start: 2em;
-      }
-      .note-editor li {
-        margin: 0.1em 0;
-        padding-left: 0.5em;
-      }
-
-      /* Checklists (BUG FIX: Style remains, behavior fixed in JS) */
-      .note-editor .checklist {
-        display: flex;
-        align-items: flex-start;
-        gap: 0.5rem;
-      }
-      .note-editor .checklist-box {
-        margin-top: 0.25em;
-        width: 16px;
-        height: 16px;
-        flex-shrink: 0;
-      }
-      .note-editor .checklist-text {
-        flex-grow: 1;
-        outline: none;
-      }
-      .note-editor .checklist.checked .checklist-text {
-        text-decoration: line-through;
-        color: var(--secondary-color);
-        opacity: 0.8;
-      }
-
-      /* Collapsible Toggles (NEW) */
-      .note-editor .toggle-block details {
-        padding: 0.25em 0;
-      }
-      .note-editor .toggle-block summary {
-        display: flex;
-        align-items: center;
-        cursor: pointer;
-        list-style: none; /* Remove default marker */
-        font-weight: 500;
-        outline: none;
-      }
-      .note-editor .toggle-block summary::-webkit-details-marker {
-        display: none; /* Remove default marker for Chrome */
-      }
-      .note-editor .toggle-block summary::before {
-        content: "";
-        display: inline-block;
-        width: 0;
-        height: 0;
-        border-top: 4px solid transparent;
-        border-bottom: 4px solid transparent;
-        border-left: 6px solid currentColor; /* Triangle */
-        margin-right: 0.5em;
-        transition: transform 0.2s ease-in-out;
-        transform-origin: 25% 50%;
-      }
-      .note-editor .toggle-block details[open] > summary::before {
-        transform: rotate(90deg); /* Triangle points down when open */
-      }
-      .note-editor .toggle-title {
-        flex-grow: 1;
-        min-width: 0;
-        outline: none;
-      }
-      .note-editor .toggle-title:empty::before {
-        content: "Toggle Title";
-        color: var(--secondary-color);
-        opacity: 0.7;
-        pointer-events: none;
-      }
-      .note-editor .toggle-content {
-        padding-left: 1.5em; /* Indent the content */
-        margin-top: 0.25em;
-        outline: none;
-      }
-      .note-editor .toggle-content:empty::before {
-        content: "Empty toggle...";
-        color: var(--secondary-color);
-        opacity: 0.7;
-        pointer-events: none;
-      }
-
-      /* --- Toolbar & Utility --- */
-
-      .notes-toolbar {
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-        padding: 0.5rem 1.25rem;
-        border-bottom: 1px solid var(--border-color);
-        flex-shrink: 0;
-        background-color: #fcfcfc;
-        flex-wrap: wrap;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-      }
-
-      .notes-toolbar-btn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 0.5rem;
-        border-radius: 6px;
-        display: grid;
-        place-items: center;
-        transition: background-color 0.2s, color 0.2s;
-        color: var(--secondary-color);
-      }
-      .notes-toolbar-btn:hover {
-        background-color: var(--bg-color);
-        color: var(--text-color);
-      }
-      .notes-toolbar-btn.active {
-        background-color: #e0e8ff;
-        color: var(--primary-color);
-      }
-      .notes-toolbar-btn svg {
-        width: 20px;
-        height: 20px;
-        stroke: currentColor;
-        stroke-width: 2;
-        fill: none;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-      }
-
-      .notes-toolbar-separator {
-        width: 1px;
-        height: 20px;
-        background-color: var(--border-color);
-        margin: 0 0.5rem;
-      }
-
-      .jump-to-today-btn {
-        position: absolute;
-        bottom: 1rem;
-        left: 50%;
-        transform: translateX(-50%) translateY(10px);
-        background-color: var(--primary-color);
-        color: white;
-        border: none;
-        border-radius: 99px;
-        padding: 0.5rem 1rem;
-        font-size: 0.75rem;
-        font-weight: 600;
-        cursor: pointer;
-        box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
-        z-index: 10;
-      }
-      .jump-to-today-btn.visible {
-        opacity: 1;
-        visibility: visible;
-        transform: translateX(-50%) translateY(0);
-      }
-      .jump-to-today-btn svg {
-        width: 16px;
-        height: 16px;
-        stroke: currentColor;
-        stroke-width: 2.5;
-      }
     </style>
   </head>
   <body>
@@ -1645,7 +1103,6 @@
       <!-- CODE TO REPLACE: Remove your old .progress-widget and replace it with this entire block. -->
       <div class="progress-widget hidden" id="progress-widget">
         <!-- View 1: The Default Progress View -->
-        <!-- REPLACE this div -->
         <div class="progress-widget-main-view" id="progress-widget-main-view">
           <div class="progress-widget-header">
             <span
@@ -1684,16 +1141,6 @@
               class="progress-bar-percentage"
               id="progress-bar-percentage"
             ></span>
-          </div>
-
-          <!-- ADD THIS ENTIRE SECTION for the new feature -->
-          <div class="subtasks-section hidden" id="subtasks-section">
-            <div class="subtasks-container" id="subtasks-container">
-              <!-- Subtask cards will be dynamically inserted here -->
-            </div>
-            <div id="subtask-controls-container">
-              <!-- "Add Subtask" button or limit notice will be here -->
-            </div>
           </div>
         </div>
 
@@ -1754,34 +1201,6 @@
           <button id="save-task-btn">Save</button>
         </div>
       </div>
-    </div>
-
-    <!-- CODE TO ADD: Place this after the modal-overlay div -->
-
-    <!-- CODE TO REPLACE: notes-widget (adds toolbar container) -->
-    <div class="notes-widget" id="notes-widget">
-      <div class="notes-widget-header">Notes</div>
-
-      <!-- The new rich text toolbar -->
-      <div class="notes-toolbar" id="notes-toolbar">
-        <!-- Toolbar buttons will be dynamically added by JavaScript -->
-      </div>
-
-      <div class="notes-content-container" id="notes-content-container">
-        <!-- Note sections will be dynamically inserted here by JavaScript -->
-      </div>
-      <button class="jump-to-today-btn" id="jump-to-today-btn">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <line x1="12" y1="19" x2="12" y2="5"></line>
-          <polyline points="5 12 12 5 19 12"></polyline>
-        </svg>
-        Jump to Today
-      </button>
     </div>
 
     <script>
@@ -1859,15 +1278,6 @@
         const taskListCards = document.getElementById("task-list-cards");
         const taskListCloseBtn = document.getElementById("task-list-close-btn");
 
-        // --- CODE TO ADD to the 'DOM Elements' section ---
-        const notesWidget = document.getElementById("notes-widget");
-        const notesContainer = document.getElementById(
-          "notes-content-container"
-        );
-        const jumpToTodayBtn = document.getElementById("jump-to-today-btn");
-
-        const notesToolbar = document.getElementById("notes-toolbar");
-
         // --- State ---
         let clockMode = "24h",
           ampm = "am",
@@ -1887,12 +1297,6 @@
 
         // State for progress widget
         let currentWidgetTaskId = null;
-
-        // --- CODE TO ADD to the 'State' section ---
-        let notesByDate = {};
-        let currentNotesDate = new Date(); // The date the notes widget is focused on
-        let todayObserver = null; // To track if today's note is visible
-        let activeNoteEditor = null; // To track the currently focused editor
 
         // --- Constants ---
         const CENTER_X = 200,
@@ -2663,7 +2067,6 @@
               startHour: startHour,
               endHour: endHour,
               completed: completed,
-              subtasks: [], // <<< ADD THIS LINE
             });
           }
 
@@ -2690,812 +2093,14 @@
             renderAppView());
         }
 
-        // CODE TO REPLACE: The entire "UPGRADED NOTES WIDGET LOGIC" section
-
-        // ============================================
-        // == UPGRADED NOTES WIDGET LOGIC (Rich Text) ==
-        // ============================================
-
-        /**
-         * [HELPER] Gets detailed information about the current cursor position or selection,
-         * crucial for contextual formatting.
-         * @param {HTMLElement} editor - The contenteditable editor element.
-         * @returns {object|null} An object with selection, range, and the current block element.
-         */
-        function getSelectionInfo(editor) {
-          const selection = window.getSelection();
-          if (!selection || selection.rangeCount === 0) return null;
-
-          const range = selection.getRangeAt(0);
-          let container = range.startContainer;
-
-          // Traverse up to find the direct child of the editor that contains the selection
-          let block =
-            container.nodeType === 3 ? container.parentElement : container;
-          let parentWrapper = block;
-          while (parentWrapper && parentWrapper.parentElement !== editor) {
-            parentWrapper = parentWrapper.parentElement;
-          }
-          block = parentWrapper || block;
-
-          return {
-            selection,
-            range,
-            block, // The top-level block element inside the editor
-            isCollapsed: range.collapsed,
-            text: block ? block.textContent : "",
-          };
-        }
-
-        /**
-         * [HELPER] Precisely sets the cursor to a specific node.
-         * @param {Node} node - The DOM node to place the cursor in.
-         * @param {string} position - 'start' or 'end' of the node.
-         */
-        function setCursor(node, position = "end") {
-          if (!node) return;
-          const selection = window.getSelection();
-          const range = document.createRange();
-
-          let targetNode =
-            node.querySelector('[contenteditable="true"]') || node;
-          while (targetNode.firstChild) {
-            targetNode = targetNode.lastChild;
-          }
-
-          try {
-            const length =
-              targetNode.nodeType === 3
-                ? targetNode.length
-                : node.childNodes.length;
-            range.setStart(targetNode, position === "start" ? 0 : length);
-            range.collapse(true);
-            selection.removeAllRanges();
-            selection.addRange(range);
-            node.closest(".note-editor").focus();
-          } catch (e) {
-            console.error("Failed to set cursor:", e, "on node:", node);
-            node.focus(); // Fallback
-          }
-        }
-
-        /**
-         * [REPLACEMENT] Initializes the notes toolbar with a full suite of rich text controls.
-         */
-        function initNotesToolbar() {
-          const controls = {
-            H1: {
-              icon: `<path d="M4 4v6h4V4H4zm0 8h4v6H4v-6zM12 4h4v16h-4V4zm6 0h4v6h-4V4zm0 8h4v6h-4v-6z"/>`,
-              action: () => formatDoc("formatBlock", "H1"),
-            },
-            H2: {
-              icon: `<path d="M4 4v6h4V4H4zm0 8h4v6H4v-6zM12 4h4v6h-4V4zm0 8h4v6h-4v-6zm6-8h4v6h-4V4z"/>`,
-              action: () => formatDoc("formatBlock", "H2"),
-            },
-            H3: {
-              icon: `<path d="M4 4v6h4V4H4zm0 8h4v6H4v-6zM12 4h4v6h-4V4zm0 8h4v6h-4v-6z"/>`,
-              action: () => formatDoc("formatBlock", "H3"),
-            },
-            separator1: { type: "separator" },
-            Bold: {
-              icon: `<path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>`,
-              action: () => formatDoc("bold"),
-            },
-            Italic: {
-              icon: `<line x1="19" y1="4" x2="10" y2="4"></line><line x1="14" y1="20" x2="5" y2="20"></line><line x1="15" y1="4" x2="9" y2="20"></line>`,
-              action: () => formatDoc("italic"),
-            },
-            Underline: {
-              icon: `<path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"></path><line x1="4" y1="21" x2="20" y2="21"></line>`,
-              action: () => formatDoc("underline"),
-            },
-            separator2: { type: "separator" },
-            Quote: {
-              icon: `<path d="M3 21c3 0 7-1 7-8V5c0-1.25-.75-2-2-2H4c-1.25 0-2 .75-2 2v6c0 7 4 8 8 8Z"></path><path d="M14 21c3 0 7-1 7-8V5c0-1.25-.75-2-2-2h-4c-1.25 0-2 .75-2 2v6c0 7 4 8 8 8Z"></path>`,
-              action: () => formatDoc("formatBlock", "BLOCKQUOTE"),
-            },
-            Checklist: {
-              icon: `<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><path d="m9 12 2 2 4-4"></path>`,
-              action: () => createBlockElement("checklist"),
-            },
-            BulletList: {
-              icon: `<line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line>`,
-              action: () => formatDoc("insertUnorderedList"),
-            },
-            Toggle: {
-              icon: `<polyline points="9 18 15 12 9 6"></polyline>`,
-              title: "Collapsible Toggle",
-              action: () => createBlockElement("toggle"),
-            },
-          };
-
-          notesToolbar.innerHTML = "";
-          for (const key in controls) {
-            const control = controls[key];
-            if (control.type === "separator") {
-              const sep = document.createElement("div");
-              sep.className = "notes-toolbar-separator";
-              notesToolbar.appendChild(sep);
-            } else {
-              const btn = document.createElement("button");
-              btn.className = "notes-toolbar-btn";
-              btn.title = control.title || key;
-              btn.innerHTML = `<svg viewBox="0 0 24 24">${control.icon}</svg>`;
-              btn.addEventListener("mousedown", (e) => {
-                e.preventDefault();
-                control.action();
-              });
-              notesToolbar.appendChild(btn);
-            }
-          }
-        }
-
-        /**
-         * [REPLACEMENT] Executes a formatting command and sanitizes the editor state afterward.
-         */
-        function formatDoc(command, value = null) {
-          if (!activeNoteEditor) return;
-          activeNoteEditor.focus();
-          document.execCommand(command, false, value);
-          sanitizeEditor(activeNoteEditor);
-          saveCurrentNote();
-        }
-
-        /**
-         * [HELPER] Creates a new default block element (a div with a break tag).
-         */
-        function createDefaultBlock() {
-          const div = document.createElement("div");
-          div.innerHTML = "<br>";
-          return div;
-        }
-
-        /**
-         * [NEW] Creates complex, multi-part block elements like checklists or toggles.
-         */
-        function createBlockElement(type) {
-          if (!activeNoteEditor) return;
-          const info = getSelectionInfo(activeNoteEditor);
-          let newBlock;
-
-          switch (type) {
-            case "checklist":
-              newBlock = document.createElement("div");
-              newBlock.className = "checklist";
-              newBlock.innerHTML = `<input type="checkbox" class="checklist-box"><div class="checklist-text" contenteditable="true"><br></div>`;
-              break;
-            case "toggle":
-              newBlock = document.createElement("div");
-              newBlock.className = "toggle-block";
-              newBlock.innerHTML = `<details><summary><div class="toggle-title" contenteditable="true"></div></summary><div class="toggle-content" contenteditable="true"><br></div></details>`;
-              break;
-            default:
-              return;
-          }
-
-          if (info && info.block && info.text.trim() === "") {
-            info.block.replaceWith(newBlock);
-          } else if (info && info.block) {
-            info.block.after(newBlock);
-          } else {
-            activeNoteEditor.appendChild(newBlock);
-          }
-
-          setCursor(newBlock);
-          saveCurrentNote();
-        }
-
-        /**
-         * [NEW] Handles markdown-style shortcuts like #, -, and [] followed by a space.
-         */
-        function handleMarkdownShortcuts(info) {
-          if (!info || !info.block) return false;
-
-          // Use non-breaking space to handle different space types
-          const text = info.text.replace(/\u00A0/g, " ").trim();
-
-          const transformations = {
-            "#": "H1",
-            "##": "H2",
-            "###": "H3",
-          };
-
-          if (transformations[text]) {
-            formatDoc("formatBlock", transformations[text]);
-            const newBlock = getSelectionInfo(activeNoteEditor).block;
-            if (newBlock) newBlock.textContent = "";
-          } else if (text === "-") {
-            formatDoc("insertUnorderedList");
-          } else if (text === "[]") {
-            createBlockElement("checklist");
-          } else if (text === ">>") {
-            createBlockElement("toggle");
-          } else if (text === ">") {
-            formatDoc("formatBlock", "BLOCKQUOTE");
-            const newBlock = getSelectionInfo(activeNoteEditor).block;
-            if (newBlock) newBlock.textContent = "";
-          }
-        }
-
-        /**
-         * [NEW] Intercepts key presses to provide advanced editor behavior (Enter, Tab, etc.).
-         */
-        function handleKeyDown(e) {
-          const editor = e.target.closest(".note-editor");
-          if (!editor) return;
-          const info = getSelectionInfo(editor);
-          if (!info || !info.block) return;
-
-          // --- Enter Key Logic ---
-          if (e.key === "Enter" && !e.shiftKey) {
-            const block = info.block;
-            const parentChecklist = block.closest(".checklist");
-            const parentListItem = block.closest("li");
-
-            if (parentChecklist) {
-              e.preventDefault();
-              if (block.textContent.trim() === "") {
-                // Exit from empty checklist
-                const newBlock = createDefaultBlock();
-                parentChecklist.replaceWith(newBlock);
-                setCursor(newBlock);
-              } else {
-                // Create new checklist item
-                const newChecklist = parentChecklist.cloneNode(true);
-                newChecklist.querySelector("input").checked = false;
-                newChecklist.querySelector(".checklist-text").innerHTML =
-                  "<br>";
-                parentChecklist.after(newChecklist);
-                setCursor(newChecklist);
-              }
-            } else if (parentListItem && block.textContent.trim() === "") {
-              e.preventDefault();
-              formatDoc("outdent"); // Exits the list
-            } else if (
-              block.tagName === "BLOCKQUOTE" &&
-              block.textContent.trim() === ""
-            ) {
-              e.preventDefault();
-              formatDoc("formatBlock", "DIV"); // Exits the blockquote
-            }
-          }
-
-          // --- Tab Key Logic for Indentation ---
-          if (e.key === "Tab") {
-            e.preventDefault();
-            formatDoc(e.shiftKey ? "outdent" : "indent");
-          }
-        }
-
-        /**
-         * [NEW] Ensures the editor DOM is clean and predictable, wrapping stray text nodes.
-         */
-        function sanitizeEditor(editor) {
-          editor.childNodes.forEach((node) => {
-            if (node.nodeType === 3 && node.textContent.trim() !== "") {
-              const div = document.createElement("div");
-              div.textContent = node.textContent;
-              node.replaceWith(div);
-            }
-          });
-          if (!editor.firstChild || editor.innerHTML.trim() === "") {
-            editor.innerHTML = "<div><br></div>";
-          }
-        }
-
-        /**
-         * [NEW] Centralized function to save the content of the currently active note editor.
-         */
-        function saveCurrentNote() {
-          if (!activeNoteEditor) return;
-          const dateKey = activeNoteEditor.dataset.datekey;
-          if (dateKey) {
-            notesByDate[dateKey] = activeNoteEditor.innerHTML;
-            saveNotes();
-          }
-        }
-
-        /**
-         * [REPLACEMENT] Loads and saves notes from/to local storage.
-         */
-        function loadNotes() {
-          const savedNotes = localStorage.getItem("clockTasksProNotes");
-          notesByDate = savedNotes ? JSON.parse(savedNotes) : {};
-        }
-        function saveNotes() {
-          localStorage.setItem(
-            "clockTasksProNotes",
-            JSON.stringify(notesByDate)
-          );
-        }
-
-        /**
-         * [REPLACEMENT] Formats the date for display in the note section header.
-         */
-        function formatNoteDateHeader(date) {
-          const today = new Date();
-          const yesterday = new Date();
-          yesterday.setDate(today.getDate() - 1);
-          const options = { day: "numeric", month: "long", year: "numeric" };
-          if (getDateKey(date) === getDateKey(today))
-            return `Today · ${today.toLocaleDateString("en-US", options)}`;
-          if (getDateKey(date) === getDateKey(yesterday))
-            return `Yesterday · ${yesterday.toLocaleDateString(
-              "en-US",
-              options
-            )}`;
-          return date.toLocaleDateString("en-US", options);
-        }
-
-        /**
-         * [REPLACEMENT] Creates the DOM elements for a single day's note section.
-         */
-        function createNoteSection(date, isFocused) {
-          const dateKey = getDateKey(date);
-          const section = document.createElement("div");
-          section.className = "note-section";
-          section.id = `note-section-${dateKey}`;
-          if (isFocused) section.classList.add("focused");
-          if (getDateKey(date) === getDateKey(new Date()))
-            section.classList.add("is-today");
-
-          const header = document.createElement("h3");
-          header.className = "note-section-header";
-          header.textContent = formatNoteDateHeader(date);
-
-          const editor = document.createElement("div");
-          editor.className = "note-editor";
-          editor.contentEditable = true;
-          editor.dataset.datekey = dateKey;
-          editor.setAttribute("spellcheck", "false");
-          editor.innerHTML = notesByDate[dateKey] || "<div><br></div>";
-
-          section.appendChild(header);
-          section.appendChild(editor);
-
-          return section;
-        }
-
-        /**
-         * [REPLACEMENT] Renders the entire content of the notes widget.
-         */
-        function renderNotesWidget() {
-          const focusedDateKey = getDateKey(currentNotesDate);
-          const todayKey = getDateKey(new Date());
-          notesContainer.innerHTML = "";
-
-          const datesToRender = new Set(
-            Object.keys(notesByDate).filter((key) =>
-              notesByDate[key]?.replace(/<[^>]*>?/gm, "").trim()
-            )
-          );
-          datesToRender.add(focusedDateKey);
-
-          const sortedDateKeys = Array.from(datesToRender).sort();
-
-          sortedDateKeys.forEach((dateKey) => {
-            const date = new Date(dateKey + "T00:00:00");
-            const isFocused = dateKey === focusedDateKey;
-            const section = createNoteSection(date, isFocused);
-            notesContainer.appendChild(section);
-          });
-
-          const focusedElement = document.querySelector(
-            ".note-section.focused"
-          );
-          if (focusedElement) {
-            focusedElement.scrollIntoView({ behavior: "auto", block: "start" });
-          }
-
-          if (todayObserver) todayObserver.disconnect();
-          const todayElement = document.getElementById(
-            `note-section-${todayKey}`
-          );
-          if (todayElement) {
-            todayObserver = new IntersectionObserver(
-              (entries) =>
-                jumpToTodayBtn.classList.toggle(
-                  "visible",
-                  !entries[0].isIntersecting
-                ),
-              { root: notesContainer, threshold: 0.1 }
-            );
-            todayObserver.observe(todayElement);
-          } else {
-            jumpToTodayBtn.classList.toggle(
-              "visible",
-              focusedDateKey !== todayKey
-            );
-          }
-        }
-
-        // --- Subtask Management Logic (New Feature - V2 with Bug Fixes) ---
-
-        function saveTasks() {
-          localStorage.setItem("clockTasksPro", JSON.stringify(tasksByDate));
-        }
-
-        function formatSecondsToMMSS(totalSeconds) {
-          if (isNaN(totalSeconds) || totalSeconds < 0) totalSeconds = 0;
-          const minutes = Math.floor(totalSeconds / 60);
-          const seconds = Math.floor(totalSeconds % 60);
-          return `${String(minutes).padStart(2, "0")}:${String(
-            seconds
-          ).padStart(2, "0")}`;
-        }
-
-        function getCurrentWidgetTask() {
-          if (!currentWidgetTaskId) return null;
-          const dateKey = getDateKey(selectedDate);
-          return (tasksByDate[dateKey] || []).find(
-            (t) => t.id === currentWidgetTaskId
-          );
-        }
-
-        // --- Event Handlers for Subtasks ---
-
-        function handleAddSubtask() {
-          const task = getCurrentWidgetTask();
-          if (!task) return;
-          if (!task.subtasks) task.subtasks = [];
-
-          // Create the new subtask data object
-          const newSubtask = {
-            id: Date.now(),
-            name: "New Subtask",
-            completed: false,
-            setDurationSeconds: null,
-            elapsedSeconds: 0,
-            timerStartTime: null,
-            isPaused: true,
-            isEditingTime: false,
-          };
-          task.subtasks.push(newSubtask);
-          saveTasks();
-
-          // Render the entire subtask UI, which creates the new element in the DOM
-          renderSubtasksUI(task);
-
-          // --- NEW LOGIC: Focus and select the new subtask name ---
-          // Find the newly created card element using its unique data attribute
-          const newCardEl = document.querySelector(
-            `[data-subtask-id="${newSubtask.id}"]`
-          );
-          if (newCardEl) {
-            const nameEl = newCardEl.querySelector(".subtask-name");
-            if (nameEl) {
-              // 1. Set focus to the element
-              nameEl.focus();
-
-              // 2. Use the Range and Selection APIs to select all text within it
-              const selection = window.getSelection();
-              const range = document.createRange();
-              range.selectNodeContents(nameEl);
-              selection.removeAllRanges(); // Clear any previous selections
-              selection.addRange(range); // Apply the new selection
-            }
-          }
-        }
-
-        function handleDeleteSubtask(subtaskId) {
-          if (!confirm("Are you sure you want to delete this subtask?")) return;
-          const task = getCurrentWidgetTask();
-          if (!task || !task.subtasks) return;
-          task.subtasks = task.subtasks.filter((st) => st.id !== subtaskId);
-          saveTasks();
-          renderSubtasksUI(task);
-        }
-
-        function handleSubtaskNameChange(subtask, newName) {
-          subtask.name = newName.trim() || "Untitled Subtask";
-          saveTasks();
-        }
-
-        function handleSubtaskCompletionToggle(subtask) {
-          subtask.completed = !subtask.completed;
-          if (subtask.completed && !subtask.isPaused) {
-            subtask.isPaused = true;
-            const elapsed = (Date.now() - subtask.timerStartTime) / 1000;
-            subtask.elapsedSeconds += elapsed;
-            subtask.timerStartTime = null;
-          }
-          saveTasks();
-          renderSubtasksUI(getCurrentWidgetTask());
-        }
-
-        function handleSetSubtaskTime(subtask, minutes) {
-          if (isNaN(minutes) || minutes <= 0) return;
-          subtask.setDurationSeconds = minutes * 60;
-          subtask.isEditingTime = false; // <<< Turn off editing mode
-          // If the timer was not running, start it. If it was, it remains paused.
-          if (subtask.isPaused && subtask.elapsedSeconds === 0) {
-            subtask.isPaused = false;
-            subtask.timerStartTime = Date.now();
-          }
-          saveTasks();
-          renderSubtasksUI(getCurrentWidgetTask());
-        }
-
-        function handleSetRemainingTime(subtask) {
-          const task = getCurrentWidgetTask();
-          if (!task) return;
-          const now = new Date();
-          const currentHour24 = now.getHours() + now.getMinutes() / 60;
-          const remainingHours = task.endHour - currentHour24;
-
-          if (remainingHours > 0) {
-            subtask.setDurationSeconds = remainingHours * 3600;
-            subtask.isEditingTime = false;
-            subtask.isPaused = false;
-            subtask.timerStartTime = Date.now();
-            saveTasks();
-            renderSubtasksUI(getCurrentWidgetTask());
-          }
-        }
-
-        function handleSubtaskTimerToggle(subtask) {
-          if (subtask.isPaused) {
-            subtask.isPaused = false;
-            subtask.timerStartTime = Date.now();
-          } else {
-            subtask.isPaused = true;
-            const elapsed = (Date.now() - subtask.timerStartTime) / 1000;
-            subtask.elapsedSeconds += elapsed;
-            subtask.timerStartTime = null;
-          }
-          saveTasks();
-          // Don't re-render the whole UI, just update timers, which happens in the interval
-          // This prevents UI jumps. The icon will update on the next render pass.
-          updateSubtaskTimersUI();
-        }
-
-        function handleEditSubtaskTime(subtask) {
-          // Pause the timer if it's running before entering edit mode
-          if (!subtask.isPaused) {
-            subtask.isPaused = true;
-            const elapsed = (Date.now() - subtask.timerStartTime) / 1000;
-            subtask.elapsedSeconds += elapsed;
-            subtask.timerStartTime = null;
-          }
-          subtask.isEditingTime = true;
-          saveTasks();
-          renderSubtasksUI(getCurrentWidgetTask());
-        }
-
-        // --- UI Rendering for Subtasks ---
-
-        function renderSubtasksUI(task) {
-          const subtasksSection = document.getElementById("subtasks-section");
-          if (!task || task.completed) {
-            subtasksSection.classList.add("hidden");
-            return;
-          }
-          subtasksSection.classList.remove("hidden");
-
-          const container = document.getElementById("subtasks-container");
-          const controlsContainer = document.getElementById(
-            "subtask-controls-container"
-          );
-          container.innerHTML = "";
-          controlsContainer.innerHTML = "";
-
-          const subtasks = task.subtasks || [];
-          subtasks.forEach((subtask) => {
-            const card = document.createElement("div");
-            card.className = "subtask-card";
-            card.dataset.subtaskId = subtask.id;
-            if (subtask.completed) card.classList.add("completed");
-
-            const checkmarkSVG = `<svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-            const deleteBtnSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`;
-
-            let timeSectionHtml = "";
-            // Show input if time is not set OR if we are explicitly editing it
-            if (subtask.setDurationSeconds === null || subtask.isEditingTime) {
-              const currentMinutes = subtask.setDurationSeconds
-                ? Math.round(subtask.setDurationSeconds / 60)
-                : "";
-              timeSectionHtml = `
-        <div class="subtask-time-controls">
-          <input type="number" class="subtask-time-input" placeholder="min" min="1" value="${currentMinutes}">
-          <button class="subtask-time-btn time-up-btn" title="Use remaining time in main task">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M12 6v6l4 2"></path></svg>
-          </button>
-          <button class="subtask-time-btn set-time-btn hidden" title="Set custom time">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-          </button>
-        </div>`;
-            } else {
-              const isPaused = subtask.isPaused || subtask.completed;
-              const playPauseIcon = isPaused
-                ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>`
-                : `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>`;
-              timeSectionHtml = `
-        <div class="subtask-time-controls">
-          <div class="subtask-timer-display" id="timer-display-${
-            subtask.id
-          }" title="Click to edit time"></div>
-          <button class="subtask-time-btn play-pause-btn" title="${
-            isPaused ? "Resume" : "Pause"
-          }">${playPauseIcon}</button>
-        </div>`;
-            }
-
-            card.innerHTML = `
-      <div class="subtask-main">
-        <div class="subtask-checkbox">${checkmarkSVG}</div>
-        <span class="subtask-name" contenteditable="true" spellcheck="false">${
-          subtask.name
-        }</span>
-        ${timeSectionHtml}
-        <button class="subtask-delete-btn" title="Delete subtask">${deleteBtnSVG}</button>
-      </div>
-      <div class="subtask-progress-container ${
-        subtask.setDurationSeconds === null ? "hidden" : ""
-      }">
-        <div class="subtask-progress-bar" id="progress-${
-          subtask.id
-        }" style="background-color: ${task.color};"></div>
-      </div>`;
-
-            container.appendChild(card);
-
-            // --- Attach Event Listeners ---
-            const nameEl = card.querySelector(".subtask-name");
-            nameEl.addEventListener("keydown", (e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                nameEl.blur();
-              }
-            });
-            nameEl.addEventListener("blur", () =>
-              handleSubtaskNameChange(subtask, nameEl.textContent)
-            );
-            card
-              .querySelector(".subtask-checkbox")
-              .addEventListener("click", () =>
-                handleSubtaskCompletionToggle(subtask)
-              );
-            card
-              .querySelector(".subtask-delete-btn")
-              .addEventListener("click", () => handleDeleteSubtask(subtask.id));
-
-            if (subtask.setDurationSeconds === null || subtask.isEditingTime) {
-              const timeInput = card.querySelector(".subtask-time-input");
-              const timeUpBtn = card.querySelector(".time-up-btn");
-              const setTimeBtn = card.querySelector(".set-time-btn");
-
-              // Show/hide set button based on input
-              const toggleSetButton = () => {
-                const hasValue =
-                  !!timeInput.value && parseInt(timeInput.value, 10) > 0;
-                timeUpBtn.classList.toggle("hidden", hasValue);
-                setTimeBtn.classList.toggle("hidden", !hasValue);
-              };
-              timeInput.addEventListener("input", toggleSetButton);
-              timeUpBtn.addEventListener("click", () =>
-                handleSetRemainingTime(subtask)
-              );
-              setTimeBtn.addEventListener("click", () =>
-                handleSetSubtaskTime(subtask, parseInt(timeInput.value, 10))
-              );
-              toggleSetButton(); // Initial check
-            } else {
-              if (!subtask.completed) {
-                card
-                  .querySelector(".play-pause-btn")
-                  .addEventListener("click", () =>
-                    handleSubtaskTimerToggle(subtask)
-                  );
-                card
-                  .querySelector(".subtask-timer-display")
-                  .addEventListener("click", () =>
-                    handleEditSubtaskTime(subtask)
-                  );
-              } else {
-                card.querySelector(".play-pause-btn").style.display = "none";
-              }
-            }
-          });
-
-          const mainTaskDurationMinutes = (task.endHour - task.startHour) * 60;
-          const totalAllocatedSubtaskMinutes = subtasks.reduce(
-            (total, st) => total + (st.setDurationSeconds || 0) / 60,
-            0
-          );
-          const maxAllowedMinutes = mainTaskDurationMinutes + 20;
-
-          if (totalAllocatedSubtaskMinutes < maxAllowedMinutes) {
-            const addBtn = document.createElement("button");
-            addBtn.className = "add-subtask-btn";
-            addBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Add Subtask`;
-            addBtn.addEventListener("click", handleAddSubtask);
-            controlsContainer.appendChild(addBtn);
-          } else {
-            const notice = document.createElement("div");
-            notice.className = "subtask-limit-notice";
-            notice.textContent =
-              "All available time has been allocated to subtasks.";
-            controlsContainer.appendChild(notice);
-          }
-          updateSubtaskTimersUI();
-        }
-
-        function updateSubtaskTimersUI() {
-          const task = getCurrentWidgetTask();
-          if (!task || !task.subtasks) return;
-
-          task.subtasks.forEach((subtask) => {
-            if (subtask.setDurationSeconds === null) return;
-            const timerDisplay = document.getElementById(
-              `timer-display-${subtask.id}`
-            );
-            const progressBar = document.getElementById(
-              `progress-${subtask.id}`
-            );
-            const playPauseBtn = document.querySelector(
-              `[data-subtask-id="${subtask.id}"] .play-pause-btn`
-            );
-
-            if (!timerDisplay || !progressBar) return;
-
-            let currentElapsed = subtask.elapsedSeconds;
-            if (!subtask.isPaused) {
-              currentElapsed += (Date.now() - subtask.timerStartTime) / 1000;
-            }
-
-            const remainingSeconds =
-              subtask.setDurationSeconds - currentElapsed;
-            const setTimeFormatted = formatSecondsToMMSS(
-              subtask.setDurationSeconds
-            );
-            let progressPercent =
-              (currentElapsed / subtask.setDurationSeconds) * 100;
-
-            if (remainingSeconds >= 0) {
-              timerDisplay.textContent = `${formatSecondsToMMSS(
-                remainingSeconds
-              )} / ${setTimeFormatted}`;
-              timerDisplay.classList.remove("overtime");
-              progressBar.classList.remove("overtime");
-            } else {
-              const overtimeSeconds = Math.abs(remainingSeconds);
-              timerDisplay.textContent = `+${formatSecondsToMMSS(
-                overtimeSeconds
-              )} / ${setTimeFormatted}`;
-              timerDisplay.classList.add("overtime");
-              progressBar.classList.add("overtime");
-              progressPercent = 100;
-            }
-            progressBar.style.width = `${Math.min(100, progressPercent)}%`;
-
-            // Update play/pause icon dynamically
-            if (playPauseBtn) {
-              const isPaused = subtask.isPaused || subtask.completed;
-              const currentIconPath = playPauseBtn
-                .querySelector("svg path")
-                ?.getAttribute("d");
-              const playIconPath = "M8 5v14l11-7z";
-              const pauseIconPath = "M6 19h4V5H6v14zm8-14v14h4V5h-4z";
-              if (isPaused && currentIconPath !== playIconPath) {
-                playPauseBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="${playIconPath}"></path></svg>`;
-              } else if (!isPaused && currentIconPath !== pauseIconPath) {
-                playPauseBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="${pauseIconPath}"></path></svg>`;
-              }
-            }
-          });
-        } // --- Progress Widget Logic ---
+        // --- Progress Widget Logic ---
         // Find the existing updateProgressWidget function and REPLACE it entirely with this code block.
 
         function updateProgressWidget() {
-          const subtasksSection = document.getElementById("subtasks-section");
-
+          // The widget is only for today. Hide it otherwise.
           if (!isToday(selectedDate)) {
             progressWidget.classList.add("hidden");
-            if (currentWidgetTaskId !== null) {
-              currentWidgetTaskId = null;
-              subtasksSection.classList.add("hidden");
-            }
+            currentWidgetTaskId = null;
             return;
           }
 
@@ -3503,26 +2108,20 @@
           const currentHour24 =
             now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
           const dateKey = getDateKey(selectedDate);
+
           const tasksForDay = (tasksByDate[dateKey] || [])
             .slice()
             .sort((a, b) => a.startHour - b.startHour);
 
           const currentTask = tasksForDay.find(
             (task) =>
-              currentHour24 >= task.startHour && currentHour24 < task.endHour
+              !task.completed &&
+              currentHour24 >= task.startHour &&
+              currentHour24 < task.endHour
           );
 
-          // CRITICAL FIX: Only re-render subtasks when the main task changes
-          if (currentTask?.id !== currentWidgetTaskId) {
-            currentWidgetTaskId = currentTask ? currentTask.id : null;
-            if (currentTask) {
-              renderSubtasksUI(currentTask); // Render structure ONCE on task change
-            } else {
-              subtasksSection.classList.add("hidden");
-            }
-          }
-
           if (currentTask) {
+            // --- RENDER ACTIVE TASK ---
             const taskIndex = tasksForDay.findIndex(
               (t) => t.id === currentTask.id
             );
@@ -3530,65 +2129,102 @@
             const timeElapsed = currentHour24 - currentTask.startHour;
             const progressPercentage = Math.min(
               100,
-              (timeElapsed / taskDuration) * 100
+              Math.max(0, (timeElapsed / taskDuration) * 100)
             );
 
-            progressWidget.classList.remove("hidden");
+            // Update DOM elements with task data
             progressWidgetTaskName.textContent = currentTask.name;
+            progressWidgetTaskName.title = currentTask.name;
+
+            // Feature 1: Display the task's designated time range.
             progressWidgetTaskTime.textContent = `${formatHourToAMPM(
               currentTask.startHour
             )} - ${formatHourToAMPM(currentTask.endHour)}`;
+
             progressWidgetCounter.textContent = `${taskIndex + 1}/${
               tasksForDay.length
             }`;
 
-            progressBarElapsed.style.backgroundColor = currentTask.completed
-              ? COMPLETED_COLOR
-              : currentTask.color;
+            // Improved Progress Bar Styling: The elapsed bar gets the task color.
+            progressBarElapsed.style.backgroundColor = currentTask.color;
+            progressBarContainer.style.backgroundColor =
+              "rgba(120, 120, 128, 0.16)"; // Neutral track color
             progressBarElapsed.style.width = `${progressPercentage}%`;
             progressBarPercentage.textContent = `${Math.floor(
               progressPercentage
             )}%`;
 
-            progressWidgetCompleteBtn.style.visibility = "visible";
+            // Restore visibility of controls that might be hidden during free time.
             progressWidgetCounter.style.visibility = "visible";
+            progressWidgetCompleteBtn.style.visibility = "visible";
 
-            progressWidgetCompleteBtn.onclick = () => {
-              if (currentWidgetTaskId)
-                toggleTaskCompletion(currentWidgetTaskId);
-            };
-          } else {
-            // Handle "Free Time" or "All Tasks Done" state
-            subtasksSection.classList.add("hidden"); // Ensure subtasks are hidden here too
-
-            const nextTask = tasksForDay.find(
-              (t) => !t.completed && t.startHour > currentHour24
-            );
-            const allTasksDone =
-              tasksForDay.every((t) => t.completed) ||
-              (!nextTask && tasksForDay.length > 0);
-
-            if (nextTask) {
-              progressWidget.classList.remove("hidden");
-              progressWidgetTaskName.textContent = "Next Up: " + nextTask.name;
-              progressWidgetTaskTime.textContent = `Starts at ${formatHourToAMPM(
-                nextTask.startHour
-              )}`;
-              progressBarElapsed.style.width = "0%";
-              progressBarPercentage.textContent = "";
-              progressWidgetCompleteBtn.style.visibility = "hidden";
-            } else if (allTasksDone) {
-              progressWidget.classList.remove("hidden");
-              progressWidgetTaskName.textContent =
-                "All tasks for today are complete!";
-              progressWidgetTaskTime.textContent = "Time to relax.";
-              progressBarElapsed.style.width = "100%";
-              progressBarPercentage.textContent = "✔";
-              progressWidgetCompleteBtn.style.visibility = "hidden";
-            } else {
-              progressWidget.classList.add("hidden");
+            if (currentWidgetTaskId !== currentTask.id) {
+              currentWidgetTaskId = currentTask.id;
+              progressWidgetCompleteBtn.onclick = () => {
+                if (currentWidgetTaskId) {
+                  toggleTaskCompletion(currentWidgetTaskId);
+                }
+              };
             }
-            progressWidgetCounter.style.visibility = "hidden";
+            progressWidget.classList.remove("hidden");
+          } else {
+            // --- RENDER FREE TIME --- Feature 2
+            // Find the current free time slot.
+            const nextTask = tasksForDay.find(
+              (task) => task.startHour > currentHour24
+            );
+            const prevTask = tasksForDay
+              .slice()
+              .reverse()
+              .find((task) => task.endHour <= currentHour24);
+
+            const freeTimeStart = prevTask ? prevTask.endHour : 0;
+            const freeTimeEnd = nextTask ? nextTask.startHour : 24;
+
+            // Only show the widget if we are in a valid, current free time slot.
+            if (currentHour24 >= freeTimeStart && currentHour24 < freeTimeEnd) {
+              const freeTimeDuration = freeTimeEnd - freeTimeStart;
+              const timeElapsed = currentHour24 - freeTimeStart;
+
+              // Prevent division by zero if tasks are back-to-back.
+              const progressPercentage =
+                freeTimeDuration > 0
+                  ? Math.min(
+                      100,
+                      Math.max(0, (timeElapsed / freeTimeDuration) * 100)
+                    )
+                  : 0;
+
+              progressWidgetTaskName.textContent = "Free Time";
+              progressWidgetTaskName.title = ""; // No tooltip needed
+
+              // Display the time range for the current free time slot.
+              progressWidgetTaskTime.textContent = `${formatHourToAMPM(
+                freeTimeStart
+              )} - ${formatHourToAMPM(freeTimeEnd)}`;
+
+              // Style the progress bar for free time as requested.
+              progressBarContainer.style.backgroundColor = "#FFFFFF"; // White background
+              progressBarElapsed.style.backgroundColor = COMPLETED_COLOR; // Grey progress
+              progressBarElapsed.style.width = `${progressPercentage}%`;
+              progressBarPercentage.textContent = `${Math.floor(
+                progressPercentage
+              )}%`;
+
+              // Expert Logic: Hide irrelevant controls during free time for a cleaner UI.
+              progressWidgetCounter.style.visibility = "hidden";
+              progressWidgetCompleteBtn.style.visibility = "hidden";
+
+              currentWidgetTaskId = null; // No task is active
+              progressWidgetCompleteBtn.onclick = null;
+
+              progressWidget.classList.remove("hidden");
+            } else {
+              // Not in an active task or a current free time slot (e.g., all tasks are done).
+              progressWidget.classList.add("hidden");
+              currentWidgetTaskId = null;
+              progressWidgetCompleteBtn.onclick = null;
+            }
           }
         }
 
@@ -3700,20 +2336,13 @@
             isToday(e) && o.classList.add("today"),
             getDateKey(e) === getDateKey(selectedDate) &&
               o.classList.add("selected"),
-            // --- ...and REPLACE IT WITH this enhanced version:
             o.addEventListener("click", () => {
-              selectedDate = e;
-              currentNotesDate = e; // <-- Add this line to sync notes
-              if (
-                e.getMonth() !== displayedDate.getMonth() ||
-                e.getFullYear() !== displayedDate.getFullYear()
-              ) {
-                displayedDate = new Date(e.getFullYear(), e.getMonth(), 1);
-              }
-              progressWidget.classList.remove("expanded-view");
-              renderCalendar();
-              renderAppView();
-              renderNotesWidget(); // <-- Add this line to re-render notes
+              (selectedDate = e),
+                (e.getMonth() === displayedDate.getMonth() &&
+                  e.getFullYear() === displayedDate.getFullYear()) ||
+                  (displayedDate = new Date(e.getFullYear(), e.getMonth(), 1)),
+                progressWidget.classList.remove("expanded-view"); // ADD or CONFIRM this line
+              renderCalendar(), renderAppView();
             }),
             o
           );
@@ -3829,91 +2458,15 @@
             .map((day) => `<div class="weekday">${day}</div>`)
             .join("");
 
-          // --- CODE TO ADD: Inside init(), before the "// Initial render" comment ---
-
-          // Event Listeners for Notes Widget
-          loadNotes();
-          initNotesToolbar();
-
-          notesContainer.addEventListener("focusin", (e) => {
-            if (e.target.closest(".note-editor")) {
-              activeNoteEditor = e.target.closest(".note-editor");
-            }
-          });
-
-          notesContainer.addEventListener("input", (e) => {
-            const editor = e.target.closest(".note-editor");
-            if (editor && e.data === " ") {
-              handleMarkdownShortcuts(getSelectionInfo(editor));
-            }
-            // Debounce saving to prevent excessive localStorage writes
-            clearTimeout(window.saveTimeout);
-            window.saveTimeout = setTimeout(saveCurrentNote, 500);
-          });
-
-          notesContainer.addEventListener("keydown", handleKeyDown);
-
-          notesContainer.addEventListener("click", (e) => {
-            // Handle clicking on checkboxes
-            if (e.target.matches(".checklist-box")) {
-              e.target.closest(".checklist").classList.toggle("checked");
-              saveCurrentNote();
-            }
-            // Notion-like "click below to add new line" feature
-            else if (e.target === notesContainer) {
-              const lastEditor = notesContainer.querySelector(
-                ".note-editor:last-of-type"
-              );
-              if (lastEditor) {
-                const rect = lastEditor.getBoundingClientRect();
-                if (e.clientY > rect.bottom - 10) {
-                  // Clicked in the bottom margin
-                  const newBlock = createDefaultBlock();
-                  lastEditor.appendChild(newBlock);
-                  setCursor(newBlock);
-                }
-              }
-            }
-          });
-
-          // Clean up the editor's HTML structure on blur for consistency
-          notesContainer.addEventListener("focusout", (e) => {
-            const editor = e.target.closest(".note-editor");
-            if (editor) {
-              sanitizeEditor(editor);
-              saveCurrentNote(); // Final save on blur
-            }
-          });
-
-          jumpToTodayBtn.addEventListener("click", () => {
-            const todayKey = getDateKey(new Date());
-            const todayElement = document.getElementById(
-              `note-section-${todayKey}`
-            );
-            if (todayElement) {
-              todayElement.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-              });
-            } else {
-              // If today's note doesn't exist, create it by focusing
-              currentNotesDate = new Date();
-              renderNotesWidget();
-            }
-          });
-
           // Initial render
           renderCalendar();
-          currentNotesDate = selectedDate; // Sync notes with calendar on start
           renderAppView();
-          renderNotesWidget(); // Add this line to perform initial render of notes
 
           // Intervals for real-time updates
           let lastRenderMinute = -1;
           setInterval(() => {
             updateClockHands();
             updateProgressWidget(); // Update progress bar every second for smoothness
-            updateSubtaskTimersUI(); // <<< ADD THIS LINE
 
             const now = new Date();
             // Only re-render the main view every minute to save performance
