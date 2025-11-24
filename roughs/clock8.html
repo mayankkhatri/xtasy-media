@@ -1165,28 +1165,28 @@
       /* CODE TO REPLACE: Replace your entire "NOTES WIDGET STYLES" section with this block */
 
       /* ================================== */
-      /* ==      NOTES WIDGET STYLES     == */
+      /* ==   NOTION-STYLE NOTES WIDGET  == */
       /* ================================== */
 
       .notes-widget {
         position: fixed;
         bottom: 1.5rem;
         right: 1.5rem;
-        width: clamp(320px, 22vw, 450px);
-        max-height: 60vh;
-        min-height: 300px;
+        width: clamp(320px, 25vw, 480px);
+        height: 60vh;
+        max-height: 600px;
+        min-height: 350px;
         background-color: var(--clock-bg);
         border-radius: 16px;
-        box-shadow: 0 8px 30px var(--shadow-color);
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
         border: 1px solid var(--border-color);
         z-index: 500;
         display: flex;
         flex-direction: column;
         opacity: 0;
         transform: translateY(20px);
-        animation: fadeInWidget 0.5s 0.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-        user-select: none;
-        -webkit-user-select: none;
+        animation: fadeInWidget 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        overflow: hidden; /* Contains the scrollbar */
       }
 
       @keyframes fadeInWidget {
@@ -1196,286 +1196,258 @@
         }
       }
 
+      /* --- Toolbar --- */
       .notes-widget-header {
-        padding: 1rem 1.25rem 0.75rem;
-        font-size: 1.25rem;
-        font-weight: 700;
+        padding: 12px 16px;
+        font-size: 16px;
+        font-weight: 600;
         color: var(--text-color);
         border-bottom: 1px solid var(--border-color);
+        background-color: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        z-index: 10;
+      }
+
+      .notes-toolbar {
+        display: flex;
+        gap: 2px;
+        padding: 4px 8px;
+        background-color: #f7f7f9;
+        border-bottom: 1px solid var(--border-color);
+        overflow-x: auto;
+        scrollbar-width: none; /* Hide scrollbar FF */
+      }
+      .notes-toolbar::-webkit-scrollbar {
+        display: none;
+      }
+
+      .notes-toolbar-btn {
+        background: transparent;
+        border: none;
+        border-radius: 4px;
+        padding: 6px;
+        cursor: pointer;
+        color: var(--secondary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
         flex-shrink: 0;
       }
-
-      .notes-content-container {
-        padding: 0.5rem 0.25rem 1rem 1.25rem;
-        flex-grow: 1;
-        overflow-y: auto;
-        scroll-behavior: smooth;
-        cursor: text; /* Notion-like affordance for creating new lines */
+      .notes-toolbar-btn:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+        color: var(--text-color);
+      }
+      .notes-toolbar-btn svg {
+        width: 18px;
+        height: 18px;
+        stroke-width: 2;
+      }
+      .notes-toolbar-separator {
+        width: 1px;
+        background-color: #e0e0e0;
+        margin: 4px 6px;
       }
 
+      /* --- Content Area --- */
+      .notes-content-container {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 16px 24px 60px; /* Bottom padding for scroll space */
+        scroll-behavior: smooth;
+        cursor: text;
+      }
+
+      /* Scrollbar Styling */
       .notes-content-container::-webkit-scrollbar {
-        width: 8px;
+        width: 6px;
       }
       .notes-content-container::-webkit-scrollbar-track {
         background: transparent;
       }
       .notes-content-container::-webkit-scrollbar-thumb {
-        background-color: #d1d1d6;
+        background-color: rgba(0, 0, 0, 0.2);
         border-radius: 10px;
-        border: 2px solid var(--clock-bg);
       }
 
+      /* --- Date Sections --- */
       .note-section {
-        padding-bottom: 1rem;
+        margin-bottom: 32px;
+        position: relative;
       }
-
       .note-section-header {
-        font-size: 0.8rem;
+        font-size: 12px;
         font-weight: 700;
-        color: var(--secondary-color);
-        padding: 0.75rem 0 0.5rem;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.05em;
+        color: var(--secondary-color);
+        margin-bottom: 12px;
+        position: sticky;
+        top: 0;
+        background-color: var(--clock-bg);
+        padding: 8px 0;
+        z-index: 5;
       }
       .note-section.is-today .note-section-header {
-        color: var(--danger-color);
+        color: var(--primary-color);
       }
 
+      /* --- Editor Content & Blocks --- */
       .note-editor {
-        width: 100%;
         outline: none;
-        background-color: transparent;
-        font-family: "Inter", sans-serif;
-        font-size: 1rem;
+        font-size: 15px;
         line-height: 1.6;
         color: var(--text-color);
-        padding-right: 1rem;
-        min-height: 80px;
-        -webkit-user-select: text;
-        user-select: text;
       }
-      .note-editor:focus {
-        outline: none;
-      }
-      /* Ensure the editor always has at least one line */
+
+      /* Placeholder for empty editor */
       .note-editor:empty::before {
-        content: "Start typing...";
-        color: var(--secondary-color);
-        opacity: 0.7;
+        content: "Type '/' for commands or start typing...";
+        color: #a1a1a6;
         pointer-events: none;
-        display: block;
       }
 
-      /* --- Block Element Styling --- */
-
+      /* Block Spacing */
       .note-editor > * {
-        margin: 0.25em 0; /* Consistent vertical rhythm for all block elements */
+        margin: 6px 0;
+        min-height: 24px; /* Ensures empty lines are clickable */
       }
 
-      /* Headings (BUG FIX: separator line removed) */
-      .note-editor h1,
-      .note-editor h2,
-      .note-editor h3 {
-        margin: 1.2em 0 0.6em;
-        font-weight: 700;
-        line-height: 1.3;
-      }
+      /* Headings */
       .note-editor h1 {
-        font-size: 1.8em;
+        font-size: 1.6em;
+        margin-top: 1em;
+        font-weight: 700;
+        line-height: 1.2;
       }
       .note-editor h2 {
-        font-size: 1.5em;
+        font-size: 1.3em;
+        margin-top: 0.8em;
+        font-weight: 600;
       }
       .note-editor h3 {
-        font-size: 1.25em;
+        font-size: 1.1em;
+        margin-top: 0.6em;
+        font-weight: 600;
       }
 
-      .note-editor strong,
-      .note-editor b {
-        font-weight: 700;
-      }
-      .note-editor u {
-        text-decoration-color: rgba(0, 122, 255, 0.5);
-        text-decoration-thickness: 2px;
-      }
-
-      /* Indentation & Blockquotes (BUG FIX: Ugly style removed) */
-      .note-editor blockquote {
-        padding-left: 1.5em;
-        border-left: 3px solid var(--border-color);
-        color: inherit; /* Use default text color */
-        background-color: transparent; /* No background */
-      }
-
-      /* Bulleted Lists (NEW) */
-      .note-editor ul {
-        list-style-type: disc;
-        padding-inline-start: 2em;
+      /* Lists */
+      .note-editor ul,
+      .note-editor ol {
+        padding-left: 24px;
       }
       .note-editor li {
-        margin: 0.1em 0;
-        padding-left: 0.5em;
+        margin: 2px 0;
+        padding-left: 4px;
+      }
+      .note-editor blockquote {
+        border-left: 3px solid var(--text-color);
+        padding-left: 16px;
+        font-style: italic;
+        color: #555;
       }
 
-      /* Checklists (BUG FIX: Style remains, behavior fixed in JS) */
-      .note-editor .checklist {
+      /* Checklists (Custom Implementation) */
+      .checklist {
         display: flex;
         align-items: flex-start;
-        gap: 0.5rem;
+        gap: 10px;
+        margin: 4px 0;
       }
-      .note-editor .checklist-box {
-        margin-top: 0.25em;
-        width: 16px;
-        height: 16px;
+      .checklist-box {
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border: 2px solid #d1d1d6;
+        border-radius: 4px;
+        cursor: pointer;
+        position: relative;
         flex-shrink: 0;
+        margin-top: 3px;
+        transition: all 0.2s;
       }
-      .note-editor .checklist-text {
+      .checklist-box:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+      }
+      .checklist-box:checked::after {
+        content: "";
+        position: absolute;
+        left: 5px;
+        top: 1px;
+        width: 4px;
+        height: 9px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+      }
+      .checklist-content {
         flex-grow: 1;
         outline: none;
+        text-decoration-thickness: 2px;
+        transition: color 0.2s;
       }
-      .note-editor .checklist.checked .checklist-text {
+      .checklist-box:checked + .checklist-content {
         text-decoration: line-through;
         color: var(--secondary-color);
-        opacity: 0.8;
       }
 
-      /* Collapsible Toggles (NEW) */
-      .note-editor .toggle-block details {
-        padding: 0.25em 0;
+      /* Toggles */
+      .toggle-block {
+        margin: 4px 0;
       }
-      .note-editor .toggle-block summary {
+      .toggle-block details summary {
+        cursor: pointer;
+        list-style: none;
         display: flex;
         align-items: center;
-        cursor: pointer;
-        list-style: none; /* Remove default marker */
         font-weight: 500;
         outline: none;
       }
-      .note-editor .toggle-block summary::-webkit-details-marker {
-        display: none; /* Remove default marker for Chrome */
+      .toggle-block details summary::-webkit-details-marker {
+        display: none;
       }
-      .note-editor .toggle-block summary::before {
-        content: "";
-        display: inline-block;
-        width: 0;
-        height: 0;
-        border-top: 4px solid transparent;
-        border-bottom: 4px solid transparent;
-        border-left: 6px solid currentColor; /* Triangle */
-        margin-right: 0.5em;
-        transition: transform 0.2s ease-in-out;
-        transform-origin: 25% 50%;
-      }
-      .note-editor .toggle-block details[open] > summary::before {
-        transform: rotate(90deg); /* Triangle points down when open */
-      }
-      .note-editor .toggle-title {
-        flex-grow: 1;
-        min-width: 0;
-        outline: none;
-      }
-      .note-editor .toggle-title:empty::before {
-        content: "Toggle Title";
-        color: var(--secondary-color);
-        opacity: 0.7;
-        pointer-events: none;
-      }
-      .note-editor .toggle-content {
-        padding-left: 1.5em; /* Indent the content */
-        margin-top: 0.25em;
-        outline: none;
-      }
-      .note-editor .toggle-content:empty::before {
-        content: "Empty toggle...";
-        color: var(--secondary-color);
-        opacity: 0.7;
-        pointer-events: none;
-      }
-
-      /* --- Toolbar & Utility --- */
-
-      .notes-toolbar {
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-        padding: 0.5rem 1.25rem;
-        border-bottom: 1px solid var(--border-color);
-        flex-shrink: 0;
-        background-color: #fcfcfc;
-        flex-wrap: wrap;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-      }
-
-      .notes-toolbar-btn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 0.5rem;
-        border-radius: 6px;
-        display: grid;
-        place-items: center;
-        transition: background-color 0.2s, color 0.2s;
-        color: var(--secondary-color);
-      }
-      .notes-toolbar-btn:hover {
-        background-color: var(--bg-color);
-        color: var(--text-color);
-      }
-      .notes-toolbar-btn.active {
-        background-color: #e0e8ff;
-        color: var(--primary-color);
-      }
-      .notes-toolbar-btn svg {
+      .toggle-arrow {
         width: 20px;
         height: 20px;
-        stroke: currentColor;
-        stroke-width: 2;
-        fill: none;
-        stroke-linecap: round;
-        stroke-linejoin: round;
+        margin-right: 6px;
+        transition: transform 0.2s;
+        fill: var(--secondary-color);
+      }
+      .toggle-block details[open] .toggle-arrow {
+        transform: rotate(90deg);
+      }
+      .toggle-content {
+        padding-left: 26px;
+        margin-top: 4px;
+        color: #555;
       }
 
-      .notes-toolbar-separator {
-        width: 1px;
-        height: 20px;
-        background-color: var(--border-color);
-        margin: 0 0.5rem;
-      }
-
+      /* Jump Button */
       .jump-to-today-btn {
         position: absolute;
-        bottom: 1rem;
+        bottom: 20px;
         left: 50%;
-        transform: translateX(-50%) translateY(10px);
-        background-color: var(--primary-color);
+        transform: translateX(-50%) translateY(60px);
+        background-color: var(--text-color);
         color: white;
         border: none;
-        border-radius: 99px;
-        padding: 0.5rem 1rem;
-        font-size: 0.75rem;
+        border-radius: 20px;
+        padding: 8px 16px;
+        font-size: 13px;
         font-weight: 600;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         cursor: pointer;
-        box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        z-index: 20;
         opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
-        z-index: 10;
       }
       .jump-to-today-btn.visible {
-        opacity: 1;
-        visibility: visible;
         transform: translateX(-50%) translateY(0);
-      }
-      .jump-to-today-btn svg {
-        width: 16px;
-        height: 16px;
-        stroke: currentColor;
-        stroke-width: 2.5;
+        opacity: 1;
       }
     </style>
   </head>
@@ -1759,27 +1731,23 @@
     <!-- CODE TO ADD: Place this after the modal-overlay div -->
 
     <!-- CODE TO REPLACE: notes-widget (adds toolbar container) -->
+    <!-- NEW NOTES WIDGET HTML -->
     <div class="notes-widget" id="notes-widget">
-      <div class="notes-widget-header">Notes</div>
+      <div class="notes-widget-header">
+        <span>Notes</span>
+      </div>
 
-      <!-- The new rich text toolbar -->
+      <!-- Rich Text Toolbar -->
       <div class="notes-toolbar" id="notes-toolbar">
-        <!-- Toolbar buttons will be dynamically added by JavaScript -->
+        <!-- Toolbar items generated by JS -->
       </div>
 
+      <!-- Scrollable Content Area -->
       <div class="notes-content-container" id="notes-content-container">
-        <!-- Note sections will be dynamically inserted here by JavaScript -->
+        <!-- Date Sections injected here -->
       </div>
+
       <button class="jump-to-today-btn" id="jump-to-today-btn">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <line x1="12" y1="19" x2="12" y2="5"></line>
-          <polyline points="5 12 12 5 19 12"></polyline>
-        </svg>
         Jump to Today
       </button>
     </div>
@@ -2693,421 +2661,415 @@
         // CODE TO REPLACE: The entire "UPGRADED NOTES WIDGET LOGIC" section
 
         // ============================================
-        // == UPGRADED NOTES WIDGET LOGIC (Rich Text) ==
+        // ==  WORLD-CLASS NOTION-STYLE NOTES LOGIC  ==
         // ============================================
 
-        /**
-         * [HELPER] Gets detailed information about the current cursor position or selection,
-         * crucial for contextual formatting.
-         * @param {HTMLElement} editor - The contenteditable editor element.
-         * @returns {object|null} An object with selection, range, and the current block element.
-         */
-        function getSelectionInfo(editor) {
-          const selection = window.getSelection();
-          if (!selection || selection.rangeCount === 0) return null;
-
-          const range = selection.getRangeAt(0);
-          let container = range.startContainer;
-
-          // Traverse up to find the direct child of the editor that contains the selection
-          let block =
-            container.nodeType === 3 ? container.parentElement : container;
-          let parentWrapper = block;
-          while (parentWrapper && parentWrapper.parentElement !== editor) {
-            parentWrapper = parentWrapper.parentElement;
-          }
-          block = parentWrapper || block;
-
-          return {
-            selection,
-            range,
-            block, // The top-level block element inside the editor
-            isCollapsed: range.collapsed,
-            text: block ? block.textContent : "",
-          };
-        }
-
-        /**
-         * [HELPER] Precisely sets the cursor to a specific node.
-         * @param {Node} node - The DOM node to place the cursor in.
-         * @param {string} position - 'start' or 'end' of the node.
-         */
-        function setCursor(node, position = "end") {
-          if (!node) return;
-          const selection = window.getSelection();
-          const range = document.createRange();
-
-          let targetNode =
-            node.querySelector('[contenteditable="true"]') || node;
-          while (targetNode.firstChild) {
-            targetNode = targetNode.lastChild;
-          }
-
-          try {
-            const length =
-              targetNode.nodeType === 3
-                ? targetNode.length
-                : node.childNodes.length;
-            range.setStart(targetNode, position === "start" ? 0 : length);
-            range.collapse(true);
-            selection.removeAllRanges();
-            selection.addRange(range);
-            node.closest(".note-editor").focus();
-          } catch (e) {
-            console.error("Failed to set cursor:", e, "on node:", node);
-            node.focus(); // Fallback
-          }
-        }
-
-        /**
-         * [REPLACEMENT] Initializes the notes toolbar with a full suite of rich text controls.
-         */
+        // --- 1. Toolbar Configuration ---
         function initNotesToolbar() {
-          const controls = {
-            H1: {
-              icon: `<path d="M4 4v6h4V4H4zm0 8h4v6H4v-6zM12 4h4v16h-4V4zm6 0h4v6h-4V4zm0 8h4v6h-4v-6z"/>`,
-              action: () => formatDoc("formatBlock", "H1"),
+          const toolbar = document.getElementById("notes-toolbar");
+          const actions = [
+            {
+              icon: '<path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>',
+              cmd: "bold",
+              title: "Bold",
             },
-            H2: {
-              icon: `<path d="M4 4v6h4V4H4zm0 8h4v6H4v-6zM12 4h4v6h-4V4zm0 8h4v6h-4v-6zm6-8h4v6h-4V4z"/>`,
-              action: () => formatDoc("formatBlock", "H2"),
+            {
+              icon: '<line x1="19" y1="4" x2="10" y2="4"></line><line x1="14" y1="20" x2="5" y2="20"></line><line x1="15" y1="4" x2="9" y2="20"></line>',
+              cmd: "italic",
+              title: "Italic",
             },
-            H3: {
-              icon: `<path d="M4 4v6h4V4H4zm0 8h4v6H4v-6zM12 4h4v6h-4V4zm0 8h4v6h-4v-6z"/>`,
-              action: () => formatDoc("formatBlock", "H3"),
+            {
+              icon: '<path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"></path><line x1="4" y1="21" x2="20" y2="21"></line>',
+              cmd: "underline",
+              title: "Underline",
             },
-            separator1: { type: "separator" },
-            Bold: {
-              icon: `<path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>`,
-              action: () => formatDoc("bold"),
+            { type: "sep" },
+            {
+              icon: "H1",
+              text: true,
+              cmd: "formatBlock",
+              val: "H1",
+              title: "Heading 1",
             },
-            Italic: {
-              icon: `<line x1="19" y1="4" x2="10" y2="4"></line><line x1="14" y1="20" x2="5" y2="20"></line><line x1="15" y1="4" x2="9" y2="20"></line>`,
-              action: () => formatDoc("italic"),
+            {
+              icon: "H2",
+              text: true,
+              cmd: "formatBlock",
+              val: "H2",
+              title: "Heading 2",
             },
-            Underline: {
-              icon: `<path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"></path><line x1="4" y1="21" x2="20" y2="21"></line>`,
-              action: () => formatDoc("underline"),
+            {
+              icon: "H3",
+              text: true,
+              cmd: "formatBlock",
+              val: "H3",
+              title: "Heading 3",
             },
-            separator2: { type: "separator" },
-            Quote: {
-              icon: `<path d="M3 21c3 0 7-1 7-8V5c0-1.25-.75-2-2-2H4c-1.25 0-2 .75-2 2v6c0 7 4 8 8 8Z"></path><path d="M14 21c3 0 7-1 7-8V5c0-1.25-.75-2-2-2h-4c-1.25 0-2 .75-2 2v6c0 7 4 8 8 8Z"></path>`,
-              action: () => formatDoc("formatBlock", "BLOCKQUOTE"),
+            { type: "sep" },
+            {
+              icon: '<line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line>',
+              cmd: "insertUnorderedList",
+              title: "Bullet List",
             },
-            Checklist: {
-              icon: `<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><path d="m9 12 2 2 4-4"></path>`,
-              action: () => createBlockElement("checklist"),
+            {
+              icon: '<polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>',
+              custom: "checklist",
+              title: "Checklist",
             },
-            BulletList: {
-              icon: `<line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line>`,
-              action: () => formatDoc("insertUnorderedList"),
+            {
+              icon: '<polyline points="9 18 15 12 9 6"></polyline>',
+              custom: "toggle",
+              title: "Toggle List",
             },
-            Toggle: {
-              icon: `<polyline points="9 18 15 12 9 6"></polyline>`,
-              title: "Collapsible Toggle",
-              action: () => createBlockElement("toggle"),
-            },
-          };
+          ];
 
-          notesToolbar.innerHTML = "";
-          for (const key in controls) {
-            const control = controls[key];
-            if (control.type === "separator") {
+          toolbar.innerHTML = "";
+          actions.forEach((action) => {
+            if (action.type === "sep") {
               const sep = document.createElement("div");
               sep.className = "notes-toolbar-separator";
-              notesToolbar.appendChild(sep);
-            } else {
-              const btn = document.createElement("button");
-              btn.className = "notes-toolbar-btn";
-              btn.title = control.title || key;
-              btn.innerHTML = `<svg viewBox="0 0 24 24">${control.icon}</svg>`;
-              btn.addEventListener("mousedown", (e) => {
-                e.preventDefault();
-                control.action();
-              });
-              notesToolbar.appendChild(btn);
+              toolbar.appendChild(sep);
+              return;
             }
+
+            const btn = document.createElement("button");
+            btn.className = "notes-toolbar-btn";
+            btn.title = action.title;
+
+            if (action.text) {
+              btn.style.fontWeight = "800";
+              btn.style.fontSize = "14px";
+              btn.textContent = action.icon;
+            } else {
+              btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">${action.icon}</svg>`;
+            }
+
+            btn.addEventListener("mousedown", (e) => {
+              e.preventDefault(); // Prevent losing focus from editor
+              if (action.custom) {
+                insertCustomBlock(action.custom);
+              } else {
+                document.execCommand(action.cmd, false, action.val || null);
+              }
+              saveCurrentNote();
+            });
+            toolbar.appendChild(btn);
+          });
+        }
+
+        // --- 2. Block & Selection Helpers ---
+
+        function getBlockContainer(node) {
+          while (node && node.parentNode) {
+            if (
+              node.parentNode.classList &&
+              node.parentNode.classList.contains("note-editor")
+            ) {
+              return node;
+            }
+            node = node.parentNode;
           }
+          return null;
         }
 
-        /**
-         * [REPLACEMENT] Executes a formatting command and sanitizes the editor state afterward.
-         */
-        function formatDoc(command, value = null) {
-          if (!activeNoteEditor) return;
-          activeNoteEditor.focus();
-          document.execCommand(command, false, value);
-          sanitizeEditor(activeNoteEditor);
-          saveCurrentNote();
-        }
-
-        /**
-         * [HELPER] Creates a new default block element (a div with a break tag).
-         */
         function createDefaultBlock() {
           const div = document.createElement("div");
           div.innerHTML = "<br>";
           return div;
         }
 
-        /**
-         * [NEW] Creates complex, multi-part block elements like checklists or toggles.
-         */
-        function createBlockElement(type) {
-          if (!activeNoteEditor) return;
-          const info = getSelectionInfo(activeNoteEditor);
-          let newBlock;
+        function placeCaretAtEnd(el) {
+          el.focus();
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          range.collapse(false);
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
 
-          switch (type) {
-            case "checklist":
-              newBlock = document.createElement("div");
-              newBlock.className = "checklist";
-              newBlock.innerHTML = `<input type="checkbox" class="checklist-box"><div class="checklist-text" contenteditable="true"><br></div>`;
-              break;
-            case "toggle":
-              newBlock = document.createElement("div");
-              newBlock.className = "toggle-block";
-              newBlock.innerHTML = `<details><summary><div class="toggle-title" contenteditable="true"></div></summary><div class="toggle-content" contenteditable="true"><br></div></details>`;
-              break;
-            default:
-              return;
+        // --- 3. Custom Block Insertion (Checklists/Toggles) ---
+
+        function insertCustomBlock(type) {
+          if (!activeNoteEditor) return;
+
+          const sel = window.getSelection();
+          if (!sel.rangeCount) return;
+          const range = sel.getRangeAt(0);
+
+          // Find current block to replace or append after
+          let currentBlock = getBlockContainer(range.startContainer);
+
+          let newBlock;
+          if (type === "checklist") {
+            newBlock = document.createElement("div");
+            newBlock.className = "checklist";
+            newBlock.innerHTML = `
+              <input type="checkbox" class="checklist-box">
+              <div class="checklist-content" contenteditable="true"></div>
+            `;
+          } else if (type === "toggle") {
+            newBlock = document.createElement("div");
+            newBlock.className = "toggle-block";
+            newBlock.innerHTML = `
+              <details open>
+                <summary>
+                  <svg class="toggle-arrow" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+                  <div class="toggle-title" contenteditable="true" placeholder="Toggle">Toggle</div>
+                </summary>
+                <div class="toggle-content" contenteditable="true"></div>
+              </details>
+            `;
           }
 
-          if (info && info.block && info.text.trim() === "") {
-            info.block.replaceWith(newBlock);
-          } else if (info && info.block) {
-            info.block.after(newBlock);
+          if (currentBlock && currentBlock.textContent.trim() === "") {
+            // Replace empty block
+            currentBlock.replaceWith(newBlock);
+          } else if (currentBlock) {
+            // Insert after
+            currentBlock.after(newBlock);
           } else {
+            // Append to end
             activeNoteEditor.appendChild(newBlock);
           }
 
-          setCursor(newBlock);
-          saveCurrentNote();
-        }
-
-        /**
-         * [NEW] Handles markdown-style shortcuts like #, -, and [] followed by a space.
-         */
-        function handleMarkdownShortcuts(info) {
-          if (!info || !info.block) return false;
-
-          // Use non-breaking space to handle different space types
-          const text = info.text.replace(/\u00A0/g, " ").trim();
-
-          const transformations = {
-            "#": "H1",
-            "##": "H2",
-            "###": "H3",
-          };
-
-          if (transformations[text]) {
-            formatDoc("formatBlock", transformations[text]);
-            const newBlock = getSelectionInfo(activeNoteEditor).block;
-            if (newBlock) newBlock.textContent = "";
-          } else if (text === "-") {
-            formatDoc("insertUnorderedList");
-          } else if (text === "[]") {
-            createBlockElement("checklist");
-          } else if (text === ">>") {
-            createBlockElement("toggle");
-          } else if (text === ">") {
-            formatDoc("formatBlock", "BLOCKQUOTE");
-            const newBlock = getSelectionInfo(activeNoteEditor).block;
-            if (newBlock) newBlock.textContent = "";
+          // Focus on the editable part of the new block
+          const editable = newBlock.querySelector('[contenteditable="true"]');
+          if (editable) {
+            editable.focus();
           }
         }
 
-        /**
-         * [NEW] Intercepts key presses to provide advanced editor behavior (Enter, Tab, etc.).
-         */
-        function handleKeyDown(e) {
-          const editor = e.target.closest(".note-editor");
-          if (!editor) return;
-          const info = getSelectionInfo(editor);
-          if (!info || !info.block) return;
+        // --- 4. Markdown Shortcuts & Key Handlers ---
 
-          // --- Enter Key Logic ---
+        function handleNoteKeyDown(e) {
           if (e.key === "Enter" && !e.shiftKey) {
-            const block = info.block;
-            const parentChecklist = block.closest(".checklist");
-            const parentListItem = block.closest("li");
+            const sel = window.getSelection();
+            const currentBlock = getBlockContainer(sel.anchorNode);
 
-            if (parentChecklist) {
+            // Handle Checklist Enter: Create new checkbox
+            if (currentBlock && currentBlock.classList.contains("checklist")) {
               e.preventDefault();
-              if (block.textContent.trim() === "") {
-                // Exit from empty checklist
-                const newBlock = createDefaultBlock();
-                parentChecklist.replaceWith(newBlock);
-                setCursor(newBlock);
+              const content = currentBlock.querySelector(".checklist-content");
+              if (content.textContent.trim() === "") {
+                // If empty, turn back into paragraph
+                const p = createDefaultBlock();
+                currentBlock.replaceWith(p);
+                placeCaretAtEnd(p);
               } else {
-                // Create new checklist item
-                const newChecklist = parentChecklist.cloneNode(true);
-                newChecklist.querySelector("input").checked = false;
-                newChecklist.querySelector(".checklist-text").innerHTML =
-                  "<br>";
-                parentChecklist.after(newChecklist);
-                setCursor(newChecklist);
+                // New checkbox item
+                const newItem = currentBlock.cloneNode(true);
+                newItem.querySelector(".checklist-box").checked = false;
+                newItem.querySelector(".checklist-content").innerHTML = "<br>";
+                currentBlock.after(newItem);
+                const newContent = newItem.querySelector(".checklist-content");
+                newContent.focus();
               }
-            } else if (parentListItem && block.textContent.trim() === "") {
-              e.preventDefault();
-              formatDoc("outdent"); // Exits the list
-            } else if (
-              block.tagName === "BLOCKQUOTE" &&
-              block.textContent.trim() === ""
+              return;
+            }
+
+            // Handle exiting headers/blockquotes on empty Enter
+            if (
+              document.queryCommandState("insertOrderedList") ||
+              document.queryCommandState("insertUnorderedList")
             ) {
-              e.preventDefault();
-              formatDoc("formatBlock", "DIV"); // Exits the blockquote
+              return; // Let browser handle list break out
+            }
+
+            // Default clean block creation (avoids span nesting hell)
+            if (
+              currentBlock &&
+              (currentBlock.tagName === "H1" ||
+                currentBlock.tagName === "H2" ||
+                currentBlock.tagName === "H3" ||
+                currentBlock.tagName === "BLOCKQUOTE")
+            ) {
+              setTimeout(() => {
+                document.execCommand("formatBlock", false, "div");
+              }, 0);
             }
           }
 
-          // --- Tab Key Logic for Indentation ---
+          // Tab Indentation
           if (e.key === "Tab") {
             e.preventDefault();
-            formatDoc(e.shiftKey ? "outdent" : "indent");
+            document.execCommand(e.shiftKey ? "outdent" : "indent");
           }
         }
 
-        /**
-         * [NEW] Ensures the editor DOM is clean and predictable, wrapping stray text nodes.
-         */
-        function sanitizeEditor(editor) {
-          editor.childNodes.forEach((node) => {
-            if (node.nodeType === 3 && node.textContent.trim() !== "") {
-              const div = document.createElement("div");
-              div.textContent = node.textContent;
-              node.replaceWith(div);
+        function handleNoteInput(e) {
+          const sel = window.getSelection();
+          if (!sel.isCollapsed) return;
+
+          const textNode = sel.anchorNode;
+          if (textNode.nodeType !== 3) return; // Must be text
+
+          const text = textNode.textContent;
+
+          // Notion-like Markdown Triggers on Space
+          if (e.data === " " && text.length > 1) {
+            // Check patterns ending in space
+            const patterns = [
+              { match: /^#\s$/, cmd: "formatBlock", val: "H1" },
+              { match: /^##\s$/, cmd: "formatBlock", val: "H2" },
+              { match: /^###\s$/, cmd: "formatBlock", val: "H3" },
+              { match: /^>\s$/, cmd: "formatBlock", val: "BLOCKQUOTE" },
+              { match: /^-\s$/, cmd: "insertUnorderedList", val: null },
+              { match: /^1\.\s$/, cmd: "insertOrderedList", val: null },
+            ];
+
+            for (let p of patterns) {
+              if (p.match.test(text)) {
+                // Remove the markdown characters
+                const offset = sel.anchorOffset;
+                const range = document.createRange();
+                range.setStart(textNode, 0);
+                range.setEnd(textNode, offset);
+                range.deleteContents();
+
+                // Execute formatting
+                document.execCommand(p.cmd, false, p.val);
+                e.preventDefault();
+                return;
+              }
             }
-          });
-          if (!editor.firstChild || editor.innerHTML.trim() === "") {
-            editor.innerHTML = "<div><br></div>";
+
+            // Custom blocks triggers
+            if (/^\[\]\s$/.test(text)) {
+              // Clear text and insert checklist
+              textNode.textContent = "";
+              insertCustomBlock("checklist");
+            }
+            if (/^>>\s$/.test(text)) {
+              textNode.textContent = "";
+              insertCustomBlock("toggle");
+            }
           }
+
+          // Debounce Save
+          clearTimeout(window.noteSaveTimer);
+          window.noteSaveTimer = setTimeout(saveCurrentNote, 800);
         }
 
-        /**
-         * [NEW] Centralized function to save the content of the currently active note editor.
-         */
+        // --- 5. Data Management & Rendering ---
+
         function saveCurrentNote() {
           if (!activeNoteEditor) return;
-          const dateKey = activeNoteEditor.dataset.datekey;
-          if (dateKey) {
-            notesByDate[dateKey] = activeNoteEditor.innerHTML;
-            saveNotes();
-          }
-        }
-
-        /**
-         * [REPLACEMENT] Loads and saves notes from/to local storage.
-         */
-        function loadNotes() {
-          const savedNotes = localStorage.getItem("clockTasksProNotes");
-          notesByDate = savedNotes ? JSON.parse(savedNotes) : {};
-        }
-        function saveNotes() {
+          const dateKey = activeNoteEditor.dataset.date;
+          // Save InnerHTML to preserve custom blocks
+          notesByDate[dateKey] = activeNoteEditor.innerHTML;
           localStorage.setItem(
             "clockTasksProNotes",
             JSON.stringify(notesByDate)
           );
         }
 
-        /**
-         * [REPLACEMENT] Formats the date for display in the note section header.
-         */
-        function formatNoteDateHeader(date) {
-          const today = new Date();
-          const yesterday = new Date();
-          yesterday.setDate(today.getDate() - 1);
-          const options = { day: "numeric", month: "long", year: "numeric" };
-          if (getDateKey(date) === getDateKey(today))
-            return `Today · ${today.toLocaleDateString("en-US", options)}`;
-          if (getDateKey(date) === getDateKey(yesterday))
-            return `Yesterday · ${yesterday.toLocaleDateString(
-              "en-US",
-              options
-            )}`;
-          return date.toLocaleDateString("en-US", options);
+        function loadNotes() {
+          const data = localStorage.getItem("clockTasksProNotes");
+          notesByDate = data ? JSON.parse(data) : {};
         }
 
-        /**
-         * [REPLACEMENT] Creates the DOM elements for a single day's note section.
-         */
-        function createNoteSection(date, isFocused) {
+        function createNoteSection(date, isTodayRef) {
           const dateKey = getDateKey(date);
-          const section = document.createElement("div");
-          section.className = "note-section";
-          section.id = `note-section-${dateKey}`;
-          if (isFocused) section.classList.add("focused");
-          if (getDateKey(date) === getDateKey(new Date()))
-            section.classList.add("is-today");
 
-          const header = document.createElement("h3");
+          const wrapper = document.createElement("div");
+          wrapper.className = "note-section";
+          if (isTodayRef) wrapper.classList.add("is-today");
+          wrapper.id = `note-section-${dateKey}`;
+
+          const header = document.createElement("div");
           header.className = "note-section-header";
-          header.textContent = formatNoteDateHeader(date);
+          const options = { weekday: "long", month: "short", day: "numeric" };
+          const label = isTodayRef
+            ? "Today"
+            : date.toLocaleDateString("en-US", options);
+          header.textContent = label;
 
           const editor = document.createElement("div");
           editor.className = "note-editor";
           editor.contentEditable = true;
-          editor.dataset.datekey = dateKey;
-          editor.setAttribute("spellcheck", "false");
+          editor.dataset.date = dateKey;
           editor.innerHTML = notesByDate[dateKey] || "<div><br></div>";
 
-          section.appendChild(header);
-          section.appendChild(editor);
+          // Bind Events
+          editor.addEventListener("keydown", handleNoteKeyDown);
+          editor.addEventListener("input", handleNoteInput);
+          editor.addEventListener("focus", () => {
+            activeNoteEditor = editor;
+          });
 
-          return section;
+          wrapper.appendChild(header);
+          wrapper.appendChild(editor);
+          return wrapper;
         }
 
-        /**
-         * [REPLACEMENT] Renders the entire content of the notes widget.
-         */
         function renderNotesWidget() {
-          const focusedDateKey = getDateKey(currentNotesDate);
-          const todayKey = getDateKey(new Date());
           notesContainer.innerHTML = "";
 
-          const datesToRender = new Set(
-            Object.keys(notesByDate).filter((key) =>
-              notesByDate[key]?.replace(/<[^>]*>?/gm, "").trim()
-            )
-          );
-          datesToRender.add(focusedDateKey);
+          // Determine range of dates to show (History + Today + Future if exists)
+          // For simplicity in this view: Show keys in storage + Today
+          const keys = Object.keys(notesByDate).sort();
+          const todayKey = getDateKey(new Date());
+          if (!keys.includes(todayKey)) keys.push(todayKey);
+          keys.sort();
 
-          const sortedDateKeys = Array.from(datesToRender).sort();
-
-          sortedDateKeys.forEach((dateKey) => {
-            const date = new Date(dateKey + "T00:00:00");
-            const isFocused = dateKey === focusedDateKey;
-            const section = createNoteSection(date, isFocused);
+          keys.forEach((key) => {
+            // Parse YYYY-MM-DD
+            const [y, m, d] = key.split("-").map(Number);
+            const date = new Date(y, m - 1, d);
+            const isTodayRef = key === todayKey;
+            const section = createNoteSection(date, isTodayRef);
             notesContainer.appendChild(section);
           });
 
-          const focusedElement = document.querySelector(
-            ".note-section.focused"
-          );
-          if (focusedElement) {
-            focusedElement.scrollIntoView({ behavior: "auto", block: "start" });
+          // Scroll to relevant date
+          const focusedKey = getDateKey(currentNotesDate);
+          const el = document.getElementById(`note-section-${focusedKey}`);
+          if (el) {
+            setTimeout(
+              () => el.scrollIntoView({ block: "center", behavior: "smooth" }),
+              100
+            );
           }
 
-          if (todayObserver) todayObserver.disconnect();
-          const todayElement = document.getElementById(
+          // "Jump to Today" Logic
+          const observer = new IntersectionObserver(
+            (entries) => {
+              const todayEl = document.getElementById(
+                `note-section-${todayKey}`
+              );
+              if (!todayEl) return;
+              // If Today is NOT intersecting, show button
+              const isVisible = entries.some(
+                (entry) =>
+                  entry.target.id === `note-section-${todayKey}` &&
+                  entry.isIntersecting
+              );
+              jumpToTodayBtn.classList.toggle("visible", !isVisible);
+            },
+            { threshold: 0.2 }
+          );
+
+          const todaySection = document.getElementById(
             `note-section-${todayKey}`
           );
-          if (todayElement) {
-            todayObserver = new IntersectionObserver(
-              (entries) =>
-                jumpToTodayBtn.classList.toggle(
-                  "visible",
-                  !entries[0].isIntersecting
-                ),
-              { root: notesContainer, threshold: 0.1 }
-            );
-            todayObserver.observe(todayElement);
-          } else {
-            jumpToTodayBtn.classList.toggle(
-              "visible",
-              focusedDateKey !== todayKey
-            );
-          }
+          if (todaySection) observer.observe(todaySection);
         }
+
+        // --- Click-to-Add Feature ---
+        notesContainer.addEventListener("click", (e) => {
+          // 1. Handle empty space click
+          if (e.target === notesContainer) {
+            // Append new block to the LAST editor
+            const editors = notesContainer.querySelectorAll(".note-editor");
+            const lastEditor = editors[editors.length - 1];
+            if (lastEditor) {
+              const div = createDefaultBlock();
+              lastEditor.appendChild(div);
+              placeCaretAtEnd(div);
+            }
+          }
+        });
 
         // --- Subtask Management Logic (New Feature - V2 with Bug Fixes) ---
 
@@ -3851,7 +3813,7 @@
             window.saveTimeout = setTimeout(saveCurrentNote, 500);
           });
 
-          notesContainer.addEventListener("keydown", handleKeyDown);
+          notesContainer.addEventListener("keydown", handleNoteKeyDown);
 
           notesContainer.addEventListener("click", (e) => {
             // Handle clicking on checkboxes

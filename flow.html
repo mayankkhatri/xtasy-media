@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flow Logger</title>
+    <style>
+      :root {
+        --bg-color: #f0f2f5;
+        --card-bg: #ffffff;
+        --text-primary: #1c1e21;
+        --text-secondary: #606770;
+        --border-color: #ccd0d5;
+        --accent-color: #1877f2;
+        --accent-hover: #166fe5;
+        --selected-bg: #e7f3ff;
+        --selected-border: #1877f2;
+        --current-line: #e41e3f;
+        --future-badge: #00a400;
+        --history-badge: #65676b;
+        --timer-bg: #e4e6eb;
+        --shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      }
+
+      body.dark-mode {
+        --bg-color: #18191a;
+        --card-bg: #242526;
+        --text-primary: #e4e6eb;
+        --text-secondary: #b0b3b8;
+        --border-color: #3e4042;
+        --accent-color: #2d88ff;
+        --accent-hover: #4599ff;
+        --selected-bg: #263951;
+        --selected-border: #2d88ff;
+        --current-line: #ff4d4d;
+        --future-badge: #2ebaae;
+        --history-badge: #b0b3b8;
+        --timer-bg: #3a3b3c;
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+      }
+
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      /* --- Header --- */
+      header {
+        background-color: var(--card-bg);
+        padding: 0.6rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-shrink: 0;
+        z-index: 50;
+        box-shadow: var(--shadow);
+      }
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .app-logo {
+        font-weight: 900;
+        font-size: 1.2rem;
+        letter-spacing: -1px;
+        color: var(--text-primary);
+      }
+
+      /* Navigation */
+      .nav-group {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        background: var(--bg-color);
+        padding: 3px;
+        border-radius: 8px;
+      }
+      .nav-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-primary);
+        width: 30px;
+        height: 30px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+      }
+      .nav-btn:hover {
+        background: var(--border-color);
+      }
+
+      input[type="date"] {
+        background: transparent;
+        border: none;
+        color: var(--text-primary);
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        outline: none;
+      }
+
+      /* Status Badges */
+      .status-badge {
+        font-size: 0.7rem;
+        font-weight: 800;
+        padding: 4px 8px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: none; /* Hidden by default */
+      }
+      .status-badge.future {
+        display: inline-block;
+        background: var(--future-badge);
+        color: white;
+      }
+      .status-badge.history {
+        display: inline-block;
+        background: var(--history-badge);
+        color: white;
+      }
+
+      /* --- Timer Section --- */
+      .timer-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--timer-bg);
+        padding: 4px 12px;
+        border-radius: 20px;
+      }
+
+      .timer-input {
+        width: 40px;
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid var(--text-secondary);
+        color: var(--text-primary);
+        text-align: center;
+        font-weight: 700;
+        font-size: 1rem;
+        outline: none;
+      }
+
+      .timer-countdown {
+        display: none;
+        font-variant-numeric: tabular-nums;
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--accent-color);
+        width: 50px;
+        text-align: center;
+      }
+
+      .timer-controls button {
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        font-size: 1rem;
+        color: var(--text-secondary);
+        padding: 0 4px;
+        display: flex;
+        align-items: center;
+      }
+      .timer-controls button:hover {
+        color: var(--accent-color);
+      }
+
+      .controls {
+        display: flex;
+        gap: 10px;
+      }
+      .btn-icon {
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+
+      /* --- Main Scrolling Area --- */
+      main {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem;
+        display: flex;
+        justify-content: center;
+        scroll-behavior: smooth;
+      }
+
+      .split-layout {
+        display: flex;
+        gap: 1.5rem;
+        width: 100%;
+        max-width: 1400px;
+        align-items: flex-start;
+      }
+
+      .day-column {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: var(--card-bg);
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow);
+      }
+
+      .col-header {
+        padding: 12px;
+        text-align: center;
+        font-weight: 800;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+        color: var(--text-secondary);
+        background: var(--bg-color);
+        border-bottom: 1px solid var(--border-color);
+        text-transform: uppercase;
+        /* Removed sticky, top, and z-index */
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+      }
+
+      .row {
+        display: flex;
+        border-bottom: 1px solid var(--border-color);
+        height: 46px;
+        position: relative;
+        background: var(--card-bg);
+      }
+      .row:last-child {
+        border-bottom: none;
+      }
+
+      .time-col {
+        width: 160px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-right: 15px;
+        font-size: 0.85rem;
+        font-weight: 900;
+        color: var(--text-secondary);
+        border-right: 1px solid var(--border-color);
+        cursor: pointer;
+        user-select: none;
+      }
+      .time-col:hover {
+        color: var(--accent-color);
+        background: var(--bg-color);
+      }
+
+      .row.selected .time-col {
+        background: var(--selected-bg);
+        color: var(--accent-color);
+        border-left: 4px solid var(--selected-border);
+        padding-left: 11px;
+      }
+      .row.selected .activity-input {
+        background: var(--selected-bg);
+      }
+
+      .activity-col {
+        flex: 1;
+      }
+      .activity-input {
+        width: 100%;
+        height: 100%;
+        border: none;
+        padding: 0 15px;
+        font-size: 0.9rem;
+        background: transparent;
+        color: var(--text-primary);
+        outline: none;
+      }
+
+      /* NOW Marker */
+      .now-line {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--current-line);
+        z-index: 5;
+        pointer-events: none;
+      }
+
+      @media (max-width: 900px) {
+        .split-layout {
+          flex-direction: column;
+          max-width: 600px;
+        }
+        .col-header {
+          top: -1px;
+        }
+      }
+
+      /* --- Floating Batch Bar --- */
+      #batch-bar {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(200%);
+        background: var(--card-bg);
+        padding: 10px;
+        border-radius: 50px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        border: 1px solid var(--border-color);
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        z-index: 100;
+        transition: transform 0.3s ease;
+        width: 90%;
+        max-width: 500px;
+      }
+      #batch-bar.active {
+        transform: translateX(-50%) translateY(0);
+      }
+      #batch-input {
+        flex: 1;
+        border: none;
+        background: var(--bg-color);
+        padding: 8px 15px;
+        border-radius: 20px;
+        outline: none;
+        color: var(--text-primary);
+      }
+      .btn-apply {
+        background: var(--accent-color);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-left">
+        <div class="app-logo">FLOW</div>
+        <div class="nav-group">
+          <button class="nav-btn" onclick="changeDay(-1)">&#10094;</button>
+          <input type="date" id="date-input" />
+          <button class="nav-btn" onclick="changeDay(1)">&#10095;</button>
+        </div>
+        <!-- RESTORED: Status Badge -->
+        <span id="status-badge" class="status-badge"></span>
+
+        <button
+          class="btn-icon"
+          onclick="goToToday()"
+          style="padding: 4px 8px; font-size: 0.75rem; margin-left: 5px"
+        >
+          Today
+        </button>
+      </div>
+
+      <div class="timer-container">
+        <input
+          type="number"
+          id="timer-input"
+          class="timer-input"
+          value="15"
+          min="1"
+          max="180"
+          placeholder="Min"
+        />
+        <span id="timer-countdown" class="timer-countdown">00:00</span>
+        <div class="timer-controls">
+          <button
+            onclick="toggleTimer()"
+            id="btn-playpause"
+            title="Start/Pause"
+          >
+            ▶
+          </button>
+          <button onclick="resetTimer()" title="Reset">↻</button>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn-icon" onclick="toggleDarkMode()">🌗</button>
+        <button class="btn-icon" onclick="exportData()">💾</button>
+      </div>
+    </header>
+
+    <main>
+      <div class="split-layout">
+        <div class="day-column">
+          <div class="col-header">AM</div>
+          <div id="col-am"></div>
+        </div>
+        <div class="day-column">
+          <div class="col-header">PM</div>
+          <div id="col-pm"></div>
+        </div>
+      </div>
+    </main>
+
+    <div id="batch-bar">
+      <div
+        style="
+          background: var(--accent-color);
+          color: white;
+          width: 25px;
+          height: 25px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.8rem;
+          font-weight: bold;
+        "
+        id="batch-count"
+      >
+        0
+      </div>
+      <input
+        type="text"
+        id="batch-input"
+        list="task-list"
+        placeholder="Batch edit..."
+      />
+      <button class="btn-apply" onclick="applyBatch()">Save</button>
+      <button
+        style="
+          border: none;
+          background: transparent;
+          font-size: 1.2rem;
+          color: var(--text-secondary);
+          cursor: pointer;
+        "
+        onclick="clearSelection()"
+      >
+        ×
+      </button>
+    </div>
+
+    <datalist id="task-list"></datalist>
+    <audio
+      id="alarm-sound"
+      src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"
+    ></audio>
+
+    <script>
+      // --- Config ---
+      const colAM = document.getElementById("col-am");
+      const colPM = document.getElementById("col-pm");
+      const dateInput = document.getElementById("date-input");
+      const statusBadge = document.getElementById("status-badge");
+
+      let currentDate = new Date().toISOString().split("T")[0];
+      let lastIdx = null;
+      let uniqueTasks = new Set();
+
+      // --- Timer Vars ---
+      let timerInterval = null;
+      let timeRemaining = 0;
+      let isRunning = false;
+      const timerInput = document.getElementById("timer-input");
+      const timerCountdown = document.getElementById("timer-countdown");
+      const btnPlay = document.getElementById("btn-playpause");
+
+      // --- Init ---
+      function init() {
+        renderSplitGrid();
+        loadTasks();
+        loadDate(currentDate);
+        checkTheme();
+
+        dateInput.addEventListener("change", (e) => loadDate(e.target.value));
+        document.addEventListener("keydown", (e) => {
+          if (
+            e.key === "Enter" &&
+            document.getElementById("batch-bar").classList.contains("active")
+          )
+            applyBatch();
+        });
+
+        setInterval(updateMarker, 60000);
+        if ("Notification" in window) Notification.requestPermission();
+      }
+
+      // --- Render Grid ---
+      function renderSplitGrid() {
+        colAM.innerHTML = "";
+        colPM.innerHTML = "";
+
+        for (let i = 0; i < 96; i++) {
+          const row = document.createElement("div");
+          row.className = "row";
+          row.dataset.idx = i;
+
+          const timeDiv = document.createElement("div");
+          timeDiv.className = "time-col";
+          timeDiv.textContent = formatInterval(i);
+          timeDiv.onclick = (e) => handleSelect(i, e);
+
+          const actDiv = document.createElement("div");
+          actDiv.className = "activity-col";
+          const input = document.createElement("input");
+          input.className = "activity-input";
+          input.setAttribute("list", "task-list");
+          input.dataset.idx = i;
+          input.addEventListener("change", (e) => saveTask(i, e.target.value));
+
+          actDiv.appendChild(input);
+          row.appendChild(timeDiv);
+          row.appendChild(actDiv);
+
+          if (i < 48) colAM.appendChild(row);
+          else colPM.appendChild(row);
+        }
+      }
+
+      function formatInterval(i) {
+        const s = i * 15,
+          e = s + 15;
+        return `${formatTime(s)} - ${formatTime(e)}`;
+      }
+      function formatTime(m) {
+        let h = Math.floor(m / 60),
+          mm = m % 60,
+          am = h >= 12 && h < 24 ? "PM" : "AM";
+        return `${(h % 24) % 12 || 12}:${mm.toString().padStart(2, "0")} ${am}`;
+      }
+
+      // --- Data & Date Logic ---
+      function loadDate(date) {
+        currentDate = date;
+        dateInput.value = date;
+
+        // RESTORED: Status Badge Logic
+        const today = new Date().toISOString().split("T")[0];
+        statusBadge.className = "status-badge";
+        statusBadge.style.display = "none";
+
+        if (date > today) {
+          statusBadge.textContent = "PLANNING";
+          statusBadge.classList.add("future");
+          statusBadge.style.display = "inline-block";
+        } else if (date < today) {
+          statusBadge.textContent = "HISTORY";
+          statusBadge.classList.add("history");
+          statusBadge.style.display = "inline-block";
+        }
+
+        // Clear and Load Data
+        document
+          .querySelectorAll(".activity-input")
+          .forEach((el) => (el.value = ""));
+        const data = JSON.parse(localStorage.getItem(`flow_${date}`) || "{}");
+        Object.entries(data).forEach(([idx, val]) => {
+          const input = document.querySelector(`.row[data-idx="${idx}"] input`);
+          if (input) input.value = val;
+        });
+
+        updateMarker();
+        if (date === today) setTimeout(scrollToNow, 100);
+      }
+
+      function saveTask(idx, val) {
+        const key = `flow_${currentDate}`;
+        let data = JSON.parse(localStorage.getItem(key) || "{}");
+        if (val.trim()) {
+          data[idx] = val;
+          addTaskHistory(val);
+        } else {
+          delete data[idx];
+        }
+        localStorage.setItem(key, JSON.stringify(data));
+      }
+
+      // --- Selection & Batch ---
+      function handleSelect(idx, e) {
+        if (e.shiftKey && lastIdx !== null) {
+          const min = Math.min(lastIdx, idx);
+          const max = Math.max(lastIdx, idx);
+          for (let i = min; i <= max; i++) {
+            const r = document.querySelector(`.row[data-idx="${i}"]`);
+            if (r) r.classList.add("selected");
+          }
+        } else if (e.ctrlKey || e.metaKey) {
+          const r = document.querySelector(`.row[data-idx="${idx}"]`);
+          r.classList.toggle("selected");
+          lastIdx = idx;
+        } else {
+          const r = document.querySelector(`.row[data-idx="${idx}"]`);
+          if (r.classList.contains("selected")) {
+            r.classList.remove("selected");
+            lastIdx = null;
+          } else {
+            r.classList.add("selected");
+            lastIdx = idx;
+          }
+        }
+        updateBatchBar();
+      }
+
+      function updateBatchBar() {
+        const count = document.querySelectorAll(".row.selected").length;
+        const bar = document.getElementById("batch-bar");
+        if (count > 0) {
+          bar.classList.add("active");
+          document.getElementById("batch-count").textContent = count;
+          document.getElementById("batch-input").focus();
+        } else {
+          bar.classList.remove("active");
+        }
+      }
+
+      function applyBatch() {
+        const val = document.getElementById("batch-input").value;
+        document.querySelectorAll(".row.selected").forEach((row) => {
+          row.querySelector("input").value = val;
+          saveTask(row.dataset.idx, val);
+          row.classList.remove("selected");
+        });
+        document.getElementById("batch-input").value = "";
+        clearSelection();
+      }
+
+      function clearSelection() {
+        document
+          .querySelectorAll(".row.selected")
+          .forEach((r) => r.classList.remove("selected"));
+        document.getElementById("batch-bar").classList.remove("active");
+        lastIdx = null;
+      }
+
+      // --- Timer Logic ---
+      function toggleTimer() {
+        if (isRunning) {
+          clearInterval(timerInterval);
+          isRunning = false;
+          btnPlay.textContent = "▶";
+        } else {
+          if (timeRemaining === 0) {
+            let mins = parseInt(timerInput.value);
+            if (isNaN(mins) || mins <= 0) mins = 15;
+            timeRemaining = mins * 60;
+            timerInput.style.display = "none";
+            timerCountdown.style.display = "inline-block";
+          }
+          isRunning = true;
+          btnPlay.textContent = "❚❚";
+          updateTimerUI();
+          timerInterval = setInterval(tick, 1000);
+        }
+      }
+
+      function resetTimer() {
+        clearInterval(timerInterval);
+        isRunning = false;
+        timeRemaining = 0;
+        btnPlay.textContent = "▶";
+        document.title = "Flow Logger";
+        timerCountdown.textContent = "00:00";
+        timerCountdown.style.display = "none";
+        timerInput.style.display = "inline-block";
+      }
+
+      function tick() {
+        if (timeRemaining > 0) {
+          timeRemaining--;
+          updateTimerUI();
+        } else {
+          completeTimer();
+        }
+      }
+
+      function updateTimerUI() {
+        const m = Math.floor(timeRemaining / 60);
+        const s = timeRemaining % 60;
+        const str = `${m}:${s.toString().padStart(2, "0")}`;
+        timerCountdown.textContent = str;
+        document.title = `(${str}) Flow`;
+      }
+
+      function completeTimer() {
+        clearInterval(timerInterval);
+        isRunning = false;
+        document.title = "🔔 Done!";
+        btnPlay.textContent = "▶";
+        const audio = document.getElementById("alarm-sound");
+        if (audio) audio.play().catch((e) => console.log("Audio blocked"));
+        if (Notification.permission === "granted")
+          new Notification("Timer Finished!");
+        else if (Notification.permission !== "denied")
+          Notification.requestPermission().then((p) => {
+            if (p === "granted") new Notification("Timer Finished!");
+          });
+        alert("Timer Finished!");
+        resetTimer();
+      }
+
+      // --- Helpers ---
+      function updateMarker() {
+        document.querySelectorAll(".now-line").forEach((e) => e.remove());
+        const today = new Date().toISOString().split("T")[0];
+        if (currentDate !== today) return;
+
+        const now = new Date();
+        const mins = now.getHours() * 60 + now.getMinutes();
+        const idx = Math.floor(mins / 15);
+        const pct = ((mins % 15) / 15) * 100;
+
+        const row = document.querySelector(`.row[data-idx="${idx}"]`);
+        if (row) {
+          const line = document.createElement("div");
+          line.className = "now-line";
+          line.style.top = `${pct}%`;
+          row.appendChild(line);
+        }
+      }
+
+      function scrollToNow() {
+        const line = document.querySelector(".now-line");
+        if (line) line.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      function changeDay(off) {
+        const d = new Date(currentDate);
+        d.setDate(d.getDate() + off);
+        loadDate(d.toISOString().split("T")[0]);
+      }
+      function goToToday() {
+        loadDate(new Date().toISOString().split("T")[0]);
+      }
+
+      function addTaskHistory(val) {
+        if (!val || val.length < 2 || uniqueTasks.has(val)) return;
+        uniqueTasks.add(val);
+        localStorage.setItem("flow_history", JSON.stringify([...uniqueTasks]));
+        loadTasks();
+      }
+      function loadTasks() {
+        const s = localStorage.getItem("flow_history");
+        if (s) uniqueTasks = new Set(JSON.parse(s));
+        const dl = document.getElementById("task-list");
+        dl.innerHTML = "";
+        uniqueTasks.forEach((t) => {
+          const o = document.createElement("option");
+          o.value = t;
+          dl.appendChild(o);
+        });
+      }
+
+      function toggleDarkMode() {
+        document.body.classList.toggle("dark-mode");
+      }
+      function checkTheme() {
+        if (window.matchMedia("(prefers-color-scheme: dark)").matches)
+          document.body.classList.add("dark-mode");
+      }
+      function exportData() {
+        const blob = new Blob([JSON.stringify(localStorage, null, 2)], {
+          type: "application/json",
+        });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "flow_data.json";
+        a.click();
+      }
+
+      init();
+    </script>
+  </body>
+</html>
